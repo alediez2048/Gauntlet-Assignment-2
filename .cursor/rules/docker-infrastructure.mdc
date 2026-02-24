@@ -1,0 +1,60 @@
+---
+description: Docker Compose and infrastructure conventions
+globs: docker/**,Dockerfile,docker-compose*,.env*
+alwaysApply: false
+---
+
+# Docker Infrastructure
+
+## 4-Service Architecture
+
+```
+postgres (15-alpine) :5432
+redis (alpine)       :6379
+ghostfolio           :3333  ← serves both Angular frontend + NestJS API
+agent (FastAPI)      :8000  ← Python LangGraph agent sidecar
+```
+
+## Compose Strategy
+
+- `docker/docker-compose.yml` — Ghostfolio's existing file (postgres, redis, ghostfolio)
+- `docker/docker-compose.agent.yml` — our overlay adding the agent service
+
+Launch: `docker compose -f docker/docker-compose.yml -f docker/docker-compose.agent.yml up -d`
+
+## Health Checks
+
+- Ghostfolio: `curl -f http://localhost:3333/api/v1/health`
+- Agent: `curl -f http://localhost:8000/health`
+- Postgres: `pg_isready -U $POSTGRES_USER`
+- Redis: `redis-cli --pass $REDIS_PASSWORD ping`
+
+## Dependency Order
+
+```yaml
+agent:
+  depends_on:
+    ghostfolio:
+      condition: service_healthy
+```
+
+## Environment Variables
+
+Required in `.env`:
+```
+ACCESS_TOKEN_SALT=<random>
+JWT_SECRET_KEY=<random>
+DATABASE_URL=postgresql://...
+POSTGRES_DB, POSTGRES_USER, POSTGRES_PASSWORD
+REDIS_HOST, REDIS_PORT, REDIS_PASSWORD
+OPENAI_API_KEY=sk-...
+GHOSTFOLIO_API_URL=http://ghostfolio:3333
+GHOSTFOLIO_ACCESS_TOKEN=<security-token>
+```
+
+Never commit `.env` — only `.env.example` with placeholder values.
+
+## Seed Data
+
+Import via Ghostfolio's `POST /api/v1/import` after boot (not raw SQL).
+Seed JSON must use `unitPrice` (per-unit, not total) and valid `dataSource` values.

@@ -1,0 +1,75 @@
+---
+description: Angular conventions for Ghostfolio agent UI integration
+globs: apps/client/**/*.ts,apps/client/**/*.html,apps/client/**/*.scss
+alwaysApply: false
+---
+
+# Angular Conventions
+
+## Standalone Components (NOT NgModules)
+
+Ghostfolio uses `bootstrapApplication()` with standalone components. Never create NgModules.
+
+```typescript
+@Component({
+  standalone: true,
+  selector: 'gf-agent-fab',
+  imports: [MatIconModule, MatButtonModule],
+  templateUrl: './agent-fab.component.html',
+  styleUrls: ['./agent-fab.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
+})
+export class GfAgentFabComponent { }
+```
+
+## Route Pattern
+
+Export a `routes: Routes` array from `agent-page.routes.ts`:
+
+```typescript
+export const routes: Routes = [
+  {
+    path: '',
+    loadComponent: () =>
+      import('./agent-page.component').then((c) => c.GfAgentPageComponent),
+    title: 'Agent'
+  }
+];
+```
+
+## Naming Conventions
+
+- Component class: `Gf` prefix (e.g., `GfAgentFabComponent`)
+- Selector: `gf-agent-` prefix (e.g., `gf-agent-fab`, `gf-agent-chat-panel`)
+- Files: kebab-case with `.component.ts`, `.component.html`, `.component.scss`
+- Services: `agent.service.ts` with `@Injectable({ providedIn: 'root' })`
+
+## Angular Material Usage
+
+- Use Angular Material components to match Ghostfolio's design system
+- Import Material modules directly in standalone component `imports` arrays
+- Use Ghostfolio's CSS custom properties for theming (`--gf-theme-primary-500`, etc.)
+- FAB pattern: `position: fixed; bottom: 2rem; right: 2rem; z-index: 999`
+- Dark mode: Ghostfolio uses `.theme-dark` class — respect it in styles
+
+## SSE Consumption
+
+Use `fetch` + `getReader()` for SSE (not `EventSource`, since we POST):
+
+```typescript
+const response = await fetch(url, { method: 'POST', body, headers });
+const reader = response.body!.getReader();
+const decoder = new TextDecoder();
+while (true) {
+  const { done, value } = await reader.read();
+  if (done) break;
+  const chunk = decoder.decode(value);
+  // parse SSE events from chunk
+}
+```
+
+## Minimal Existing File Changes
+
+- `app.routes.ts`: add ONE route entry with `loadChildren`
+- `app.component.ts`: add FAB component to `imports` array
+- `app.component.html`: add `<gf-agent-fab />` after `</main>`

@@ -1,0 +1,65 @@
+---
+description: SSE streaming protocol between FastAPI agent and Angular client
+globs: agent/**/*.py,apps/client/**/agent*
+alwaysApply: false
+---
+
+# SSE Streaming Protocol
+
+## Event Types
+
+```
+thinking     → Agent is processing (show spinner)
+tool_call    → Tool selected (show "Analyzing portfolio...")
+tool_result  → Tool returned data (show checkmark)
+token        → Incremental text from LLM (stream into chat bubble)
+done         → Final structured response with typed blocks
+error        → Error occurred (show graceful message)
+```
+
+## SSE Format (FastAPI → Angular)
+
+```
+event: thinking
+data: {"message": "Analyzing your request..."}
+
+event: tool_call
+data: {"tool": "analyze_portfolio_performance", "args": {"time_period": "ytd"}}
+
+event: tool_result
+data: {"tool": "analyze_portfolio_performance", "success": true}
+
+event: token
+data: {"content": "Your portfolio has returned"}
+
+event: done
+data: {"blocks": [{"type": "text", "content": "..."}, {"type": "metric", ...}]}
+```
+
+## FastAPI Endpoint
+
+```python
+@app.post("/api/agent/chat")
+async def chat(request: ChatRequest):
+    async def event_generator():
+        async for event in graph.astream_events(input, config):
+            yield f"event: {event_type}\ndata: {json.dumps(payload)}\n\n"
+    return StreamingResponse(event_generator(), media_type="text/event-stream")
+```
+
+## Structured Response Blocks (in `done` event)
+
+| Type | Fields | Renders As |
+|------|--------|------------|
+| `text` | `content: string` | Markdown paragraph |
+| `table` | `headers: string[], rows: any[][]` | mat-table |
+| `metric` | `label, value, trend: "up"\|"down"` | mat-card with trend arrow |
+| `chart` | `chartType: "pie"\|"bar", data: []` | Chart.js canvas |
+
+## Rules
+
+- Always send `thinking` event first for perceived responsiveness
+- `tool_call` and `tool_result` events enable step-by-step UI narration
+- The `done` event must always be the last event in a stream
+- On error, send `error` event — never leave the stream hanging
+- CORS: allow origin `http://localhost:3333` (Ghostfolio serves frontend on 3333)

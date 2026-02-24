@@ -1,0 +1,73 @@
+---
+description: LangGraph agent architecture and tool design patterns
+globs: agent/**/*.py
+alwaysApply: false
+---
+
+# Agent Patterns
+
+## Tool Design — Pure Functions with Dependency Injection
+
+Every tool MUST follow this pattern:
+
+```python
+async def analyze_portfolio(
+    api_client: GhostfolioClient,
+    time_period: str = "max"
+) -> ToolResult:
+    if time_period not in VALID_DATE_RANGES:
+        return ToolResult.fail("INVALID_TIME_PERIOD", time_period=time_period)
+    try:
+        data = await api_client.get_portfolio_performance(time_period)
+        return ToolResult.ok(data, source="portfolio_performance")
+    except Exception as e:
+        return ToolResult.fail("API_ERROR", detail=str(e))
+```
+
+Rules:
+- Tools are pure functions — no LLM calls inside tools
+- Dependency injection: accept `api_client` as parameter, never instantiate
+- Always return `ToolResult` — never raise exceptions
+- Validate inputs before calling the API
+- Include metadata (response time, cache hit) in ToolResult
+
+## ToolResult Contract
+
+```python
+@dataclass
+class ToolResult:
+    success: bool
+    data: dict | None
+    error: str | None
+    metadata: dict
+
+    @classmethod
+    def ok(cls, data: dict, **meta) -> "ToolResult": ...
+
+    @classmethod
+    def fail(cls, error: str, **meta) -> "ToolResult": ...
+```
+
+## LangGraph 6-Node Topology
+
+Router → Tool Executor → Validator → Synthesizer
+Router → Clarifier (ambiguous queries)
+Validator → Error Handler (validation failures)
+
+- Router: LLM classifies intent, selects tool via function calling
+- Tool Executor: calls tool with injected GhostfolioClient
+- Validator: checks success flag, numerical sanity, non-empty data
+- Synthesizer: LLM formats ToolResult into structured response blocks
+- Clarifier: lists capabilities when intent is ambiguous
+- Error Handler: graceful message + recovery suggestion, never stack traces
+
+## Valid DateRange Values
+
+`"1d"`, `"wtd"`, `"mtd"`, `"ytd"`, `"1y"`, `"5y"`, `"max"` (all lowercase)
+
+## 4 Tools
+
+1. `analyze_portfolio_performance` — GET /api/v2/portfolio/performance
+2. `categorize_transactions` — GET /api/v1/order
+3. `estimate_capital_gains_tax` — GET /api/v1/order (FIFO algorithm, deterministic)
+4. `advise_asset_allocation` — GET /api/v1/portfolio/details

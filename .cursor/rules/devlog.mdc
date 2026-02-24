@@ -1,0 +1,23 @@
+---
+description: Development log maintenance — update after every ticket
+alwaysApply: true
+---
+
+# DevLog Maintenance
+
+After completing any ticket or significant work unit, update `docs/tickets/devlog.md`:
+
+1. Change the ticket status emoji (⬜→🔵→🟢)
+2. Fill in all sections of the entry template (summary, metadata, scope, achievements, etc.)
+3. Update the "Running Totals" table at the bottom
+4. Include actual time spent vs estimate
+5. List every file created and modified
+6. Document any issues encountered and how they were solved
+7. Note key learnings and takeaways
+
+Rules:
+- Be specific — include commit hashes, branch names, exact file counts
+- Be honest about time variance — over-estimates are as useful as under-estimates
+- Document what DIDN'T work, not just what did
+- Keep the next ticket's planned scope accurate as understanding evolves
+- The devlog is the project's memory — future sessions start by reading it

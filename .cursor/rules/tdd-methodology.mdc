@@ -1,0 +1,72 @@
+---
+description: Test-Driven Development methodology for AgentForge
+alwaysApply: true
+---
+
+# TDD Methodology
+
+## Three Testing Layers
+
+### Layer 1: Unit Tests (per tool, mocked API)
+
+- 3 tests minimum per tool: happy path, invalid input, API error
+- Use `pytest` with `httpx` mock / `respx` for API mocking
+- Use `MockGhostfolioClient` — same interface, pre-defined JSON responses
+- Tests run in milliseconds with zero network calls
+- No LLM calls in unit tests
+
+```python
+async def test_portfolio_happy_path(mock_client):
+    result = await analyze_portfolio(mock_client, time_period="ytd")
+    assert result.success is True
+    assert "netPerformance" in result.data
+
+async def test_portfolio_invalid_period(mock_client):
+    result = await analyze_portfolio(mock_client, time_period="INVALID")
+    assert result.success is False
+    assert result.error == "INVALID_TIME_PERIOD"
+
+async def test_portfolio_api_failure(failing_client):
+    result = await analyze_portfolio(failing_client, time_period="ytd")
+    assert result.success is False
+    assert result.error == "API_ERROR"
+```
+
+### Layer 2: Integration Tests (graph routing, mocked tools)
+
+- Mock all 4 tools with deterministic returns
+- Send canonical queries, assert correct tool routing
+- Verify state transitions through the LangGraph graph
+- No real LLM calls — mock the LLM response for tool selection
+
+### Layer 3: Golden-Path E2E (real LLM, seeded data)
+
+- 5 scripted scenarios in Jupyter notebook
+- Real GPT-4o calls against Ghostfolio with seed data
+- Run manually before demo — eyeball results
+- Snapshot outputs for regression detection
+
+## Test File Structure
+
+```
+agent/tests/
+├── unit/
+│   ├── test_portfolio_analyzer.py
+│   ├── test_transaction_categorizer.py
+│   ├── test_tax_estimator.py
+│   ├── test_allocation_advisor.py
+│   └── test_auth.py
+├── integration/
+│   └── test_graph_routing.py
+├── e2e/
+│   └── golden_path.ipynb
+├── fixtures/              # JSON matching real Ghostfolio API shapes
+└── conftest.py            # Shared fixtures, mock client factory
+```
+
+## Rules
+
+- Write tests BEFORE implementation when possible
+- Never skip tests to save time — a tested 2-tool agent beats an untested 4-tool agent
+- Financial calculations (FIFO tax) MUST have hand-verified ground truth values
+- All test fixtures must match actual Ghostfolio API response shapes

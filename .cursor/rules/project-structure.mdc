@@ -1,0 +1,41 @@
+---
+description: AgentForge project structure and file conventions
+alwaysApply: true
+---
+
+# Project Structure
+
+This is a monorepo combining a forked Ghostfolio (Nx workspace) with a Python AI agent sidecar.
+
+## Directory Layout
+
+- `apps/api/src/` — Ghostfolio NestJS backend (DO NOT modify unless absolutely necessary)
+- `apps/client/src/app/` — Ghostfolio Angular frontend
+- `apps/client/src/app/pages/agent/` — NEW agent chat widget (standalone components)
+- `libs/common/src/lib/` — Shared DTOs, interfaces, enums, helpers
+- `libs/ui/src/lib/` — Reusable Angular UI components (Storybook)
+- `agent/` — NEW Python FastAPI + LangGraph agent service
+- `agent/tools/` — 4 pure-function tools (portfolio, transactions, tax, allocation)
+- `agent/graph/` — LangGraph 6-node topology
+- `agent/clients/` — GhostfolioClient (httpx) and MockClient
+- `agent/tests/` — pytest unit, integration, e2e
+- `docker/` — Docker Compose files, seed data
+- `prisma/` — PostgreSQL schema and migrations
+- `docs/requirements/` — PRD, PreSearch Checklist
+- `docs/architecture/` — Build Guidelines, Interview (ADRs, topology, contracts)
+- `docs/tickets/` — devlog.md (ticket-by-ticket development log)
+- `docs/reference/` — Course materials (Week 2 agent concepts)
+
+## Path Aliases (from tsconfig.base.json)
+
+- `@ghostfolio/api/*` → `apps/api/src/*`
+- `@ghostfolio/client/*` → `apps/client/src/app/*`
+- `@ghostfolio/common/*` → `libs/common/src/lib/*`
+- `@ghostfolio/ui/*` → `libs/ui/src/lib/*`
+
+## Fork Discipline
+
+- ALL agent code goes in NEW files — never modify existing Ghostfolio source unless required
+- Only 3 existing files may be touched: `app.routes.ts`, `app.component.ts`, `app.component.html`
+- Use `gf-agent-` prefix for all new Angular component selectors
+- Git diff should be almost entirely additions

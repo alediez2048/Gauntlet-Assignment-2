@@ -1,0 +1,68 @@
+---
+description: Ghostfolio API integration and auth patterns
+alwaysApply: true
+---
+
+# Ghostfolio Integration
+
+## Authentication Flow
+
+1. Agent calls `POST /api/v1/auth/anonymous` with `{"accessToken": "<security_token>"}`
+2. Ghostfolio returns `{"authToken": "<jwt>"}` (JWT valid for 180 days)
+3. All subsequent requests use header: `Authorization: Bearer <jwt>`
+4. On 401 response, refresh the token automatically
+
+```python
+async def authenticate(self) -> str:
+    resp = await self.client.post(
+        f"{self.base_url}/api/v1/auth/anonymous",
+        json={"accessToken": self.access_token}
+    )
+    return resp.json()["authToken"]
+```
+
+## Key API Endpoints (All Require Bearer Token)
+
+| Endpoint | Version | Method | Used By |
+|----------|---------|--------|---------|
+| `/api/v2/portfolio/performance` | **v2** | GET | Portfolio Analyzer |
+| `/api/v1/portfolio/details` | v1 | GET | Allocation Advisor |
+| `/api/v1/portfolio/holdings` | v1 | GET | Allocation Advisor |
+| `/api/v1/order` | v1 | GET | Transaction Categorizer, Tax Estimator |
+| `/api/v1/import` | v1 | POST | Seed data import |
+| `/api/v1/health` | v1 | GET | Health checks (no auth) |
+
+## Common Query Parameters
+
+- `range`: DateRange — `"1d"`, `"wtd"`, `"mtd"`, `"ytd"`, `"1y"`, `"5y"`, `"max"`
+- `accounts`, `assetClasses`, `tags`: comma-separated filter strings
+
+## Activity Types (Prisma enum Type)
+
+`BUY`, `SELL`, `DIVIDEND`, `FEE`, `INTEREST`, `LIABILITY`
+
+## Asset Classes (Prisma enum AssetClass)
+
+`EQUITY`, `FIXED_INCOME`, `LIQUIDITY`, `COMMODITY`, `REAL_ESTATE`, `ALTERNATIVE_INVESTMENT`
+
+## Data Sources (Prisma enum DataSource)
+
+`YAHOO` (stocks/ETFs), `COINGECKO` (crypto), `MANUAL` (custom)
+Note: `dataSource` is optional for FEE, INTEREST, LIABILITY activity types.
+
+## Import Format (POST /api/v1/import)
+
+```json
+{
+  "activities": [{
+    "currency": "USD",
+    "dataSource": "YAHOO",
+    "date": "2024-01-15T00:00:00.000Z",
+    "fee": 0,
+    "quantity": 10,
+    "symbol": "AAPL",
+    "type": "BUY",
+    "unitPrice": 185.50
+  }]
+}
+```

@@ -1,0 +1,65 @@
+---
+description: Error handling patterns — errors as values, validation gates
+alwaysApply: true
+---
+
+# Error Handling
+
+## Core Principle: Errors Are Values, Not Exceptions
+
+Tools never raise exceptions. They return `ToolResult.fail(...)`.
+
+```python
+# BAD — exceptions crash the agent
+def analyze(client, period):
+    data = client.get_performance(period)  # might throw
+    return data
+
+# GOOD — errors are values
+async def analyze(client, period) -> ToolResult:
+    try:
+        data = await client.get_performance(period)
+        return ToolResult.ok(data)
+    except httpx.TimeoutException:
+        return ToolResult.fail("API_TIMEOUT")
+    except httpx.HTTPStatusError as e:
+        return ToolResult.fail("API_ERROR", status=e.response.status_code)
+```
+
+## Validation Gates
+
+Every tool validates inputs BEFORE calling the API:
+
+```python
+VALID_RANGES = {"1d", "wtd", "mtd", "ytd", "1y", "5y", "max"}
+
+if time_period not in VALID_RANGES:
+    return ToolResult.fail("INVALID_TIME_PERIOD")
+if tax_year < 2020 or tax_year > datetime.now().year:
+    return ToolResult.fail("INVALID_TAX_YEAR")
+```
+
+## Numerical Sanity Checks (Validator Node)
+
+- Returns between -100% and +10,000%
+- Holdings count >= 0
+- All monetary values finite and not NaN
+- Allocation percentages sum to ~100% (±1%)
+
+## Error Taxonomy
+
+| Error Code | Meaning | User Message |
+|------------|---------|-------------|
+| `INVALID_TIME_PERIOD` | Bad date range | "Please use a valid period like ytd, 1y, or max." |
+| `INVALID_TAX_YEAR` | Year out of range | "Tax year must be between 2020 and current year." |
+| `API_TIMEOUT` | Ghostfolio unreachable | "Having trouble reaching portfolio data. Is Ghostfolio running?" |
+| `API_ERROR` | Non-200 from Ghostfolio | "Received an error from the portfolio service." |
+| `EMPTY_PORTFOLIO` | No holdings found | "No holdings found. Add investments to Ghostfolio first." |
+| `AUTH_FAILED` | Bearer token rejected | "Authentication failed. Check GHOSTFOLIO_ACCESS_TOKEN." |
+
+## Never Expose to Users
+
+- Internal stack traces
+- Raw exception messages
+- Database errors
+- API keys or tokens

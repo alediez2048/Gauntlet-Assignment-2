@@ -1,0 +1,65 @@
+---
+description: Python coding standards for the agent service
+globs: agent/**/*.py
+alwaysApply: false
+---
+
+# Python Code Style
+
+## Type Hints
+
+All function signatures must have full type annotations:
+
+```python
+async def get_portfolio_performance(
+    self, time_period: str = "max"
+) -> dict[str, Any]:
+```
+
+## Docstrings
+
+Google-style docstrings on all public functions:
+
+```python
+async def analyze_portfolio(
+    api_client: GhostfolioClient,
+    time_period: str = "max"
+) -> ToolResult:
+    """Retrieves and analyzes portfolio performance for a given period.
+
+    Args:
+        api_client: Authenticated Ghostfolio HTTP client.
+        time_period: One of "1d", "wtd", "mtd", "ytd", "1y", "5y", "max".
+
+    Returns:
+        ToolResult with performance data or structured error.
+    """
+```
+
+## Import Order
+
+```python
+# 1. Standard library
+import json
+from datetime import datetime
+from typing import Any, Optional
+
+# 2. Third-party
+import httpx
+from fastapi import FastAPI
+from langgraph.graph import StateGraph
+
+# 3. Local
+from agent.tools.base import ToolResult
+from agent.clients.ghostfolio_client import GhostfolioClient
+```
+
+## Rules
+
+- Line length: 100 characters max
+- No bare `except:` — always catch specific exceptions
+- No `# type: ignore` without justification
+- Use `async/await` consistently (httpx async client)
+- Use `Pydantic` models for request/response validation
+- Use `@dataclass` for internal data structures (like ToolResult)
+- Logging: use `logging` module, never bare `print()`
