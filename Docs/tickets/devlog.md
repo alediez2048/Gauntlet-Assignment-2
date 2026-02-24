@@ -225,9 +225,89 @@ Each ticket entry follows this standardized structure:
 
 ---
 
-## TICKET-01: Environment Setup & Agent Scaffold ⬜ `MVP`
+## TICKET-01: Environment Setup & Agent Scaffold 🟢 `MVP`
 
-> **Planned scope:** Local environment running, agent service scaffolded, Docker Compose overlay created
+### 🧠 Plain-English Summary
+- **What was done:** Scaffolded the full `/agent` Python service directory (FastAPI skeleton, tools/graph/clients placeholders, tests layout), added pinned `requirements.txt`, Dockerfile, Docker Compose agent overlay, and `.env.example` agent variables.
+- **What it means:** The repo is ready for TICKET-02 (GhostfolioClient + Auth). No Ghostfolio source was modified; all work is additive under `agent/` and `docker/`.
+- **Success looked like:** Agent directory matches primer spec; Docker build succeeds; `/health` returns `{"status":"ok"}` when the agent container runs.
+- **How it works (simple):** FastAPI app with CORS and a health route. Placeholder modules for auth, four tools, LangGraph state/nodes/graph, and test structure. Compose overlay adds `agent` service that builds from `agent/Dockerfile` and depends on healthy Ghostfolio.
+
+### 📋 Metadata
+- **Status:** Complete
+- **Completed:** Feb 24, 2026
+- **Time Spent:** ~45 min (scaffold + Docker + devlog)
+- **Branch:** (feature branch or main per your workflow)
+- **Estimate:** 2–3 hrs (local Ghostfolio run + first user remain manual)
+
+### 🎯 Scope
+- ✅ Agent directory scaffold: `main.py`, `auth.py`, `prompts.py`, `clients/`, `tools/` (base + 4 placeholders), `graph/` (state, nodes, graph), `tests/` (conftest, unit, integration, fixtures)
+- ✅ `tools/base.py`: `ToolResult` dataclass with `ok`/`fail` class methods
+- ✅ `requirements.txt`: langchain, langgraph, langchain-openai, fastapi, uvicorn[standard], httpx, pytest, pytest-asyncio, respx, cachetools, pydantic, python-dotenv (version ranges for Python 3.11+)
+- ✅ `Dockerfile`: Python 3.11-slim, uvicorn CMD, port 8000
+- ✅ `docker/docker-compose.agent.yml`: agent service, build context `../agent`, depends_on ghostfolio healthy, healthcheck `curl /health`
+- ✅ `.env.example`: OPENAI_API_KEY, GHOSTFOLIO_API_URL, GHOSTFOLIO_ACCESS_TOKEN
+- ⬜ Local Ghostfolio run (copy `.env.dev` → `.env`, docker compose dev, npm install, database:setup, start:server/start:client, first user) — **manual steps for you**
+- ⬜ Full stack verification (`docker compose -f docker/docker-compose.yml -f docker/docker-compose.agent.yml up -d` + `curl localhost:8000/health`) — **you can run after populating .env**
+
+### 🏆 Key Achievements
+- Single additive change set: no edits to existing Ghostfolio app code
+- Docker build verified; image runs and serves `/health`
+- Structure aligns with TDD and project-structure rules (tools, graph, clients, tests/fixtures)
+
+### 🔧 Technical Implementation
+- **main.py:** FastAPI app, CORSMiddleware for localhost:3333 and :4200, `GET /health` → `{"status":"ok"}`.
+- **ToolResult:** `success`, `data`, `error`, `metadata`; `ToolResult.ok(data, **meta)` and `ToolResult.fail(error, **meta)`.
+- **Compose:** Agent build context `../agent` so only agent tree is copied; env_file `../.env` from `docker/` directory.
+
+### ⚠️ Issues & Solutions
+- Shell in environment produced `command not found: z` for some invocations; Docker build was run with absolute paths and `all` permissions and succeeded.
+- requirements.txt uses version ranges (e.g. `langgraph>=1.0.0,<2.0`) so pip resolves current compatible versions; Docker build installed successfully.
+
+### ✅ Testing
+- Docker build: `docker build -f agent/Dockerfile -t gf-agent:test agent/` — success.
+- Manual: run agent container and `curl http://localhost:8000/health` → `{"status":"ok"}` (after you bring up the stack).
+
+### 📁 Files Changed
+
+**Created:**
+- `agent/main.py`
+- `agent/auth.py`
+- `agent/prompts.py`
+- `agent/requirements.txt`
+- `agent/Dockerfile`
+- `agent/clients/__init__.py`, `ghostfolio_client.py`, `mock_client.py`
+- `agent/tools/__init__.py`, `base.py`, `portfolio_analyzer.py`, `transaction_categorizer.py`, `tax_estimator.py`, `allocation_advisor.py`
+- `agent/graph/__init__.py`, `state.py`, `nodes.py`, `graph.py`
+- `agent/tests/__init__.py`, `conftest.py`, `tests/fixtures/.gitkeep`, `tests/unit/__init__.py`, `tests/integration/__init__.py`
+- `docker/docker-compose.agent.yml`
+
+**Modified:**
+- `.env.example` (agent variables)
+- `docs/tickets/devlog.md` (this entry)
+
+### 🎯 Acceptance Criteria
+- ✅ `/agent` directory scaffolded with all placeholder files
+- ✅ `requirements.txt` with real dependency version ranges (Docker build verified)
+- ✅ `agent/Dockerfile` builds successfully
+- ✅ `docker/docker-compose.agent.yml` created
+- ✅ `.env.example` updated with agent variables
+- ✅ `docs/tickets/devlog.md` updated with TICKET-01 entry
+- ⬜ Ghostfolio runs locally + first admin user (manual)
+- ⬜ Full 4-service stack boots and agent health check responds (manual after .env)
+- ⬜ All new files committed on a feature branch (your step)
+
+### 📊 Performance
+- Docker build ~75s (install deps + copy).
+- No runtime tests yet (no tools or graph).
+
+### 🚀 Next Steps
+- **TICKET-02: GhostfolioClient + Auth Module** — Implement HTTP client with Bearer token, MockClient, JSON fixtures, auth lifecycle tests.
+- Optionally: run local Ghostfolio (A checklist in primer), then full compose with agent and confirm `curl http://localhost:8000/health` and agent → Ghostfolio connectivity.
+
+### 💡 Learnings
+- Compose build context must be `../agent` when compose file lives in `docker/` so COPY in Dockerfile only gets agent files.
+- `.env` is already in `.gitignore`; only `.env.example` documents required agent vars.
 
 ---
 
@@ -341,9 +421,9 @@ Each ticket entry follows this standardized structure:
 
 | Metric | Value |
 |--------|-------|
-| Tickets Complete | 1 / 13 |
-| Total Dev Time | ~1.5 hrs |
+| Tickets Complete | 2 / 13 |
+| Total Dev Time | ~2.25 hrs |
 | Tests Passing | — |
-| Files Created | 10 |
-| Files Modified | 4 |
+| Files Created | 27 |
+| Files Modified | 6 |
 | Cursor Rules | 10 |

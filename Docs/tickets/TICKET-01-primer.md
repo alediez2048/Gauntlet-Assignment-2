@@ -283,6 +283,59 @@ Common query params: `range` (DateRange), `accounts`, `assetClasses`, `tags`, `s
 
 ---
 
+## Troubleshooting: `npm run start:server`
+
+If the server starts but you see these, use the following.
+
+### 1. Redis AUTH errors (spam in logs)
+
+**Symptom:** `[RedisCacheService] ERR AUTH <password> called without any password configured for the default user`
+
+**Cause:** The API sends `REDIS_PASSWORD` from `.env`, but the Redis you’re connecting to has no password.
+
+**Fix (recommended for local dev):**
+
+1. In `.env`, set `REDIS_PASSWORD=` (empty) so the API does not send AUTH.
+2. The dev Compose file (`docker/docker-compose.dev.yml`) runs Redis **without** a password. Restart the dev stack so Redis is recreated with that config:
+   ```bash
+   cd docker && docker compose -f docker-compose.dev.yml down && docker compose -f docker-compose.dev.yml up -d
+   ```
+   (From repo root you can use `docker compose -f docker/docker-compose.dev.yml down` then `up -d`.)
+3. Run `npm run start:server` again.
+
+Redis AUTH and HTML errors should stop; the server will listen on http://0.0.0.0:3333.
+
+### 2. HTMLTemplateMiddleware “Failed to initialize index HTML map”
+
+**Symptom:** `ENOENT: no such file or directory, open '.../dist/apps/client/ca/index.html'`
+
+**Cause:** The API expects built client assets at `dist/apps/client/<locale>/index.html` for every supported locale. In dev the middleware still skips serving HTML, but it tries to load all locale files at startup.
+
+**Options:**
+
+- **Ignore in dev:** The server continues to start and listen; API routes and the client dev server (e.g. `npm run start:client` at 4200) work. You can leave this as-is.
+- **Clear the error:** Build the client once so the files exist (takes a few minutes):
+  ```bash
+  npx nx run client:copy-assets && npx nx run client:build:production
+  ```
+  Then run `npm run start:server` again.
+
+### 3. Full stack: “variable is not set” / Ghostfolio unhealthy
+
+**Symptom:** `WARN The "POSTGRES_USER" variable is not set. Defaulting to a blank string.` and/or `container ghostfolio is unhealthy`
+
+**Cause:** Docker Compose uses the directory of the first `-f` file as the project directory, so it looks for `.env` in `docker/` instead of the repo root. Variable substitution in the compose file then gets blank values, so Ghostfolio receives an invalid `DATABASE_URL` and fails.
+
+**Fix:** Run from **repo root** and pass the project-root `.env` explicitly:
+
+```bash
+docker compose -f docker/docker-compose.yml -f docker/docker-compose.agent.yml --env-file .env up -d
+```
+
+Then check agent health: `curl http://localhost:8000/health`
+
+---
+
 ## Definition of Done for TICKET-01
 
 - [ ] Ghostfolio runs locally (server + client accessible at localhost:4200)
@@ -291,7 +344,7 @@ Common query params: `range` (DateRange), `accounts`, `assetClasses`, `tags`, `s
 - [ ] `requirements.txt` created with real dependency versions
 - [ ] `agent/Dockerfile` builds successfully
 - [ ] `docker/docker-compose.agent.yml` created
-- [ ] Full 4-service Docker stack boots: `docker compose -f docker/docker-compose.yml -f docker/docker-compose.agent.yml up -d`
+- [ ] Full 4-service Docker stack boots (from repo root): `docker compose -f docker/docker-compose.yml -f docker/docker-compose.agent.yml --env-file .env up -d`
 - [ ] Agent health check responds: `curl http://localhost:8000/health` → `{"status":"ok"}`
 - [ ] `.env.example` updated with agent variables
 - [ ] `docs/tickets/devlog.md` updated with TICKET-01 entry
