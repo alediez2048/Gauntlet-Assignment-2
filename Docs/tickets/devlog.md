@@ -35,6 +35,8 @@ The following tickets are **required** to reach MVP — a working end-to-end age
 
 > **Minimum viable MVP:** If time is tight, TICKET-05 and TICKET-06 can be deferred to production phase (2 tools instead of 4). TICKET-01 through TICKET-04 + TICKET-07 through TICKET-10 constitute the absolute minimum.
 
+**Source control:** TICKET-01 was committed and pushed to `main` as the initial setup. For all future tickets, use a dedicated feature branch per ticket (e.g. `feature/TICKET-02-ghostfolio-client`, `feature/TICKET-03-portfolio-analyzer`), then merge to `main` when the ticket is done.
+
 **Post-MVP / Production Polish (TICKET-11 → TICKET-12):**
 
 | Ticket | Title | Role |
