@@ -1,0 +1,49 @@
+{
+  "holdings": [
+    {
+      "activitiesCount": 1,
+      "allocationInPercentage": 100,
+      "assetClass": "EQUITY",
+      "countries": [
+        {
+          "code": "US",
+          "continent": "NA",
+          "name": "United States",
+          "weight": 100
+        }
+      ],
+      "currency": "USD",
+      "dataSource": "YAHOO",
+      "dateOfFirstActivity": "2024-01-15T00:00:00.000Z",
+      "dividend": 0,
+      "grossPerformance": 1750,
+      "grossPerformancePercent": 14.58,
+      "grossPerformancePercentWithCurrencyEffect": 14.58,
+      "grossPerformanceWithCurrencyEffect": 1750,
+      "holdings": [
+        {
+          "allocationInPercentage": 100,
+          "name": "Apple Inc.",
+          "valueInBaseCurrency": 13750
+        }
+      ],
+      "investment": 12000,
+      "marketPrice": 137.5,
+      "name": "Apple Inc.",
+      "netPerformance": 1750,
+      "netPerformancePercent": 14.58,
+      "netPerformancePercentWithCurrencyEffect": 14.58,
+      "netPerformanceWithCurrencyEffect": 1750,
+      "quantity": 100,
+      "sectors": [
+        {
+          "name": "Technology",
+          "weight": 100
+        }
+      ],
+      "symbol": "AAPL",
+      "valueInBaseCurrency": 13750,
+      "valueInPercentage": 100
+    }
+  ]
+}

@@ -9,10 +9,10 @@
 
 ## Timeline
 
-| Phase | Days | Target |
-|-------|------|--------|
-| MVP | Feb 24–Mar 2 (6 days, ~8 hrs) | Working 2–4 tool agent with chat widget, Docker Compose |
-| Production | Mar 2–7 (5 days) | Edge cases, polish, testing, demo prep |
+| Phase      | Days                          | Target                                                  |
+| ---------- | ----------------------------- | ------------------------------------------------------- |
+| MVP        | Feb 24–Mar 2 (6 days, ~8 hrs) | Working 2–4 tool agent with chat widget, Docker Compose |
+| Production | Mar 2–7 (5 days)              | Edge cases, polish, testing, demo prep                  |
 
 ---
 
@@ -20,18 +20,18 @@
 
 The following tickets are **required** to reach MVP — a working end-to-end agent with functional tools, a chat UI, and a one-command Docker boot:
 
-| Ticket | Title | MVP Role |
-|--------|-------|----------|
-| TICKET-01 | Environment Setup & Agent Scaffold | **Foundation** — nothing works without this |
-| TICKET-02 | GhostfolioClient + Auth Module | **Foundation** — every tool depends on this |
-| TICKET-03 | Portfolio Performance Analyzer | **Core tool** — minimum viable demo query |
-| TICKET-04 | Transaction Categorizer | **Core tool** — second demo query |
-| TICKET-05 | Capital Gains Tax Estimator | **Core tool** — demonstrates deterministic (non-LLM) logic |
-| TICKET-06 | Asset Allocation Advisor | **Core tool** — demonstrates structured output (charts) |
-| TICKET-07 | LangGraph 6-Node Graph + System Prompt | **Core** — the agent brain; routes queries to tools |
-| TICKET-08 | FastAPI SSE Endpoint + Event Mapping | **Core** — connects agent to frontend via streaming |
-| TICKET-09 | Angular Agent UI — FAB + Chat Panel | **Core** — the user-facing chat widget |
-| TICKET-10 | Docker Compose + Seed Data + E2E | **Core** — one-command boot + demo data |
+| Ticket    | Title                                  | MVP Role                                                   |
+| --------- | -------------------------------------- | ---------------------------------------------------------- |
+| TICKET-01 | Environment Setup & Agent Scaffold     | **Foundation** — nothing works without this                |
+| TICKET-02 | GhostfolioClient + Auth Module         | **Foundation** — every tool depends on this                |
+| TICKET-03 | Portfolio Performance Analyzer         | **Core tool** — minimum viable demo query                  |
+| TICKET-04 | Transaction Categorizer                | **Core tool** — second demo query                          |
+| TICKET-05 | Capital Gains Tax Estimator            | **Core tool** — demonstrates deterministic (non-LLM) logic |
+| TICKET-06 | Asset Allocation Advisor               | **Core tool** — demonstrates structured output (charts)    |
+| TICKET-07 | LangGraph 6-Node Graph + System Prompt | **Core** — the agent brain; routes queries to tools        |
+| TICKET-08 | FastAPI SSE Endpoint + Event Mapping   | **Core** — connects agent to frontend via streaming        |
+| TICKET-09 | Angular Agent UI — FAB + Chat Panel    | **Core** — the user-facing chat widget                     |
+| TICKET-10 | Docker Compose + Seed Data + E2E       | **Core** — one-command boot + demo data                    |
 
 > **Minimum viable MVP:** If time is tight, TICKET-05 and TICKET-06 can be deferred to production phase (2 tools instead of 4). TICKET-01 through TICKET-04 + TICKET-07 through TICKET-10 constitute the absolute minimum.
 
@@ -39,10 +39,10 @@ The following tickets are **required** to reach MVP — a working end-to-end age
 
 **Post-MVP / Production Polish (TICKET-11 → TICKET-12):**
 
-| Ticket | Title | Role |
-|--------|-------|------|
-| TICKET-11 | Edge Case Hardening + Golden Path E2E | Polish — adversarial testing, robustness |
-| TICKET-12 | README + Demo Script + Rehearsal | Polish — documentation, demo prep, rehearsals |
+| Ticket    | Title                                 | Role                                          |
+| --------- | ------------------------------------- | --------------------------------------------- |
+| TICKET-11 | Edge Case Hardening + Golden Path E2E | Polish — adversarial testing, robustness      |
+| TICKET-12 | README + Demo Script + Rehearsal      | Polish — documentation, demo prep, rehearsals |
 
 ---
 
@@ -102,18 +102,21 @@ Each ticket entry follows this standardized structure:
 ## TICKET-00: Repository Indexing & Docs Alignment 🟢
 
 ### 🧠 Plain-English Summary
+
 - **What was done:** Deep-indexed the entire Ghostfolio forked repo and all 5 AgentForge planning docs. Cross-referenced docs against the real codebase and corrected every inaccuracy.
 - **What it means:** We have a verified, single source of truth — the docs now match the actual code exactly. No surprises during implementation.
 - **Success looked like:** Every API endpoint, Angular pattern, auth flow, and Docker config referenced in the docs was validated against the actual source code.
 - **How it works (simple):** Read every controller, route file, Prisma schema, Docker config, and Angular component. Found 6 categories of corrections and applied them across 4 doc files.
 
 ### 📋 Metadata
+
 - **Status:** Complete
 - **Completed:** Feb 24, 2026
 - **Time Spent:** ~1.5 hours
 - **Branch:** `main`
 
 ### 🎯 Scope
+
 - ✅ Full Ghostfolio repo indexed (apps/api, apps/client, libs/common, libs/ui, prisma, docker)
 - ✅ All 5 docs indexed (PRD, Build Guidelines, PreSearch Checklist, Interview, Week 2 materials)
 - ✅ Cross-referenced docs against actual codebase
@@ -121,6 +124,7 @@ Each ticket entry follows this standardized structure:
 - ✅ Created 10 Cursor rules files for development guidance
 
 ### 🏆 Key Achievements
+
 - **6 Correction Categories Identified & Fixed:**
   1. Angular uses standalone components (`app.routes.ts`), not NgModules (`app-routing.module.ts`)
   2. Performance endpoint is `GET /api/v2/portfolio/performance` (v2, not v1)
@@ -133,6 +137,7 @@ Each ticket entry follows this standardized structure:
 ### 🔧 Technical Implementation
 
 **Key Codebase Discoveries:**
+
 - Auth: `POST /api/v1/auth/anonymous` → hashes token with HMAC-SHA512 → signs JWT (180-day expiry)
 - App bootstrap: `bootstrapApplication(GfAppComponent)` — fully standalone, no root NgModule
 - App shell: `<header>` → `<main><router-outlet /></main>` → `<footer>` (53 lines total)
@@ -146,6 +151,7 @@ Each ticket entry follows this standardized structure:
 - FAB pattern in codebase: `position: fixed; bottom: 2rem; right: 2rem; z-index: 999`
 
 **Docs Corrected:**
+
 - `AgentForge_PRD.md` — 8 corrections (routing, module, date ranges, Node version, file manifest, dataSource, allocation)
 - `AgentForge_Build_Guidelines.md` — 6 corrections (routing, module, endpoint v2, date ranges, tool contracts, file manifest)
 - `AgentForge_Interview_Complete.md` — 3 corrections (routing, module, endpoint v2, date ranges)
@@ -153,16 +159,17 @@ Each ticket entry follows this standardized structure:
 
 ### ⚠️ Issues & Solutions
 
-| Issue | Solution |
-|-------|----------|
-| Docs referenced `app-routing.module.ts` (NgModule) | Corrected to `app.routes.ts` (standalone routes) across all 4 docs |
-| Docs referenced `agent.module.ts` NgModule pattern | Corrected to standalone components with `agent-page.routes.ts` |
-| Performance endpoint listed as v1 | Corrected to v2 (`@Version('2')` in controller) |
-| Date ranges listed as uppercase (`"YTD"`, `"1Y"`) | Corrected to lowercase (`"ytd"`, `"1y"`) matching actual `DateRange` type |
-| Node.js listed as 18+ | Corrected to 22+ (>=22.18.0 per `package.json` engines) |
-| File manifest showed 2 modified files | Corrected to 3 (added `app.component.ts` for standalone imports) |
+| Issue                                              | Solution                                                                  |
+| -------------------------------------------------- | ------------------------------------------------------------------------- |
+| Docs referenced `app-routing.module.ts` (NgModule) | Corrected to `app.routes.ts` (standalone routes) across all 4 docs        |
+| Docs referenced `agent.module.ts` NgModule pattern | Corrected to standalone components with `agent-page.routes.ts`            |
+| Performance endpoint listed as v1                  | Corrected to v2 (`@Version('2')` in controller)                           |
+| Date ranges listed as uppercase (`"YTD"`, `"1Y"`)  | Corrected to lowercase (`"ytd"`, `"1y"`) matching actual `DateRange` type |
+| Node.js listed as 18+                              | Corrected to 22+ (>=22.18.0 per `package.json` engines)                   |
+| File manifest showed 2 modified files              | Corrected to 3 (added `app.component.ts` for standalone imports)          |
 
 ### ✅ Testing
+
 - ✅ Verified all `agent.module.ts` / `AgentModule` references removed from docs (grep: 0 matches)
 - ✅ Verified all `/api/v1/portfolio/performance` references removed (grep: 0 matches)
 - ✅ Verified all `Node.js 18` references removed (grep: 0 matches)
@@ -172,6 +179,7 @@ Each ticket entry follows this standardized structure:
 ### 📁 Files Changed
 
 **Created:**
+
 - `.cursor/rules/project-structure.mdc`
 - `.cursor/rules/tech-stack.mdc`
 - `.cursor/rules/agent-patterns.mdc`
@@ -184,12 +192,14 @@ Each ticket entry follows this standardized structure:
 - `.cursor/rules/sse-streaming.mdc`
 
 **Modified:**
+
 - `docs/AgentForge_PRD.md` — 8 corrections
 - `docs/AgentForge_Build_Guidelines.md` — 6 corrections
 - `docs/AgentForge_Interview_Complete.md` — 3 corrections
 - `docs/AgentForge_PreSearch_Checklist.md` — 1 correction
 
 ### 🎯 Acceptance Criteria
+
 - ✅ Full repo structure understood and documented
 - ✅ All 5 planning docs indexed and internalized
 - ✅ Docs cross-referenced against actual codebase
@@ -198,12 +208,14 @@ Each ticket entry follows this standardized structure:
 - ✅ API endpoints mapped for all 4 agent tools
 
 ### 📊 Performance
+
 - Indexed ~2,000+ files across the Nx monorepo
 - Examined 15+ controllers, 10+ interfaces, full Prisma schema
 - 18 total corrections applied across 4 documents
 - 10 cursor rules created (~18KB total)
 
 ### 🚀 Next Steps (TICKET-01)
+
 - Set up local environment (`.env` from `.env.dev`, Docker Compose for Postgres + Redis)
 - Verify Ghostfolio builds and runs locally (`npm install`, `npm run database:setup`, `npm run start:server`)
 - Create first admin user via "Get Started"
@@ -212,6 +224,7 @@ Each ticket entry follows this standardized structure:
 - Create agent `Dockerfile`
 
 ### 💡 Learnings
+
 1. **Ghostfolio is fully standalone Angular** — no NgModules anywhere, which simplifies our agent UI integration
 2. **Performance endpoint is v2** — easy to miss since all other portfolio endpoints are v1
 3. **DateRange is lowercase** — the README shows uppercase (`YTD`, `1Y`) but the actual TypeScript type and API use lowercase
@@ -230,12 +243,14 @@ Each ticket entry follows this standardized structure:
 ## TICKET-01: Environment Setup & Agent Scaffold 🟢 `MVP`
 
 ### 🧠 Plain-English Summary
+
 - **What was done:** Scaffolded the full `/agent` Python service directory (FastAPI skeleton, tools/graph/clients placeholders, tests layout), added pinned `requirements.txt`, Dockerfile, Docker Compose agent overlay, and `.env.example` agent variables.
 - **What it means:** The repo is ready for TICKET-02 (GhostfolioClient + Auth). No Ghostfolio source was modified; all work is additive under `agent/` and `docker/`.
 - **Success looked like:** Agent directory matches primer spec; Docker build succeeds; `/health` returns `{"status":"ok"}` when the agent container runs.
 - **How it works (simple):** FastAPI app with CORS and a health route. Placeholder modules for auth, four tools, LangGraph state/nodes/graph, and test structure. Compose overlay adds `agent` service that builds from `agent/Dockerfile` and depends on healthy Ghostfolio.
 
 ### 📋 Metadata
+
 - **Status:** Complete
 - **Completed:** Feb 24, 2026
 - **Time Spent:** ~45 min (scaffold + Docker + devlog)
@@ -243,6 +258,7 @@ Each ticket entry follows this standardized structure:
 - **Estimate:** 2–3 hrs (local Ghostfolio run + first user remain manual)
 
 ### 🎯 Scope
+
 - ✅ Agent directory scaffold: `main.py`, `auth.py`, `prompts.py`, `clients/`, `tools/` (base + 4 placeholders), `graph/` (state, nodes, graph), `tests/` (conftest, unit, integration, fixtures)
 - ✅ `tools/base.py`: `ToolResult` dataclass with `ok`/`fail` class methods
 - ✅ `requirements.txt`: langchain, langgraph, langchain-openai, fastapi, uvicorn[standard], httpx, pytest, pytest-asyncio, respx, cachetools, pydantic, python-dotenv (version ranges for Python 3.11+)
@@ -253,26 +269,31 @@ Each ticket entry follows this standardized structure:
 - ⬜ Full stack verification (`docker compose -f docker/docker-compose.yml -f docker/docker-compose.agent.yml up -d` + `curl localhost:8000/health`) — **you can run after populating .env**
 
 ### 🏆 Key Achievements
+
 - Single additive change set: no edits to existing Ghostfolio app code
 - Docker build verified; image runs and serves `/health`
 - Structure aligns with TDD and project-structure rules (tools, graph, clients, tests/fixtures)
 
 ### 🔧 Technical Implementation
+
 - **main.py:** FastAPI app, CORSMiddleware for localhost:3333 and :4200, `GET /health` → `{"status":"ok"}`.
 - **ToolResult:** `success`, `data`, `error`, `metadata`; `ToolResult.ok(data, **meta)` and `ToolResult.fail(error, **meta)`.
 - **Compose:** Agent build context `../agent` so only agent tree is copied; env_file `../.env` from `docker/` directory.
 
 ### ⚠️ Issues & Solutions
+
 - Shell in environment produced `command not found: z` for some invocations; Docker build was run with absolute paths and `all` permissions and succeeded.
 - requirements.txt uses version ranges (e.g. `langgraph>=1.0.0,<2.0`) so pip resolves current compatible versions; Docker build installed successfully.
 
 ### ✅ Testing
+
 - Docker build: `docker build -f agent/Dockerfile -t gf-agent:test agent/` — success.
 - Manual: run agent container and `curl http://localhost:8000/health` → `{"status":"ok"}` (after you bring up the stack).
 
 ### 📁 Files Changed
 
 **Created:**
+
 - `agent/main.py`
 - `agent/auth.py`
 - `agent/prompts.py`
@@ -285,10 +306,12 @@ Each ticket entry follows this standardized structure:
 - `docker/docker-compose.agent.yml`
 
 **Modified:**
+
 - `.env.example` (agent variables)
 - `docs/tickets/devlog.md` (this entry)
 
 ### 🎯 Acceptance Criteria
+
 - ✅ `/agent` directory scaffolded with all placeholder files
 - ✅ `requirements.txt` with real dependency version ranges (Docker build verified)
 - ✅ `agent/Dockerfile` builds successfully
@@ -300,14 +323,17 @@ Each ticket entry follows this standardized structure:
 - ⬜ All new files committed on a feature branch (your step)
 
 ### 📊 Performance
+
 - Docker build ~75s (install deps + copy).
 - No runtime tests yet (no tools or graph).
 
 ### 🚀 Next Steps
+
 - **TICKET-02: GhostfolioClient + Auth Module** — Implement HTTP client with Bearer token, MockClient, JSON fixtures, auth lifecycle tests.
 - Optionally: run local Ghostfolio (A checklist in primer), then full compose with agent and confirm `curl http://localhost:8000/health` and agent → Ghostfolio connectivity.
 
 ### 💡 Learnings
+
 - Compose build context must be `../agent` when compose file lives in `docker/` so COPY in Dockerfile only gets agent files.
 - `.env` is already in `.gitignore`; only `.env.example` documents required agent vars.
 
@@ -317,9 +343,113 @@ Each ticket entry follows this standardized structure:
 
 ---
 
-## TICKET-02: GhostfolioClient + Auth Module ⬜ `MVP`
+## TICKET-02: GhostfolioClient + Auth Module 🟢 `MVP`
 
-> **Planned scope:** HTTP client with Bearer token auth, MockClient, test fixtures, auth tests
+### 🧠 Plain-English Summary
+
+- **What was done:** Replaced all TICKET-02 placeholders with a working `auth.py`, production-style `GhostfolioClient`, fixture-backed `MockGhostfolioClient`, four deterministic API fixtures, and full unit tests for auth + client lifecycle.
+- **What it means:** TICKET-03+ tools can now receive a stable injected API client and run fast, fully mocked unit tests without any real Ghostfolio dependency.
+- **Success looked like:** Bearer token fetch/caching works, 401 triggers token refresh and one retry, raw httpx errors are translated to structured client errors, and unit tests pass locally.
+- **How it works (simple):** The client authenticates via `POST /api/v1/auth/anonymous`, stores Bearer token in short TTL cache, adds `Authorization: Bearer ...` to every request, refreshes on 401, and returns endpoint JSON for tools.
+
+### 📋 Metadata
+
+- **Status:** Complete
+- **Completed:** Feb 24, 2026
+- **Time Spent:** ~1.5 hrs (estimate: 1.5–2 hrs)
+- **Branch:** `feature/TICKET-02-ghostfolio-client` (recommended; not created in this session)
+- **Commit:** Pending (not requested in this session)
+
+### 🎯 Scope
+
+- ✅ `agent/auth.py` implemented with env token handling, Bearer fetch, TTL cache, and cache invalidation helper
+- ✅ `agent/clients/ghostfolio_client.py` implemented with required endpoints, Bearer headers, 401 refresh/retry once, and translated error codes
+- ✅ `agent/clients/mock_client.py` implemented with identical public async interface and fixture-backed responses
+- ✅ Added fixtures under `agent/tests/fixtures/` for performance/details/holdings/orders response shapes
+- ✅ Added unit tests: auth lifecycle + client happy path + 401 refresh + timeout/HTTP error paths
+- ✅ Added shared test fixtures in `agent/tests/conftest.py` including fixture loader and mock client
+
+### 🏆 Key Achievements
+
+- Standardized client error surface via `GhostfolioClientError(error_code, status, detail)` with taxonomy-aligned codes (`AUTH_FAILED`, `API_ERROR`, `API_TIMEOUT`, `INVALID_TIME_PERIOD`)
+- Auth flow and retry behavior now matches Ghostfolio integration rules (`/api/v1/auth/anonymous`, Bearer auth, refresh on 401)
+- Unit tests are fully deterministic and isolated from network/Ghostfolio runtime
+
+### 🔧 Technical Implementation
+
+- **Auth module (`agent/auth.py`):** Added `get_access_token_from_env()`, `get_bearer_token(...)`, and `clear_bearer_token_cache(...)` backed by `cachetools.TTLCache` (60s).
+- **Ghostfolio client (`agent/clients/ghostfolio_client.py`):**
+  - Constructor supports injected `httpx.AsyncClient` for testability.
+  - Implements:
+    - `get_portfolio_performance(time_period)`
+    - `get_portfolio_details()`
+    - `get_portfolio_holdings()`
+    - `get_orders(date_range=None)`
+  - Validates date ranges and maps httpx exceptions/status failures to structured client errors.
+  - Retries once on 401 after forcing token refresh.
+- **Mock client (`agent/clients/mock_client.py`):** Loads fixtures and returns deep-copied deterministic payloads with same method signatures.
+- **Testing (`agent/tests/unit/`):**
+  - `test_auth.py`: payload correctness, cache behavior, missing env handling.
+  - `test_ghostfolio_client.py`: happy path, 401 refresh success, repeated 401 failure, timeout and 500 handling.
+
+### ⚠️ Issues & Solutions
+
+| Issue                                         | Solution                                                                            |
+| --------------------------------------------- | ----------------------------------------------------------------------------------- |
+| `pytest` not available in default shell       | Created local `.venv` and installed `agent/requirements.txt` for isolated execution |
+| SSL trust failure while installing in sandbox | Re-ran install/tests with full permissions to use local trust store                 |
+
+### ✅ Testing
+
+- ✅ Command: `./.venv/bin/python -m pytest agent/tests/unit/`
+- ✅ Result: **9 passed** (`test_auth.py` + `test_ghostfolio_client.py`)
+- ✅ No real network calls in unit tests (all HTTP interactions mocked via `respx`)
+
+### 📁 Files Changed
+
+**Created:**
+
+- `agent/tests/fixtures/performance_ytd.json`
+- `agent/tests/fixtures/portfolio_details.json`
+- `agent/tests/fixtures/portfolio_holdings.json`
+- `agent/tests/fixtures/orders.json`
+- `agent/tests/unit/test_auth.py`
+- `agent/tests/unit/test_ghostfolio_client.py`
+
+**Modified:**
+
+- `agent/auth.py`
+- `agent/clients/ghostfolio_client.py`
+- `agent/clients/mock_client.py`
+- `agent/tests/conftest.py`
+- `docs/tickets/devlog.md` (this entry)
+
+### 🎯 Acceptance Criteria
+
+- ✅ `auth.py` implements Bearer token fetch and cache with no token logging
+- ✅ `GhostfolioClient` sends Bearer header and refreshes on 401 with one retry
+- ✅ `MockGhostfolioClient` mirrors public interface and is fixture-backed
+- ✅ Multiple realistic fixture JSON files added
+- ✅ Unit tests cover auth flow, happy path, refresh-on-401, and error translation
+- ✅ Unit tests pass: `pytest agent/tests/unit/`
+- ⬜ Feature branch creation + commit (pending user workflow step)
+
+### 📊 Performance
+
+- Dependency install + test bootstrap in `.venv`: ~1.5 min after resolver completed
+- Unit suite runtime: ~0.07s for 9 tests
+- Implementation touched 11 project files (6 created, 5 modified)
+
+### 🚀 Next Steps
+
+- **TICKET-03:** Implement `Portfolio Performance Analyzer` tool using injected `api_client.get_portfolio_performance(time_period)` and return `ToolResult`.
+- Add unit tests for TICKET-03 with `MockGhostfolioClient` fixture as the default test client.
+
+### 💡 Learnings
+
+- Keep auth caching in a dedicated module so token invalidation and refresh logic stay centralized.
+- Translating raw httpx failures at the client boundary gives tools a clean, deterministic error contract.
+- Fixture-backed mocks accelerate future ticket development because tool tests stay fast and offline.
 
 ---
 
@@ -409,23 +539,23 @@ Each ticket entry follows this standardized structure:
 
 ## Status Legend
 
-| Emoji | Meaning |
-|-------|---------|
-| ⬜ | Not started |
-| 🔵 | In progress |
-| 🟢 | Complete |
-| 🔴 | Blocked |
-| ⚠️ | Complete with issues |
+| Emoji | Meaning              |
+| ----- | -------------------- |
+| ⬜    | Not started          |
+| 🔵    | In progress          |
+| 🟢    | Complete             |
+| 🔴    | Blocked              |
+| ⚠️    | Complete with issues |
 
 ---
 
 ## Running Totals
 
-| Metric | Value |
-|--------|-------|
-| Tickets Complete | 2 / 13 |
-| Total Dev Time | ~2.25 hrs |
-| Tests Passing | — |
-| Files Created | 27 |
-| Files Modified | 6 |
-| Cursor Rules | 10 |
+| Metric           | Value          |
+| ---------------- | -------------- |
+| Tickets Complete | 3 / 13         |
+| Total Dev Time   | ~3.75 hrs      |
+| Tests Passing    | 9 (agent unit) |
+| Files Created    | 33             |
+| Files Modified   | 11             |
+| Cursor Rules     | 10             |

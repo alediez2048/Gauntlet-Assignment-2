@@ -1,0 +1,33 @@
+{
+  "activities": [
+    {
+      "id": "activity-1",
+      "accountId": "account-1",
+      "comment": "Initial position",
+      "createdAt": "2024-01-15T00:00:00.000Z",
+      "currency": "USD",
+      "date": "2024-01-15T00:00:00.000Z",
+      "fee": 1,
+      "feeInAssetProfileCurrency": 1,
+      "feeInBaseCurrency": 1,
+      "isDraft": false,
+      "quantity": 10,
+      "symbolProfileId": "symbol-profile-aapl",
+      "type": "BUY",
+      "unitPrice": 185.5,
+      "unitPriceInAssetProfileCurrency": 185.5,
+      "updatedAt": "2024-01-15T00:00:00.000Z",
+      "userId": "user-1",
+      "value": 1855,
+      "valueInBaseCurrency": 1855,
+      "SymbolProfile": {
+        "currency": "USD",
+        "dataSource": "YAHOO",
+        "name": "Apple Inc.",
+        "symbol": "AAPL"
+      },
+      "tags": []
+    }
+  ],
+  "count": 1
+}

@@ -1,0 +1,29 @@
+{
+  "chart": [
+    {
+      "date": "2024-01-15",
+      "netPerformance": 0,
+      "netWorth": 12000,
+      "totalInvestment": 12000
+    },
+    {
+      "date": "2024-12-31",
+      "netPerformance": 1750,
+      "netWorth": 13750,
+      "totalInvestment": 12000
+    }
+  ],
+  "firstOrderDate": "2024-01-15T00:00:00.000Z",
+  "hasErrors": false,
+  "performance": {
+    "annualizedPerformancePercent": 12.45,
+    "currentNetWorth": 13750,
+    "currentValueInBaseCurrency": 13750,
+    "netPerformance": 1750,
+    "netPerformancePercentage": 14.58,
+    "netPerformancePercentageWithCurrencyEffect": 14.58,
+    "netPerformanceWithCurrencyEffect": 1750,
+    "totalInvestment": 12000,
+    "totalInvestmentValueWithCurrencyEffect": 12000
+  }
+}

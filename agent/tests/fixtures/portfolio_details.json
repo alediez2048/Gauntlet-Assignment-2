@@ -1,0 +1,103 @@
+{
+  "accounts": {
+    "account-1": {
+      "balance": 13750,
+      "currency": "USD",
+      "name": "Brokerage Account",
+      "valueInBaseCurrency": 13750,
+      "valueInPercentage": 100
+    }
+  },
+  "createdAt": "2024-01-15T00:00:00.000Z",
+  "holdings": {
+    "AAPL": {
+      "activitiesCount": 1,
+      "allocationInPercentage": 100,
+      "assetClass": "EQUITY",
+      "countries": [
+        {
+          "code": "US",
+          "continent": "NA",
+          "name": "United States",
+          "weight": 100
+        }
+      ],
+      "currency": "USD",
+      "dataSource": "YAHOO",
+      "dateOfFirstActivity": "2024-01-15T00:00:00.000Z",
+      "dividend": 0,
+      "grossPerformance": 1750,
+      "grossPerformancePercent": 14.58,
+      "grossPerformancePercentWithCurrencyEffect": 14.58,
+      "grossPerformanceWithCurrencyEffect": 1750,
+      "holdings": [
+        {
+          "allocationInPercentage": 100,
+          "name": "Apple Inc.",
+          "valueInBaseCurrency": 13750
+        }
+      ],
+      "investment": 12000,
+      "marketPrice": 137.5,
+      "name": "Apple Inc.",
+      "netPerformance": 1750,
+      "netPerformancePercent": 14.58,
+      "netPerformancePercentWithCurrencyEffect": 14.58,
+      "netPerformanceWithCurrencyEffect": 1750,
+      "quantity": 100,
+      "sectors": [
+        {
+          "name": "Technology",
+          "weight": 100
+        }
+      ],
+      "symbol": "AAPL",
+      "valueInBaseCurrency": 13750
+    }
+  },
+  "platforms": {
+    "platform-1": {
+      "balance": 13750,
+      "currency": "USD",
+      "name": "Demo Broker",
+      "valueInBaseCurrency": 13750,
+      "valueInPercentage": 100
+    }
+  },
+  "summary": {
+    "activityCount": 1,
+    "annualizedPerformancePercent": 12.45,
+    "annualizedPerformancePercentWithCurrencyEffect": 12.45,
+    "cash": 0,
+    "committedFunds": 12000,
+    "currentNetWorth": 13750,
+    "currentValueInBaseCurrency": 13750,
+    "dateOfFirstActivity": "2024-01-15T00:00:00.000Z",
+    "dividendInBaseCurrency": 0,
+    "emergencyFund": {
+      "assets": 13750,
+      "cash": 0,
+      "total": 13750
+    },
+    "excludedAccountsAndActivities": 0,
+    "fees": 0,
+    "fireWealth": {
+      "today": {
+        "valueInBaseCurrency": 13750
+      }
+    },
+    "grossPerformance": 1750,
+    "grossPerformanceWithCurrencyEffect": 1750,
+    "interestInBaseCurrency": 0,
+    "liabilitiesInBaseCurrency": 0,
+    "netPerformance": 1750,
+    "netPerformancePercentage": 14.58,
+    "netPerformancePercentageWithCurrencyEffect": 14.58,
+    "netPerformanceWithCurrencyEffect": 1750,
+    "totalBuy": 12000,
+    "totalInvestment": 12000,
+    "totalInvestmentValueWithCurrencyEffect": 12000,
+    "totalSell": 0,
+    "totalValueInBaseCurrency": 13750
+  }
+}
