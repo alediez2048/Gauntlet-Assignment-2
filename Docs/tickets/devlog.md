@@ -550,9 +550,120 @@ Each ticket entry follows this standardized structure:
 
 ---
 
-## TICKET-04: Tool 2 — Transaction Categorizer ⬜ `MVP`
+## TICKET-04: Tool 2 — Transaction Categorizer 🟢 `MVP`
 
-> **Planned scope:** Categorize by 6 activity types, summary stats, 3+ unit tests
+### 🧠 Plain-English Summary
+
+- **What was done:** Replaced the placeholder transaction tool with a production-style async
+  `categorize_transactions(api_client, date_range="max")` implementation and added a dedicated
+  mixed-types fixture plus unit test module.
+- **What it means:** AgentForge now has its second MVP tool (after portfolio analysis), enabling
+  grouped activity insights and deterministic summary metrics for Ghostfolio transaction data.
+- **Success looked like:** Date range validation short-circuits invalid input, all 6 Ghostfolio
+  activity types are always represented, and client/unknown failures are mapped to safe
+  `ToolResult.fail(...)` outputs.
+- **How it works (simple):** Validate range -> call `get_orders(range)` -> group by type -> compute
+  counts and totals -> return structured success/error result.
+
+### 📋 Metadata
+
+- **Status:** Complete
+- **Completed:** Feb 24, 2026
+- **Time Spent:** ~0.75 hrs (estimate: 60-90 min)
+- **Branch:** `feature/TICKET-04-transaction-categorizer`
+- **Commit:** Pending (not requested in this session)
+
+### 🎯 Scope
+
+- ✅ Implemented `categorize_transactions(api_client, date_range="max") -> ToolResult`
+- ✅ Added date-range validation gate for `1d`, `wtd`, `mtd`, `ytd`, `1y`, `5y`, `max`
+- ✅ Added grouping for all activity types: `BUY`, `SELL`, `DIVIDEND`, `FEE`, `INTEREST`,
+  `LIABILITY`
+- ✅ Added summary payload with total transactions, by-type counts, and per-type monetary totals
+- ✅ Added fixture-backed unit tests for happy path, invalid range, client error mapping, empty
+  activities, and unexpected exception fallback
+
+### 🏆 Key Achievements
+
+- Established the second canonical pure-function tool pattern using injected client dependencies.
+- Ensured output shape always includes all 6 categories, even when activity lists are empty.
+- Increased the unit suite from 15 to 22 passing tests while preserving deterministic offline
+  behavior.
+
+### 🔧 Technical Implementation
+
+- **Tool module (`agent/tools/transaction_categorizer.py`):**
+  - Added public async function with full type hints and Google-style docstring.
+  - Reused shared `VALID_DATE_RANGES` and mapped `GhostfolioClientError.error_code` directly to
+    `ToolResult.fail(...)`.
+  - Implemented deterministic grouping (`by_type`) and count map (`by_type_counts`) for all 6
+    supported activity types.
+  - Added summary totals (`buy_total`, `sell_total`, `dividend_total`, `interest_total`,
+    `fee_total`, `liability_total`) using normalized numeric value extraction.
+- **Fixture (`agent/tests/fixtures/orders_mixed_types.json`):**
+  - Added deterministic fixture containing one transaction for each Ghostfolio activity type.
+- **Unit tests (`agent/tests/unit/test_transaction_categorizer.py`):**
+  - Happy path verifies full category coverage, counts, summary totals, and metadata.
+  - Validation short-circuit test confirms no API call for invalid `date_range`.
+  - Parametrized client error mapping for `API_TIMEOUT`, `API_ERROR`, and `AUTH_FAILED`.
+  - Added empty-activity success path and unexpected-exception safety fallback tests.
+
+### ⚠️ Issues & Solutions
+
+| Issue | Solution |
+| ----- | -------- |
+| Needed deterministic coverage for all six activity types. | Added `orders_mixed_types.json` with stable values and assertions against exact totals. |
+
+### ✅ Testing
+
+- ✅ Command: `./.venv/bin/python -m pytest agent/tests/unit/test_transaction_categorizer.py`
+- ✅ Result: **7 passed** in ~0.03s
+- ✅ Command: `./.venv/bin/python -m pytest agent/tests/unit/`
+- ✅ Result: **22 passed** in ~0.07s (auth + client + portfolio analyzer + transaction
+  categorizer)
+
+### 📁 Files Changed
+
+**Created:**
+
+- `agent/tests/fixtures/orders_mixed_types.json`
+- `agent/tests/unit/test_transaction_categorizer.py`
+
+**Modified:**
+
+- `agent/tools/transaction_categorizer.py`
+- `docs/tickets/devlog.md` (this entry + running totals)
+
+### 🎯 Acceptance Criteria
+
+- ✅ `agent/tools/transaction_categorizer.py` implemented as pure async function using injected
+  client.
+- ✅ Input validation implemented for DateRange values; invalid values return
+  `INVALID_TIME_PERIOD`.
+- ✅ Activities categorized into all 6 Ghostfolio activity types.
+- ✅ Summary metrics computed and returned in `ToolResult.ok(...)`.
+- ✅ Client errors mapped to `ToolResult.fail(...)` with taxonomy-aligned error code.
+- ✅ Unit tests added and passing: `pytest agent/tests/unit/test_transaction_categorizer.py`
+- ✅ Full unit suite still passing: `pytest agent/tests/unit/`
+- ✅ `docs/tickets/devlog.md` updated after completion.
+- ⬜ Work commit on ticket branch pending user workflow step.
+
+### 📊 Performance
+
+- Transaction categorizer unit module runtime: ~0.03s for 7 tests.
+- Full agent unit suite runtime: ~0.07s for 22 tests.
+- TICKET-04 implementation touched 4 files (2 created, 2 modified).
+
+### 🚀 Next Steps
+
+- **TICKET-05:** Implement Capital Gains Tax Estimator with deterministic FIFO lot accounting.
+- Reuse this ticket's mixed-fixture approach for hand-verified tax math test vectors.
+
+### 💡 Learnings
+
+- A single normalized value helper keeps summary math resilient across heterogeneous activity
+  shapes.
+- Explicitly returning zero-populated category buckets simplifies downstream UI/render logic.
 
 ---
 
@@ -644,9 +755,9 @@ Each ticket entry follows this standardized structure:
 
 | Metric           | Value           |
 | ---------------- | --------------- |
-| Tickets Complete | 4 / 13          |
-| Total Dev Time   | ~4.5 hrs        |
-| Tests Passing    | 15 (agent unit) |
-| Files Created    | 34              |
-| Files Modified   | 13              |
+| Tickets Complete | 5 / 13          |
+| Total Dev Time   | ~5.25 hrs       |
+| Tests Passing    | 22 (agent unit) |
+| Files Created    | 36              |
+| Files Modified   | 15              |
 | Cursor Rules     | 10              |
