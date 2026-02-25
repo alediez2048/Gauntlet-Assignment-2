@@ -1,0 +1,102 @@
+.agent-panel-backdrop {
+  background: rgba(15, 23, 42, 0.35);
+  inset: 0;
+  position: fixed;
+  z-index: 1000;
+}
+
+.agent-panel {
+  background: var(--light-background-primary);
+  border: 1px solid rgba(15, 23, 42, 0.15);
+  border-radius: 0.75rem;
+  bottom: 1.5rem;
+  box-shadow: 0 1.25rem 2.5rem rgba(15, 23, 42, 0.2);
+  display: flex;
+  flex-direction: column;
+  height: min(40rem, calc(100vh - 3rem));
+  position: fixed;
+  right: 1.5rem;
+  width: min(30rem, calc(100vw - 2rem));
+  z-index: 1001;
+}
+
+.agent-panel__header {
+  align-items: center;
+  border-bottom: 1px solid rgba(15, 23, 42, 0.12);
+  display: flex;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+}
+
+.agent-panel__messages {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 0.6rem;
+  overflow-y: auto;
+  padding: 0.8rem 1rem;
+}
+
+.agent-panel__empty {
+  color: var(--dark-font-secondary-color);
+  font-size: 0.9rem;
+}
+
+.agent-panel__message-row {
+  display: flex;
+}
+
+.agent-panel__message-row--user {
+  justify-content: flex-end;
+}
+
+.agent-panel__message-row--assistant {
+  justify-content: flex-start;
+}
+
+.agent-bubble {
+  border-radius: 0.65rem;
+  line-height: 1.35;
+  max-width: 90%;
+  padding: 0.6rem 0.75rem;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.agent-bubble--user {
+  background: rgba(46, 91, 255, 0.12);
+  border: 1px solid rgba(46, 91, 255, 0.25);
+}
+
+.agent-bubble--assistant {
+  background: rgba(15, 23, 42, 0.06);
+  border: 1px solid rgba(15, 23, 42, 0.12);
+}
+
+.agent-panel__composer {
+  border-top: 1px solid rgba(15, 23, 42, 0.12);
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  padding: 0.8rem 1rem;
+}
+
+.agent-panel__input {
+  width: 100%;
+}
+
+.agent-panel__actions {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+}
+
+:host-context(.theme-dark) .agent-panel {
+  background: #111827;
+  border-color: rgba(255, 255, 255, 0.14);
+}
+
+:host-context(.theme-dark) .agent-bubble--assistant {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.16);
+}

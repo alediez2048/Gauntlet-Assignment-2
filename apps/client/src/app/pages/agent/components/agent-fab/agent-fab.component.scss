@@ -1,0 +1,13 @@
+.agent-fab-button {
+  bottom: 2rem;
+  position: fixed;
+  right: 2rem;
+  z-index: 1002;
+}
+
+@media (max-width: 720px) {
+  .agent-fab-button {
+    bottom: 1rem;
+    right: 1rem;
+  }
+}

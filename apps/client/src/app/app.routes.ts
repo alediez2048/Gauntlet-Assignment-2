@@ -70,6 +70,11 @@ export const routes: Routes = [
     title: publicRoutes.features.title
   },
   {
+    path: 'agent',
+    loadChildren: () =>
+      import('./pages/agent/agent-page.routes').then((m) => m.routes)
+  },
+  {
     path: internalRoutes.home.path,
     loadChildren: () =>
       import('./pages/home/home-page.routes').then((m) => m.routes)

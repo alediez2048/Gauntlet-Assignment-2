@@ -1,0 +1,116 @@
+@if (isOpen) {
+  <div class="agent-panel-backdrop" (click)="onRequestClose()"></div>
+
+  <section class="agent-panel" aria-label="Agent Chat Panel" role="dialog">
+    <header class="agent-panel__header">
+      <h2 class="mb-0">Agent</h2>
+      <button
+        aria-label="Close agent panel"
+        mat-icon-button
+        type="button"
+        (click)="onRequestClose()"
+      >
+        <mat-icon>close</mat-icon>
+      </button>
+    </header>
+
+    <div #messageContainer class="agent-panel__messages">
+      @if (chatState().blocks.length === 0) {
+        <p class="agent-panel__empty mb-0" i18n>
+          Ask about your portfolio performance, allocation, transactions, or
+          taxes.
+        </p>
+      }
+
+      @for (block of chatState().blocks; track $index) {
+        <div
+          class="agent-panel__message-row"
+          [class.agent-panel__message-row--assistant]="block.type === 'assistant'"
+          [class.agent-panel__message-row--user]="block.type === 'user'"
+        >
+          @if (block.type === 'user') {
+            <div class="agent-bubble agent-bubble--user">
+              {{ block.content }}
+            </div>
+          }
+
+          @if (block.type === 'assistant') {
+            <div class="agent-bubble agent-bubble--assistant">
+              {{ block.content }}
+            </div>
+          }
+
+          @if (block.type === 'thinking') {
+            <gf-agent-thinking-block
+              [message]="block.message || 'Analyzing your request...'"
+            />
+          }
+
+          @if (block.type === 'tool_call') {
+            <gf-agent-tool-call-block
+              [args]="block.args || {}"
+              [tool]="block.tool || 'unknown_tool'"
+            />
+          }
+
+          @if (block.type === 'tool_result') {
+            <gf-agent-tool-result-block
+              [error]="block.error"
+              [success]="!!block.success"
+              [tool]="block.tool || 'unknown_tool'"
+            />
+          }
+
+          @if (block.type === 'error') {
+            <gf-agent-error-block
+              [code]="block.code || ''"
+              [message]="
+                block.message || 'Received an error from the portfolio service.'
+              "
+            />
+          }
+        </div>
+      }
+    </div>
+
+    <footer class="agent-panel__composer">
+      <mat-form-field appearance="outline" class="agent-panel__input">
+        <mat-label i18n>Ask the agent</mat-label>
+        <textarea
+          data-testid="agent-chat-input"
+          matInput
+          placeholder="How is my portfolio doing ytd?"
+          rows="2"
+          [disabled]="chatState().isStreaming"
+          [value]="draftMessage"
+          (input)="onDraftMessageInput($event)"
+          (keydown)="onInputKeyDown($event)"
+        ></textarea>
+      </mat-form-field>
+
+      <div class="agent-panel__actions">
+        @if (chatState().isStreaming) {
+          <button
+            data-testid="agent-cancel-button"
+            mat-stroked-button
+            type="button"
+            (click)="onCancelStream()"
+          >
+            Cancel
+          </button>
+        }
+
+        <button
+          color="primary"
+          data-testid="agent-send-button"
+          mat-flat-button
+          type="button"
+          [disabled]="!canSendMessage"
+          (click)="onSendMessage()"
+        >
+          Send
+        </button>
+      </div>
+    </footer>
+  </section>
+}

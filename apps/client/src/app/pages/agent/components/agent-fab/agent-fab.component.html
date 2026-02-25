@@ -1,0 +1,17 @@
+@if (!isPanelOpen()) {
+  <button
+    aria-label="Open agent chat panel"
+    class="agent-fab-button"
+    mat-fab
+    type="button"
+    [attr.aria-expanded]="isPanelOpen()"
+    (click)="onOpenPanel()"
+  >
+    <mat-icon>smart_toy</mat-icon>
+  </button>
+}
+
+<gf-agent-chat-panel
+  [isOpen]="isPanelOpen()"
+  (closeRequested)="onClosePanel()"
+/>

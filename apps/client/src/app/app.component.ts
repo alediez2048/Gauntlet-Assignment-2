@@ -37,13 +37,20 @@ import { GfFooterComponent } from './components/footer/footer.component';
 import { GfHeaderComponent } from './components/header/header.component';
 import { GfHoldingDetailDialogComponent } from './components/holding-detail-dialog/holding-detail-dialog.component';
 import { HoldingDetailDialogParams } from './components/holding-detail-dialog/interfaces/interfaces';
+import { GfAgentFabComponent } from './pages/agent/components/agent-fab/agent-fab.component';
 import { ImpersonationStorageService } from './services/impersonation-storage.service';
 import { TokenStorageService } from './services/token-storage.service';
 import { UserService } from './services/user/user.service';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [GfFooterComponent, GfHeaderComponent, RouterLink, RouterOutlet],
+  imports: [
+    GfFooterComponent,
+    GfHeaderComponent,
+    GfAgentFabComponent,
+    RouterLink,
+    RouterOutlet
+  ],
   selector: 'gf-root',
   styleUrls: ['./app.component.scss'],
   templateUrl: './app.component.html'
