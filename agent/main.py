@@ -16,6 +16,31 @@ from pydantic import BaseModel, Field, field_validator
 from agent.clients.ghostfolio_client import GhostfolioClient
 from agent.graph.graph import build_graph
 
+try:
+    from langchain_openai import ChatOpenAI as _ChatOpenAI
+except ModuleNotFoundError:
+    _ChatOpenAI = None
+
+
+def _build_synthesizer_callable() -> Any | None:
+    """Builds an async callable that uses GPT-4o to narrate tool results."""
+    api_key = os.getenv("OPENAI_API_KEY")
+    if not api_key or _ChatOpenAI is None:
+        return None
+
+    llm = _ChatOpenAI(model="gpt-4o", temperature=0.3, max_tokens=512)
+
+    async def _synthesize(system_prompt: str, user_content: str) -> str:
+        messages = [
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": user_content},
+        ]
+        response = await llm.ainvoke(messages)
+        text = response.content if hasattr(response, "content") else str(response)
+        return text.strip() if isinstance(text, str) else str(text).strip()
+
+    return _synthesize
+
 _DEFAULT_CORS_ORIGINS: list[str] = [
     "http://localhost:3333",
     "https://localhost:3333",
@@ -38,7 +63,9 @@ def _resolve_cors_origins() -> list[str]:
     return resolved_origins
 
 
-app = FastAPI(title="AgentForge", version="0.1.0")
+_BUILD_VERSION = "synth-v2"
+
+app = FastAPI(title="AgentForge", version="0.2.0")
 
 app.add_middleware(
     CORSMiddleware,
@@ -219,7 +246,8 @@ async def chat(request: ChatRequest) -> StreamingResponse:
                 graph_input["tool_call_history"] = prior_tool_history
 
             async with GhostfolioClient(base_url=base_url, access_token=access_token) as api_client:
-                graph = build_graph(api_client=api_client)
+                synthesizer = _build_synthesizer_callable()
+                graph = build_graph(api_client=api_client, synthesizer=synthesizer)
                 graph_state = await graph.ainvoke(
                     graph_input,
                     config={"configurable": {"thread_id": thread_id}},
@@ -254,4 +282,4 @@ async def chat(request: ChatRequest) -> StreamingResponse:
 @app.get("/health")
 async def health() -> dict[str, str]:
     """Returns a liveness health payload for container checks."""
-    return {"status": "ok"}
+    return {"status": "ok", "version": _BUILD_VERSION}

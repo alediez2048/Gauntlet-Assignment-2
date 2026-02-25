@@ -1758,6 +1758,82 @@ Each ticket entry follows this standardized structure:
 
 ---
 
+## TICKET-10.2: LLM-Backed Synthesis + Infrastructure Fixes 🟢 `COMPLETED`
+
+> **Branch:** `feature/TICKET-10-1-e2e-railway-deploy`
+> **Estimated time:** 1.5 hrs | **Actual time:** ~3 hrs
+
+### Summary
+
+Upgraded the agent's synthesizer node from hardcoded template strings to LLM-backed response generation using GPT-4o, and fixed infrastructure issues that prevented both local and production environments from working.
+
+### What Was Broken and Why
+
+**Problem 1 — Terse, unhelpful agent responses:**
+The synthesizer node in `agent/graph/nodes.py` used `_build_summary()` which produced rigid one-liner templates like "Allocation analysis is complete. I found 1 concentration warning(s)." The tool result data (allocations, holdings, tax breakdowns) was rich but the user-facing message was a canned string. The LLM was used for routing but never for response synthesis.
+
+**Problem 2 — Local API_ERROR (Docker network mismatch):**
+The agent container and Ghostfolio container were on different Docker networks. `docker-compose.yml` declares `name: ghostfolio` but `.env` has `COMPOSE_PROJECT_NAME=ghostfolio-development`. When services were started via separate compose invocations, they landed on different networks (`ghostfolio_default` vs `ghostfolio-development_default`) and couldn't resolve each other's hostnames. The agent's requests to `http://ghostfolio:3333` failed with connection errors.
+
+**Problem 3 — Production API_ERROR (stale auth token):**
+The `GHOSTFOLIO_ACCESS_TOKEN` on the Railway agent service became invalid after the production Ghostfolio DB was reset during earlier debugging. The agent could not authenticate and all tool calls returned `API_ERROR`.
+
+**Problem 4 — Railway deploys not activating:**
+Multiple `railway up` commands built images successfully but the running container never updated. The `--ci` flag was dropped from deploy commands, causing builds to complete without triggering deployment activation. Additionally, `railway redeploy` only restarts the currently active deployment, not the latest build.
+
+### How Each Was Fixed
+
+1. **LLM synthesis:** Added `SYNTHESIS_PROMPT` to `agent/prompts.py`, upgraded `make_synthesizer_node` to accept an optional `SynthesizerCallable`, and wired `_build_synthesizer_callable()` in `main.py` using `langchain-openai` (already a dependency). Falls back to the old templates if the LLM is unavailable or errors.
+
+2. **Local networking:** Nuked all containers and networks (`docker rm -f` + `docker network prune`), then restarted everything with a single `docker compose ... --env-file .env up -d --build` command. All services joined `ghostfolio-development_default`.
+
+3. **Production auth:** Created a fresh user on the production Ghostfolio instance, imported seed data using the MANUAL-transform path, and updated the agent's `GHOSTFOLIO_ACCESS_TOKEN` on Railway.
+
+4. **Railway deploy:** The `--ci` flag was restored for deploys. One of the earlier builds did eventually activate, confirmed by the `/health` endpoint returning `version: synth-v2`.
+
+### Scope
+
+| Area | Details |
+| --- | --- |
+| Agent code | 4 files modified: `prompts.py`, `nodes.py`, `graph.py`, `main.py` |
+| Infrastructure | Docker network cleanup, Railway token + deploy |
+| Testing | Manual E2E on both local and production |
+
+### Files Changed
+
+- `agent/prompts.py` — Added `SYNTHESIS_PROMPT` constant
+- `agent/graph/nodes.py` — Added `SynthesizerCallable` type, `synthesizer` field on `NodeDependencies`, upgraded `make_synthesizer_node` to async with LLM fallback
+- `agent/graph/graph.py` — Added `synthesizer` parameter to `build_graph()`, passed dependencies to synthesizer node
+- `agent/main.py` — Added `_build_synthesizer_callable()` using `ChatOpenAI`, `_BUILD_VERSION` constant, version in health endpoint
+- `Docs/tickets/devlog.md` — This entry
+
+### Acceptance Criteria
+
+- ✅ Local agent chat returns rich, multi-paragraph LLM-synthesized answers
+- ✅ Production agent chat returns rich, multi-paragraph LLM-synthesized answers
+- ✅ All four tools (portfolio, transactions, tax, allocation) return `tool_result.success: true`
+- ✅ Fallback to template strings if LLM is unavailable (tested via `docker exec`)
+- ✅ `/health` endpoint includes `version` field for deploy verification
+
+### Issues Encountered
+
+| Issue | Root Cause | Resolution |
+| --- | --- | --- |
+| Agent API_ERROR on local | Docker network mismatch from inconsistent compose invocations | Single `docker compose` command with `--env-file .env` |
+| Agent API_ERROR on production | Stale `GHOSTFOLIO_ACCESS_TOKEN` after DB reset | Fresh user bootstrap + token update |
+| Railway builds not deploying | Missing `--ci` flag on `railway up` | Restored `--ci`; one earlier build eventually activated |
+| Railway "Hobby deploys are paused" | Platform-level rate limit on Hobby tier | Waited for cooldown; services remained running |
+| Template responses despite code changes | Code not deployed (old container serving) | Verified via `version` field in health endpoint |
+
+### Learnings
+
+- Always use `--env-file .env` with `docker compose` to ensure consistent project name and network across invocations.
+- Add a version/build tag to health endpoints to verify which code is actually running in production.
+- Railway's `--ci` flag is not optional — without it, builds may complete without activating a deployment.
+- LLM synthesis with a template fallback is the right pattern: rich answers when the LLM is available, deterministic answers when it's not.
+
+---
+
 ## Phase 7: Testing & Edge Cases
 
 ---
@@ -1794,9 +1870,9 @@ Each ticket entry follows this standardized structure:
 
 | Metric           | Value           |
 | ---------------- | --------------- |
-| Tickets Complete | 12 / 14                  |
-| Total Dev Time   | ~27.00 hrs               |
+| Tickets Complete | 13 / 14                  |
+| Total Dev Time   | ~30.00 hrs               |
 | Tests Passing    | 80 automated + hosted/local E2E regression matrices |
 | Files Created    | 69                       |
-| Files Modified   | 47                       |
+| Files Modified   | 51                       |
 | Cursor Rules     | 10              |

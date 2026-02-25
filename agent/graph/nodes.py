@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import math
 import re
 import traceback as _tb
@@ -12,7 +13,7 @@ from typing import Any, Final, cast
 
 from agent.clients.ghostfolio_client import VALID_DATE_RANGES
 from agent.graph.state import AgentState, RouteName, ToolName
-from agent.prompts import SUPPORTED_CAPABILITIES
+from agent.prompts import SUPPORTED_CAPABILITIES, SYNTHESIS_PROMPT
 from agent.tools.allocation_advisor import advise_asset_allocation
 from agent.tools.base import ToolResult
 from agent.tools.portfolio_analyzer import analyze_portfolio_performance
@@ -105,12 +106,16 @@ _FOLLOW_UP_MARKERS: Final[tuple[str, ...]] = (
 )
 
 
+SynthesizerCallable = Callable[[str, str], Awaitable[str]]
+
+
 @dataclass(frozen=True)
 class NodeDependencies:
     """Injected dependencies for graph nodes."""
 
     api_client: Any
     router: RouterCallable
+    synthesizer: SynthesizerCallable | None = None
 
 
 def _message_to_text(message: Any) -> str:
@@ -651,13 +656,40 @@ def _build_summary(tool_name: ToolName | None, tool_result: ToolResult | None) -
     )
 
 
-def make_synthesizer_node() -> Callable[[AgentState], AgentState]:
-    """Builds Synthesizer node to produce deterministic user-facing payloads."""
+def make_synthesizer_node(
+    dependencies: NodeDependencies | None = None,
+) -> Callable[[AgentState], AgentState | Awaitable[AgentState]]:
+    """Builds Synthesizer node. Uses LLM when a synthesizer callable is available."""
 
-    def synthesizer_node(state: AgentState) -> AgentState:
+    synthesizer_fn = dependencies.synthesizer if dependencies else None
+
+    async def synthesizer_node(state: AgentState) -> AgentState:
         tool_name = state.get("tool_name")
         tool_result = state.get("tool_result")
-        summary = _build_summary(tool_name, tool_result)
+
+        if synthesizer_fn is not None and tool_result is not None:
+            try:
+                tool_json = json.dumps(tool_result.data, default=str)[:4000]
+                user_query = ""
+                messages = state.get("messages")
+                if isinstance(messages, list):
+                    for msg in reversed(messages):
+                        text = _message_to_text(msg)
+                        role = msg.get("role") if isinstance(msg, dict) else getattr(msg, "role", None)
+                        if role == "user" and text:
+                            user_query = text
+                            break
+                prompt_context = (
+                    f"User asked: {user_query}\n\n"
+                    f"Tool used: {tool_name}\n\n"
+                    f"Tool result (JSON):\n{tool_json}"
+                )
+                summary = await synthesizer_fn(SYNTHESIS_PROMPT, prompt_context)
+            except Exception:
+                summary = _build_summary(tool_name, tool_result)
+        else:
+            summary = _build_summary(tool_name, tool_result)
+
         final_response: dict[str, Any] = {
             "category": "analysis",
             "message": summary,

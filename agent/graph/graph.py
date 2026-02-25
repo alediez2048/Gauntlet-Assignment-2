@@ -156,6 +156,7 @@ except ModuleNotFoundError:
 from agent.graph.nodes import (
     NodeDependencies,
     RouterCallable,
+    SynthesizerCallable,
     keyword_router,
     make_clarifier_node,
     make_error_handler_node,
@@ -171,12 +172,17 @@ from agent.graph.state import AgentState
 _SHARED_CHECKPOINTER = MemorySaver() if MemorySaver is not None else None
 
 
-def build_graph(api_client: Any, router: RouterCallable | None = None) -> Any:
+def build_graph(
+    api_client: Any,
+    router: RouterCallable | None = None,
+    synthesizer: SynthesizerCallable | None = None,
+) -> Any:
     """Builds and compiles the 6-node AgentForge graph.
 
     Args:
         api_client: Injected Ghostfolio API client dependency.
         router: Optional injected router callable (LLM-backed or mocked in tests).
+        synthesizer: Optional LLM-backed callable for rich response generation.
 
     Returns:
         A compiled LangGraph executable.
@@ -184,13 +190,14 @@ def build_graph(api_client: Any, router: RouterCallable | None = None) -> Any:
     dependencies = NodeDependencies(
         api_client=api_client,
         router=router or keyword_router,
+        synthesizer=synthesizer,
     )
 
     graph = StateGraph(AgentState)
     graph.add_node("router", make_router_node(dependencies))
     graph.add_node("tool_executor", make_tool_executor_node(dependencies))
     graph.add_node("validator", make_validator_node())
-    graph.add_node("synthesizer", make_synthesizer_node())
+    graph.add_node("synthesizer", make_synthesizer_node(dependencies))
     graph.add_node("clarifier", make_clarifier_node())
     graph.add_node("error_handler", make_error_handler_node())
 
