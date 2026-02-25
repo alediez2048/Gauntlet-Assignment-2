@@ -871,9 +871,134 @@ Each ticket entry follows this standardized structure:
 
 ---
 
-## TICKET-06: Tool 4 — Asset Allocation Advisor ⬜ `MVP — deferrable if time-constrained`
+## TICKET-06: Tool 4 — Asset Allocation Advisor 🟢 `MVP — deferrable if time-constrained`
 
-> **Planned scope:** Current vs target allocation, concentration warnings, 3+ unit tests
+### 🧠 Plain-English Summary
+
+- **What was done:** Replaced the allocation advisor placeholder with a deterministic async tool,
+  added a mixed allocation fixture, and created a dedicated unit test module for all required
+  success/error paths.
+- **What it means:** AgentForge now has all four planned MVP tool contracts implemented with
+  structured `ToolResult` outputs and no in-tool LLM dependency.
+- **Success looked like:** Profile validation short-circuits invalid requests, allocation drift is
+  computed against deterministic target profiles, concentration warnings are emitted correctly, and
+  both targeted and full unit suites pass.
+- **How it works (simple):** Validate target profile -> fetch portfolio details -> aggregate
+  holdings allocation by asset class -> compare to target -> generate drift/warnings/suggestions ->
+  return structured success/error payload.
+
+### 📋 Metadata
+
+- **Status:** Complete
+- **Completed:** Feb 24, 2026
+- **Time Spent:** ~1.25 hrs (estimate: 75-120 min)
+- **Branch:** `feature/TICKET-06-allocation-advisor`
+- **Commit:** Pending local commit for this ticket branch changeset
+
+### 🎯 Scope
+
+- ✅ Implemented `advise_asset_allocation(api_client, target_profile="balanced")`
+- ✅ Added deterministic target profiles (`conservative`, `balanced`, `aggressive`)
+- ✅ Added holdings-based allocation aggregation using `allocationInPercentage` and `assetClass`
+- ✅ Added class-level drift calculations and concentration warnings (strictly `> 25%`)
+- ✅ Added deterministic rebalancing suggestions from largest over/underweight drifts
+- ✅ Added full unit coverage for happy path, validation, edge cases, and error mapping
+
+### 🏆 Key Achievements
+
+- Completed the fourth and final deterministic MVP tool, aligning the project with the planned
+  tool set before LangGraph wiring (TICKET-07).
+- Added taxonomy-aligned failures for `INVALID_TARGET_PROFILE` and `EMPTY_PORTFOLIO`.
+- Expanded the unit suite from 32 to 44 passing tests with allocation-advisor coverage included.
+
+### 🔧 Technical Implementation
+
+- **Tool module (`agent/tools/allocation_advisor.py`):**
+  - Added typed constants for supported asset classes, profile targets, threshold, and disclaimer.
+  - Implemented safe holdings extraction from `portfolio_details["holdings"]` map payloads.
+  - Aggregated current allocation by top-level asset class with zero-fill for missing classes.
+  - Calculated deterministic drift as `current - target` and rounded all percentages to two
+    decimals.
+  - Added concentration warning payloads (`symbol`, `pct_of_portfolio`, `threshold`) for holdings
+    above the default 25% threshold.
+  - Preserved error-handling pattern: map `GhostfolioClientError` by `error_code`, include optional
+    status metadata, fallback to `API_ERROR` for unexpected exceptions.
+- **Fixture (`agent/tests/fixtures/portfolio_details_allocation_mix.json`):**
+  - Added hand-checkable holdings mix (AAPL 45, MSFT 20, BND 20, USD 10, GLD 5) summing to 100%.
+- **Unit tests (`agent/tests/unit/test_allocation_advisor.py`):**
+  - Added happy-path assertions for exact `current_allocation`, `target_allocation`, and `drift`.
+  - Added concentration warning assertion for AAPL crossing 25% threshold.
+  - Added invalid profile short-circuit test to confirm no API call is made.
+  - Added empty portfolio, client error mapping, and unexpected exception fallback tests.
+
+### ⚠️ Issues & Solutions
+
+| Issue                                                | Solution                                                                                  |
+| ---------------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| Fixture JSON parse failed with `Extra data`          | Removed unintended duplicate JSON block from the fixture and re-ran targeted tests.      |
+| Allocation test module collected duplicate test code | Removed duplicate appended block so only the intended TICKET-06 test suite remains.      |
+
+### 🐛 Errors / Bugs / Problems
+
+1. **JSON decode failure in new fixture:**
+   - **What happened:** `json.decoder.JSONDecodeError: Extra data` failed two happy-path tests.
+   - **What was tried:** Re-ran focused tests to isolate to fixture parsing.
+   - **What fixed it:** Cleaned the fixture to a single valid JSON object.
+   - **Impact:** Brief interruption during first targeted test run.
+
+2. **Duplicate tests in allocation module file:**
+   - **What happened:** The new test file contained an additional appended test block, causing
+     duplicate collection and noisy failures.
+   - **What fixed it:** Removed the duplicate block and kept a single canonical TICKET-06 suite.
+   - **Impact:** Additional cleanup pass before final verification.
+
+### ✅ Testing
+
+- ✅ Command: `agent/.venv/bin/python -m pytest agent/tests/unit/test_allocation_advisor.py`
+- ✅ Result: **8 passed** in ~0.02s
+- ✅ Command: `agent/.venv/bin/python -m pytest agent/tests/unit/`
+- ✅ Result: **44 passed** in ~0.10s (auth + client + portfolio + transaction + tax + allocation)
+
+### 📁 Files Changed
+
+**Created:**
+
+- `agent/tests/fixtures/portfolio_details_allocation_mix.json`
+- `agent/tests/unit/test_allocation_advisor.py`
+
+**Modified:**
+
+- `agent/tools/allocation_advisor.py`
+- `Docs/tickets/devlog.md` (this entry + running totals)
+
+### 🎯 Acceptance Criteria
+
+- ✅ `agent/tools/allocation_advisor.py` implemented as pure async function using injected client.
+- ✅ Input validation for `target_profile` returns structured error (`INVALID_TARGET_PROFILE`).
+- ✅ Current allocation is aggregated by asset class from pre-computed allocation percentages.
+- ✅ Drift and concentration warnings are generated deterministically.
+- ✅ All percentage outputs are rounded to two decimals.
+- ✅ Unit tests with hand-verified expected values were added and are passing.
+- ✅ Full unit suite is passing: `agent/.venv/bin/python -m pytest agent/tests/unit/`
+- ✅ `Docs/tickets/devlog.md` updated after completion.
+
+### 📊 Performance
+
+- Allocation advisor test module runtime: ~0.02s for 8 tests.
+- Full agent unit suite runtime: ~0.10s for 44 tests.
+- TICKET-06 implementation touched 4 files (2 created, 2 modified).
+
+### 🚀 Next Steps
+
+- **TICKET-07:** Wire all four tools into the LangGraph 6-node topology with deterministic routing
+  and validator/synthesizer behavior.
+
+### 💡 Learnings
+
+- Pre-computed `allocationInPercentage` from Ghostfolio details makes allocation analysis simple and
+  deterministic when combined with strict output normalization.
+- Deterministic fixture math plus explicit drift assertions gives strong confidence in portfolio
+  interpretation logic before LLM orchestration is introduced.
 
 ---
 
@@ -953,9 +1078,9 @@ Each ticket entry follows this standardized structure:
 
 | Metric           | Value           |
 | ---------------- | --------------- |
-| Tickets Complete | 6 / 13          |
-| Total Dev Time   | ~6.75 hrs       |
-| Tests Passing    | 32 (agent unit) |
-| Files Created    | 38              |
-| Files Modified   | 17              |
+| Tickets Complete | 7 / 13          |
+| Total Dev Time   | ~8.00 hrs       |
+| Tests Passing    | 44 (agent unit) |
+| Files Created    | 40              |
+| Files Modified   | 19              |
 | Cursor Rules     | 10              |

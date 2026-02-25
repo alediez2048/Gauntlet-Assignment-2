@@ -1,0 +1,65 @@
+{
+  "accounts": {
+    "account-1": {
+      "balance": 100000,
+      "currency": "USD",
+      "name": "Brokerage Account",
+      "valueInBaseCurrency": 100000,
+      "valueInPercentage": 100
+    }
+  },
+  "createdAt": "2024-01-15T00:00:00.000Z",
+  "holdings": {
+    "AAPL": {
+      "allocationInPercentage": 45,
+      "assetClass": "EQUITY",
+      "name": "Apple Inc.",
+      "symbol": "AAPL",
+      "valueInBaseCurrency": 45000
+    },
+    "MSFT": {
+      "allocationInPercentage": 20,
+      "assetClass": "EQUITY",
+      "name": "Microsoft Corporation",
+      "symbol": "MSFT",
+      "valueInBaseCurrency": 20000
+    },
+    "BND": {
+      "allocationInPercentage": 20,
+      "assetClass": "FIXED_INCOME",
+      "name": "Vanguard Total Bond Market ETF",
+      "symbol": "BND",
+      "valueInBaseCurrency": 20000
+    },
+    "USD": {
+      "allocationInPercentage": 10,
+      "assetClass": "LIQUIDITY",
+      "name": "US Dollar Cash",
+      "symbol": "USD",
+      "valueInBaseCurrency": 10000
+    },
+    "GLD": {
+      "allocationInPercentage": 5,
+      "assetClass": "COMMODITY",
+      "name": "SPDR Gold Shares",
+      "symbol": "GLD",
+      "valueInBaseCurrency": 5000
+    }
+  },
+  "platforms": {
+    "platform-1": {
+      "balance": 100000,
+      "currency": "USD",
+      "name": "Demo Broker",
+      "valueInBaseCurrency": 100000,
+      "valueInPercentage": 100
+    }
+  },
+  "summary": {
+    "activityCount": 5,
+    "currentNetWorth": 100000,
+    "currentValueInBaseCurrency": 100000,
+    "totalInvestment": 100000,
+    "totalValueInBaseCurrency": 100000
+  }
+}
