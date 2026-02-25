@@ -3,7 +3,9 @@ import { config } from 'dotenv';
 import { expand } from 'dotenv-expand';
 import { join } from 'node:path';
 
-expand(config({ quiet: true }));
+// Load .env from project root so Prisma gets DATABASE_URL regardless of cwd
+const pathToEnv = join(__dirname, '..', '.env');
+expand(config({ path: pathToEnv, quiet: true }));
 
 export default defineConfig({
   migrations: {

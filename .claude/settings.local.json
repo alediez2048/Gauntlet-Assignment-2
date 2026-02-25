@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find apps -type d -name \"*assistant*\" 2>/dev/null | head -10)",
+      "Bash(wc -l apps/client/src/app/pages/*/)"
+    ]
+  }
+}

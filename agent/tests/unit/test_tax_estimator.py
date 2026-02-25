@@ -262,3 +262,151 @@ async def test_estimate_capital_gains_tax_consumes_multiple_lots_for_single_sell
     assert result.data["short_term"]["total_gains"] == pytest.approx(340.0)
     assert result.data["short_term"]["net"] == pytest.approx(340.0)
     assert result.data["short_term"]["estimated_tax"] == pytest.approx(81.6)
+
+
+@pytest.mark.asyncio
+async def test_estimate_capital_gains_tax_exactly_365_days_is_short_term() -> None:
+    mock_client = MockGhostfolioClient(
+        orders={
+            "activities": [
+                {
+                    "type": "BUY",
+                    "date": "2023-01-01T00:00:00.000Z",
+                    "quantity": 1,
+                    "unitPrice": 100,
+                    "SymbolProfile": {"symbol": "AAPL"},
+                },
+                {
+                    "type": "SELL",
+                    "date": "2024-01-01T00:00:00.000Z",
+                    "quantity": 1,
+                    "unitPrice": 120,
+                    "SymbolProfile": {"symbol": "AAPL"},
+                },
+            ],
+            "count": 2,
+        }
+    )
+
+    result = await estimate_capital_gains_tax(mock_client, tax_year=2024, income_bracket="middle")
+
+    assert result.success is True
+    assert result.error is None
+    assert result.data is not None
+    assert len(result.data["per_asset"]) == 1
+    assert result.data["per_asset"][0]["holding_period"] == "short_term"
+    assert result.data["short_term"]["net"] == pytest.approx(20.0)
+    assert result.data["short_term"]["estimated_tax"] == pytest.approx(4.8)
+    assert result.data["long_term"]["net"] == pytest.approx(0.0)
+
+
+@pytest.mark.asyncio
+async def test_estimate_capital_gains_tax_oversell_matches_only_available_lots() -> None:
+    mock_client = MockGhostfolioClient(
+        orders={
+            "activities": [
+                {
+                    "type": "BUY",
+                    "date": "2024-01-01T00:00:00.000Z",
+                    "quantity": 2,
+                    "unitPrice": 100,
+                    "SymbolProfile": {"symbol": "NVDA"},
+                },
+                {
+                    "type": "SELL",
+                    "date": "2024-02-01T00:00:00.000Z",
+                    "quantity": 5,
+                    "unitPrice": 150,
+                    "SymbolProfile": {"symbol": "NVDA"},
+                },
+            ],
+            "count": 2,
+        }
+    )
+
+    result = await estimate_capital_gains_tax(mock_client, tax_year=2024, income_bracket="middle")
+
+    assert result.success is True
+    assert result.error is None
+    assert result.data is not None
+    assert len(result.data["per_asset"]) == 1
+    assert result.data["per_asset"][0]["cost_basis"] == pytest.approx(200.0)
+    assert result.data["per_asset"][0]["proceeds"] == pytest.approx(300.0)
+    assert result.data["short_term"]["net"] == pytest.approx(100.0)
+    assert result.data["short_term"]["estimated_tax"] == pytest.approx(24.0)
+
+
+@pytest.mark.asyncio
+async def test_estimate_capital_gains_tax_ignores_malformed_rows() -> None:
+    mock_client = MockGhostfolioClient(
+        orders={
+            "activities": [
+                {
+                    "type": "BUY",
+                    "date": "2024-01-01T00:00:00.000Z",
+                    "quantity": 1,
+                    "unitPrice": 100,
+                    "SymbolProfile": {"symbol": "AAPL"},
+                },
+                {
+                    "type": "SELL",
+                    "date": "2024-02-01T00:00:00.000Z",
+                    "quantity": 1,
+                    "unitPrice": 999,
+                    "SymbolProfile": None,
+                },
+                {
+                    "type": "SELL",
+                    "date": "2024-03-01T00:00:00.000Z",
+                    "quantity": 1,
+                    "unitPrice": 110,
+                    "SymbolProfile": {"symbol": "AAPL"},
+                },
+            ],
+            "count": 3,
+        }
+    )
+
+    result = await estimate_capital_gains_tax(mock_client, tax_year=2024, income_bracket="middle")
+
+    assert result.success is True
+    assert result.error is None
+    assert result.data is not None
+    assert len(result.data["per_asset"]) == 1
+    assert result.data["per_asset"][0]["symbol"] == "AAPL"
+    assert result.data["short_term"]["net"] == pytest.approx(10.0)
+    assert result.data["short_term"]["estimated_tax"] == pytest.approx(2.4)
+
+
+@pytest.mark.asyncio
+async def test_estimate_capital_gains_tax_rounds_small_decimal_values() -> None:
+    mock_client = MockGhostfolioClient(
+        orders={
+            "activities": [
+                {
+                    "type": "BUY",
+                    "date": "2024-01-01T00:00:00.000Z",
+                    "quantity": 3,
+                    "unitPrice": 10.101,
+                    "SymbolProfile": {"symbol": "TSLA"},
+                },
+                {
+                    "type": "SELL",
+                    "date": "2024-04-01T00:00:00.000Z",
+                    "quantity": 3,
+                    "unitPrice": 10.333,
+                    "SymbolProfile": {"symbol": "TSLA"},
+                },
+            ],
+            "count": 2,
+        }
+    )
+
+    result = await estimate_capital_gains_tax(mock_client, tax_year=2024, income_bracket="middle")
+
+    assert result.success is True
+    assert result.error is None
+    assert result.data is not None
+    assert result.data["per_asset"][0]["gain_loss"] == pytest.approx(0.7)
+    assert result.data["short_term"]["estimated_tax"] == pytest.approx(0.17)
+    assert result.data["combined_liability"] == pytest.approx(0.17)

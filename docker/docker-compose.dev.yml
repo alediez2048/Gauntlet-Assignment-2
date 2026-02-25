@@ -15,6 +15,13 @@ services:
     container_name: gf-redis-dev
     ports:
       - ${REDIS_PORT:-6379}:6379
+    # Local dev: run without password so API (REDIS_PASSWORD= in .env) connects without AUTH
+    command: ['redis-server']
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
 volumes:
   postgres:
