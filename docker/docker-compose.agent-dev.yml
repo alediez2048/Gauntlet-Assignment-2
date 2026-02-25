@@ -1,0 +1,23 @@
+# Dev overlay: run agent against local (host) Ghostfolio instead of the Docker instance.
+# Launch:
+#   docker compose -f docker/docker-compose.agent-dev.yml --env-file .env up -d --build
+services:
+  agent:
+    build:
+      context: ../agent
+      dockerfile: Dockerfile
+    container_name: gf-agent
+    restart: unless-stopped
+    env_file:
+      - ../.env
+    environment:
+      - GHOSTFOLIO_API_URL=http://host.docker.internal:3333
+    ports:
+      - 8000:8000
+    volumes:
+      - ../.cursor:/debug
+    healthcheck:
+      test: ['CMD-SHELL', 'curl -f http://localhost:8000/health || exit 1']
+      interval: 10s
+      timeout: 5s
+      retries: 5

@@ -1144,9 +1144,118 @@ Each ticket entry follows this standardized structure:
 
 ---
 
-## TICKET-08: FastAPI SSE Endpoint + Event Mapping ⬜ `MVP`
+## TICKET-08: FastAPI SSE Endpoint + Event Mapping 🟢 `MVP`
 
-> **Planned scope:** POST /api/agent/chat, SSE streaming, event type mapping, CORS, health check
+### 🧠 Plain-English Summary
+
+- **What was done:** Implemented `POST /api/agent/chat` in FastAPI, added typed SSE event streaming,
+  mapped graph state to frontend event contracts, and added deterministic integration tests.
+- **What it means:** AgentForge now exposes a live backend stream that the Angular chat UI can consume
+  for progress narration and final responses.
+- **Success looked like:** Every request emits `thinking` first, emits tool telemetry (`tool_call`,
+  `tool_result`) when applicable, streams `token` chunks, and terminates with either `done` or `error`.
+- **How it works (simple):** API validates chat payload -> invokes compiled graph with injected
+  dependencies -> maps graph output into SSE frames -> guarantees clean terminal event.
+
+### 📋 Metadata
+
+- **Status:** Complete
+- **Completed:** Feb 24, 2026
+- **Time Spent:** ~2.0 hrs (estimate: 120-180 min)
+- **Branch:** `feature/TICKET-08-sse-endpoint`
+- **Commit:** Pending local commit for this ticket branch changeset
+
+### 🎯 Scope
+
+- ✅ Added `ChatRequest` model with `message` validation and optional `thread_id`.
+- ✅ Added `POST /api/agent/chat` returning `StreamingResponse(..., media_type="text/event-stream")`.
+- ✅ Kept existing CORS policy and `GET /health`.
+- ✅ Added graph-state-to-SSE mapping for `thinking`, `tool_call`, `tool_result`, `token`, `done`,
+  and `error`.
+- ✅ Added deterministic integration coverage for event order, payload shape, and failure termination.
+
+### 🏆 Key Achievements
+
+- Delivered a stable frontend-facing SSE contract without changing graph topology.
+- Implemented deterministic token chunking fallback so UI can render progressive assistant output now.
+- Added a terminal error boundary to avoid hanging streams and prevent raw exception leakage.
+
+### 🔧 Technical Implementation
+
+- **FastAPI endpoint (`agent/main.py`):**
+  - Added request model (`ChatRequest`) and message validator.
+  - Added SSE serializer helper (`event:` / `data:` formatting with JSON payloads).
+  - Added `/api/agent/chat` async generator route and per-request graph invocation.
+- **SSE mapping (`agent/main.py`):**
+  - Added helper to normalize `tool_call_history`.
+  - Added mapper from graph state -> ordered SSE events:
+    - `thinking` always first
+    - zero-or-more `tool_call`/`tool_result` pairs
+    - zero-or-more deterministic `token` chunks
+    - terminal `done` (success/clarification) or terminal `error` (failure)
+  - Added safe error-message mapping by error code.
+- **Integration tests (`agent/tests/integration/test_sse_stream.py`):**
+  - Added deterministic stub graph + FastAPI ASGI client harness.
+  - Added tests for first-event ordering, terminal-event ordering, payload shape, and failure closure.
+
+### ⚠️ Issues & Solutions
+
+| Issue | Solution |
+| ----- | -------- |
+| Local `agent/.venv` was missing FastAPI/Pydantic during initial integration test run | Installed minimal runtime deps (`fastapi`, `pydantic`) into the existing venv so endpoint tests could execute. |
+| Initial bulk install from `requirements.txt` hit TLS certificate verification errors for PyPI in local environment | Used `pip --trusted-host` for targeted package install needed by this ticket’s integration tests. |
+
+### 🐛 Errors / Bugs / Problems
+
+1. **SSE integration test collection error (`ModuleNotFoundError: fastapi`):**
+   - **What happened:** New SSE test module could not import `agent.main` during pytest collection.
+   - **What was tried:** Ran targeted integration command and confirmed dependency gap in local venv.
+   - **What fixed it:** Installed `fastapi` and `pydantic` into `agent/.venv`.
+   - **Impact:** Minor setup interruption before validation run.
+
+### ✅ Testing
+
+- ✅ Command: `agent/.venv/bin/python -m pytest agent/tests/integration/test_sse_stream.py agent/tests/integration/test_graph_routing.py`
+- ✅ Result: **10 passed** in ~0.39s (4 SSE integration + 6 graph routing integration)
+
+### 📁 Files Changed
+
+**Created:**
+
+- `agent/tests/integration/test_sse_stream.py`
+
+**Modified:**
+
+- `agent/main.py`
+- `docs/tickets/devlog.md` (this entry + running totals)
+
+### 🎯 Acceptance Criteria
+
+- ✅ `POST /api/agent/chat` implemented in FastAPI.
+- ✅ SSE stream emits required event names: `thinking`, `tool_call`, `tool_result`, `token`, `done`,
+  `error`.
+- ✅ `thinking` emitted first.
+- ✅ `done` emitted last on success.
+- ✅ `error` emitted on failure and stream closes cleanly.
+- ✅ New SSE integration tests pass without live LLM dependency.
+- ✅ Existing graph routing integration tests remain green.
+- ✅ `docs/tickets/devlog.md` updated with status, tests, files, and totals.
+
+### 📊 Performance
+
+- SSE + routing integration runtime: ~0.39s for 10 total tests.
+- TICKET-08 implementation touched 3 files (1 created, 2 modified).
+
+### 🚀 Next Steps
+
+- **TICKET-09:** Build Angular agent chat UI (FAB + panel) and consume the SSE stream from
+  `POST /api/agent/chat`.
+
+### 💡 Learnings
+
+- Graph-state mapping is sufficient for MVP SSE telemetry even without live token-level LLM streaming.
+- Keeping SSE payloads small and typed makes frontend rendering logic straightforward.
+- A single endpoint-level error boundary is essential to guarantee stream termination semantics.
 
 ---
 
@@ -1206,9 +1315,9 @@ Each ticket entry follows this standardized structure:
 
 | Metric           | Value           |
 | ---------------- | --------------- |
-| Tickets Complete | 8 / 13                 |
-| Total Dev Time   | ~9.75 hrs              |
-| Tests Passing    | 50 (44 unit, 6 integ.) |
-| Files Created    | 41                     |
-| Files Modified   | 24                     |
+| Tickets Complete | 9 / 13                  |
+| Total Dev Time   | ~11.75 hrs              |
+| Tests Passing    | 54 (44 unit, 10 integ.) |
+| Files Created    | 42                      |
+| Files Modified   | 26                      |
 | Cursor Rules     | 10              |

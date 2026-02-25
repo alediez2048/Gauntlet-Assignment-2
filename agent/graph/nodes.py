@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import math
 import re
+import traceback as _tb
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
 from datetime import datetime
@@ -378,13 +379,13 @@ def make_tool_executor_node(
             tool_function = _TOOL_FUNCTIONS[tool_name]
             try:
                 tool_result = await tool_function(dependencies.api_client, **tool_args)
-            except TypeError:
+            except TypeError as _te:
                 fallback_args = _default_args_for_tool(tool_name, "")
                 try:
                     tool_result = await tool_function(dependencies.api_client, **fallback_args)
-                except Exception:
+                except Exception as _fe:
                     tool_result = ToolResult.fail("API_ERROR")
-            except Exception:
+            except Exception as _ex:
                 tool_result = ToolResult.fail("API_ERROR")
 
         history.append(
