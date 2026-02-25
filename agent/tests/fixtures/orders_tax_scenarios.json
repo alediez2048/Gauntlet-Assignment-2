@@ -1,0 +1,128 @@
+{
+  "activities": [
+    {
+      "id": "activity-aapl-buy-1",
+      "accountId": "account-1",
+      "date": "2024-01-15T00:00:00.000Z",
+      "currency": "USD",
+      "type": "BUY",
+      "quantity": 10,
+      "unitPrice": 100,
+      "value": 1000,
+      "SymbolProfile": {
+        "symbol": "AAPL",
+        "name": "Apple Inc.",
+        "currency": "USD",
+        "dataSource": "YAHOO"
+      }
+    },
+    {
+      "id": "activity-aapl-sell-1",
+      "accountId": "account-1",
+      "date": "2024-06-15T00:00:00.000Z",
+      "currency": "USD",
+      "type": "SELL",
+      "quantity": 5,
+      "unitPrice": 150,
+      "value": 750,
+      "SymbolProfile": {
+        "symbol": "AAPL",
+        "name": "Apple Inc.",
+        "currency": "USD",
+        "dataSource": "YAHOO"
+      }
+    },
+    {
+      "id": "activity-msft-buy-1",
+      "accountId": "account-1",
+      "date": "2023-01-10T00:00:00.000Z",
+      "currency": "USD",
+      "type": "BUY",
+      "quantity": 8,
+      "unitPrice": 200,
+      "value": 1600,
+      "SymbolProfile": {
+        "symbol": "MSFT",
+        "name": "Microsoft Corp.",
+        "currency": "USD",
+        "dataSource": "YAHOO"
+      }
+    },
+    {
+      "id": "activity-msft-sell-1",
+      "accountId": "account-1",
+      "date": "2024-06-10T00:00:00.000Z",
+      "currency": "USD",
+      "type": "SELL",
+      "quantity": 4,
+      "unitPrice": 250,
+      "value": 1000,
+      "SymbolProfile": {
+        "symbol": "MSFT",
+        "name": "Microsoft Corp.",
+        "currency": "USD",
+        "dataSource": "YAHOO"
+      }
+    },
+    {
+      "id": "activity-tsla-buy-1",
+      "accountId": "account-1",
+      "date": "2024-03-01T00:00:00.000Z",
+      "currency": "USD",
+      "type": "BUY",
+      "quantity": 6,
+      "unitPrice": 300,
+      "value": 1800,
+      "SymbolProfile": {
+        "symbol": "TSLA",
+        "name": "Tesla Inc.",
+        "currency": "USD",
+        "dataSource": "YAHOO"
+      }
+    },
+    {
+      "id": "activity-tsla-sell-1",
+      "accountId": "account-1",
+      "date": "2024-09-01T00:00:00.000Z",
+      "currency": "USD",
+      "type": "SELL",
+      "quantity": 3,
+      "unitPrice": 250,
+      "value": 750,
+      "SymbolProfile": {
+        "symbol": "TSLA",
+        "name": "Tesla Inc.",
+        "currency": "USD",
+        "dataSource": "YAHOO"
+      }
+    },
+    {
+      "id": "activity-dividend-noise-1",
+      "accountId": "account-1",
+      "date": "2024-07-01T00:00:00.000Z",
+      "currency": "USD",
+      "type": "DIVIDEND",
+      "quantity": 0,
+      "unitPrice": 0,
+      "value": 50,
+      "SymbolProfile": {
+        "symbol": "AAPL",
+        "name": "Apple Inc.",
+        "currency": "USD",
+        "dataSource": "YAHOO"
+      }
+    },
+    {
+      "id": "activity-fee-noise-1",
+      "accountId": "account-1",
+      "date": "2024-07-02T00:00:00.000Z",
+      "currency": "USD",
+      "type": "FEE",
+      "quantity": 0,
+      "unitPrice": 0,
+      "value": 5,
+      "SymbolProfile": null
+    }
+  ],
+  "count": 8
+}
