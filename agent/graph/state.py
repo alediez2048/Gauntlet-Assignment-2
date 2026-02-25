@@ -1,7 +1,58 @@
-"""AgentState TypedDict placeholder (TICKET-07)."""
-from typing import TypedDict
+"""Typed state definitions for the LangGraph orchestration flow."""
+
+from __future__ import annotations
+
+from typing import Annotated, Any, Literal, TypedDict
+
+try:
+    from langgraph.graph import add_messages
+except ModuleNotFoundError:
+    def add_messages(existing: list[Any], new_messages: list[Any]) -> list[Any]:
+        """Fallback reducer when LangGraph is not installed."""
+        return [*(existing or []), *(new_messages or [])]
+
+from agent.tools.base import ToolResult
+
+RouteName = Literal["portfolio", "transactions", "tax", "allocation", "clarify"]
+ToolName = Literal[
+    "analyze_portfolio_performance",
+    "categorize_transactions",
+    "estimate_capital_gains_tax",
+    "advise_asset_allocation",
+]
+PendingAction = Literal["tool_selected", "ambiguous_or_unsupported", "valid", "invalid_or_error"]
+
+
+class ToolCallRecord(TypedDict, total=False):
+    """Tracks one executed tool invocation for observability/SSE."""
+
+    route: RouteName
+    tool_name: ToolName
+    tool_args: dict[str, Any]
+    success: bool
+    error: str | None
+
+
+class FinalResponse(TypedDict, total=False):
+    """Normalized response payload used by end nodes."""
+
+    category: Literal["analysis", "clarification", "error"]
+    message: str
+    tool_name: ToolName | None
+    data: dict[str, Any] | None
+    suggestions: list[str]
 
 
 class AgentState(TypedDict, total=False):
-    """State shape for the agent graph — extend in TICKET-07."""
-    pass
+    """State contract for Router -> ToolExecutor -> Validator -> terminal nodes."""
+
+    messages: Annotated[list[Any], add_messages]
+    portfolio_snapshot: dict[str, Any]
+    pending_action: PendingAction
+    route: RouteName
+    tool_name: ToolName | None
+    tool_args: dict[str, Any]
+    tool_result: ToolResult | None
+    tool_call_history: list[ToolCallRecord]
+    error: str | None
+    final_response: FinalResponse
