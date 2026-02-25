@@ -37,6 +37,7 @@ _SAFE_ERROR_MESSAGES: dict[str, str] = {
     "EMPTY_PORTFOLIO": "No holdings found. Add investments to Ghostfolio first.",
     "AUTH_FAILED": "Authentication failed. Check GHOSTFOLIO_ACCESS_TOKEN.",
 }
+_THREAD_STATE_CACHE: dict[str, dict[str, Any]] = {}
 
 
 class ChatRequest(BaseModel):
@@ -108,12 +109,18 @@ def _map_graph_state_to_events(
     state: dict[str, Any],
     *,
     thread_id: str,
+    history_offset: int = 0,
 ) -> list[tuple[str, dict[str, Any]]]:
     """Maps graph output state to frontend-facing SSE events."""
     events: list[tuple[str, dict[str, Any]]] = []
     tool_history = _coerce_tool_call_history(state.get("tool_call_history"))
+    emitted_tool_history = (
+        tool_history[history_offset:]
+        if history_offset > 0 and history_offset <= len(tool_history)
+        else tool_history
+    )
 
-    for record in tool_history:
+    for record in emitted_tool_history:
         tool_name = record.get("tool_name")
         normalized_tool_name = tool_name if isinstance(tool_name, str) else "unknown_tool"
         tool_args = record.get("tool_args")
@@ -179,21 +186,40 @@ async def chat(request: ChatRequest) -> StreamingResponse:
         try:
             base_url = os.getenv("GHOSTFOLIO_API_URL", "http://localhost:3333")
             access_token = os.getenv("GHOSTFOLIO_ACCESS_TOKEN", "test-token")
+            prior_state = _THREAD_STATE_CACHE.get(thread_id, {})
+            prior_messages = prior_state.get("messages")
+            prior_tool_history = _coerce_tool_call_history(prior_state.get("tool_call_history"))
+            prior_history_len = len(prior_tool_history)
+
+            graph_input_messages: list[Any] = []
+            if isinstance(prior_messages, list):
+                graph_input_messages.extend(prior_messages)
+            graph_input_messages.append({"role": "user", "content": request.message})
+
+            graph_input: dict[str, Any] = {"messages": graph_input_messages}
+            if prior_tool_history:
+                graph_input["tool_call_history"] = prior_tool_history
 
             async with GhostfolioClient(base_url=base_url, access_token=access_token) as api_client:
                 graph = build_graph(api_client=api_client)
                 graph_state = await graph.ainvoke(
-                    {
-                        "thread_id": thread_id,
-                        "messages": [{"role": "user", "content": request.message}],
-                        "tool_call_history": [],
-                    }
+                    graph_input,
+                    config={"configurable": {"thread_id": thread_id}},
                 )
 
             if not isinstance(graph_state, dict):
                 raise TypeError("Graph output must be a dictionary state.")
 
-            for event_type, payload in _map_graph_state_to_events(graph_state, thread_id=thread_id):
+            _THREAD_STATE_CACHE[thread_id] = {
+                "messages": graph_state.get("messages", graph_input_messages),
+                "tool_call_history": _coerce_tool_call_history(graph_state.get("tool_call_history")),
+            }
+
+            for event_type, payload in _map_graph_state_to_events(
+                graph_state,
+                thread_id=thread_id,
+                history_offset=prior_history_len,
+            ):
                 yield _serialize_sse_event(event_type, payload)
         except Exception:
             yield _serialize_sse_event(

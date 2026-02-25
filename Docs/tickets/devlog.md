@@ -1477,9 +1477,143 @@ Each ticket entry follows this standardized structure:
 
 ---
 
-## TICKET-10: Docker Compose + Seed Data + E2E ⬜ `MVP`
+## TICKET-10: Docker Compose + Seed Data + E2E 🟢 `MVP`
 
-> **Planned scope:** docker-compose.agent.yml, seed portfolio, full-stack boot, 5-query E2E test
+### 🧠 Plain-English Summary
+
+- **What was done:** Implemented a reproducible full-stack Docker workflow, created/imported a realistic `seed-data.json` dataset, added a runnable 5-scenario E2E notebook, and closed runtime blockers around allocation normalization and follow-up continuity.
+- **What it means:** A clean `down -v` -> `up -d --build` flow now leads to working seeded portfolio data and demo-ready agent responses through real `/api/agent/chat` SSE streams.
+- **Success looked like:** Full stack healthy, import succeeds via Ghostfolio API, 5 golden-path prompts complete with expected tool routes, and same-thread follow-ups remain coherent.
+- **How it works (simple):** Bootstrap user + access token -> exchange Bearer -> import activities -> run notebook assertions against live Ghostfolio/agent endpoints.
+
+### 📋 Metadata
+
+- **Status:** Complete
+- **Started:** Feb 25, 2026
+- **Last Updated:** Feb 25, 2026
+- **Time Spent:** ~4.25 hrs (estimate: 180-300 min)
+- **Branch:** `feature/TICKET-10-docker-seed-e2e`
+- **Commit:** Finalized in ticket closeout session (see branch history)
+
+### 🎯 Scope
+
+- ✅ Verified clean 4-service Compose startup (`postgres`, `redis`, `ghostfolio`, `agent`) from repo root with explicit `--env-file`.
+- ✅ Added `docker/seed-data.json` with 26 activities across multi-year timeline and all required activity types (`BUY`, `SELL`, `DIVIDEND`, `FEE`, `INTEREST`, `LIABILITY`).
+- ✅ Validated import path via API only (`POST /api/v1/auth/anonymous` -> `POST /api/v1/import`) and confirmed repeatability after multiple `down -v` resets.
+- ✅ Added `agent/tests/e2e/golden_path.ipynb` with 5 scripted live SSE scenarios plus precondition/health assertions and snapshot output cell.
+- ✅ Resolved allocation/runtime blockers to make full E2E path stable in real data conditions.
+
+### 🏆 Key Achievements
+
+- Delivered a reproducible seed/import workflow from clean state without manual DB intervention.
+- Added golden-path notebook coverage that validates routing, event order, terminal stream behavior, and thread reuse.
+- Closed real integration gaps discovered only in live stack:
+  - Ghostfolio allocation values arriving as fractions (0..1),
+  - keyword ambiguity for follow-up/concentration phrasing,
+  - true same-thread follow-up continuity for ambiguous prompts.
+- Preserved SSE UX quality by emitting only new tool telemetry per turn while retaining full `tool_call_history` in `done`.
+
+### 🔧 Technical Implementation
+
+- **Seed dataset:** Created `docker/seed-data.json` with realistic multi-month/multi-asset activity mix and explicit `assetClass` fields for market activities.
+- **Notebook E2E harness:** Added `agent/tests/e2e/golden_path.ipynb` with:
+  - environment/root discovery,
+  - Ghostfolio + agent health assertions,
+  - seeded-data precondition checks,
+  - POST-SSE parser + runner,
+  - 5-query execution with route/event assertions,
+  - continuity check using shared `thread_id`.
+- **Allocation normalization fix:** Updated `agent/tools/allocation_advisor.py` to normalize fraction allocations (0..1) to percentages (0..100).
+- **Routing/follow-up fixes:** Updated `agent/graph/nodes.py` to recognize `"concentrated"` and recover route for ambiguous follow-ups using recent thread context.
+- **Thread continuity plumbing:** Updated `agent/graph/graph.py` fallback compiled graph to persist state by `thread_id` and updated `agent/main.py` to invoke graph with thread config plus cached state replay.
+- **SSE telemetry refinement:** Updated `agent/main.py` event mapping to emit only new tool events for each turn (prevents duplicate historical telemetry blocks).
+
+### ⚠️ Issues & Solutions
+
+| Issue | Solution |
+| ----- | -------- |
+| `GHOSTFOLIO_ACCESS_TOKEN` became invalid after `docker compose ... down -v` (fresh DB) | Bootstrapped a new user via `POST /api/v1/user`, persisted returned access token into local `.env`, then recreated agent container. |
+| Allocation validator failed with `INVALID_ALLOCATION_SUM` in live stack | Normalized allocation ratios (0..1) to percentages in allocation tool and verified with new unit test. |
+| Suggested follow-up wording could miss allocation route (`concentrated`) | Added `"concentrated"` keyword and follow-up context recovery in router node. |
+| Same-thread ambiguous follow-up lacked true continuity in fallback runtime | Added thread-aware fallback state persistence and thread-configured graph invocation path. |
+| New notebook file could not be created directly by notebook cell editor until JSON existed | Initialized minimal notebook scaffold, then used notebook cell edits for final content. |
+
+### 🐛 Errors / Bugs / Problems
+
+1. **Auth bootstrap failure after clean reset (`403 Forbidden` on `/api/v1/auth/anonymous`):**
+   - **What happened:** Access token from previous DB state no longer matched any user after volume wipe.
+   - **What was tried:** Direct auth exchange with existing `.env` token.
+   - **What fixed it:** User bootstrap via `POST /api/v1/user`, token refresh in `.env`, agent recreate.
+2. **Allocation E2E failure (`error` SSE with `INVALID_ALLOCATION_SUM`):**
+   - **What happened:** Live Ghostfolio `allocationInPercentage` values were ratios, not whole percentages.
+   - **What was tried:** Re-seeding with asset class metadata only.
+   - **What fixed it:** Allocation ratio normalization in tool logic + regression unit test.
+3. **Golden-path Q5 follow-up initially clarified or duplicated telemetry:**
+   - **What happened:** Router keyword miss (`concentrated`) and cumulative history emission per turn.
+   - **What was tried:** Query wording tweak and direct route checks.
+   - **What fixed it:** Router keyword + follow-up context recovery + per-turn tool-event slicing.
+
+### ✅ Testing
+
+- ✅ `PYTHONPATH=. ./agent/.venv/bin/pytest agent/tests/unit/test_allocation_advisor.py`
+  - Result: **9 passed**
+- ✅ `PYTHONPATH=. ./agent/.venv/bin/pytest agent/tests/integration/test_graph_routing.py agent/tests/integration/test_sse_stream.py`
+  - Result: **13 passed**
+- ✅ `python3` execution of all code cells in `agent/tests/e2e/golden_path.ipynb`
+  - Result: **All assertions passed** (5/5 scenarios, continuity check green)
+- ✅ Live runtime validation:
+  - `docker compose ... down -v` + `up -d --build` (multiple cycles)
+  - `GET /api/v1/health` and `GET /health` both 200
+  - API import path (`auth/anonymous` + `/import`) returned 201
+  - SSE smoke checks returned ordered terminal `done` events
+
+### 📁 Files Changed
+
+**Created (2):**
+
+- `docker/seed-data.json`
+- `agent/tests/e2e/golden_path.ipynb`
+
+**Modified (8):**
+
+- `agent/main.py`
+- `agent/graph/graph.py`
+- `agent/graph/nodes.py`
+- `agent/tools/allocation_advisor.py`
+- `agent/tests/unit/test_allocation_advisor.py`
+- `agent/tests/integration/test_graph_routing.py`
+- `agent/tests/integration/test_sse_stream.py`
+- `Docs/tickets/devlog.md` (this entry + running totals)
+
+### 🎯 Acceptance Criteria
+
+- ✅ Full 4-service Docker stack boots cleanly from repo root command.
+- ✅ Seed import succeeds through Ghostfolio API with valid payload.
+- ✅ Portfolio data is visible/usable for agent responses.
+- ✅ 5 golden-path queries run successfully end-to-end.
+- ✅ Thread continuity verified on follow-up prompt.
+- ✅ `agent/tests/e2e/golden_path.ipynb` exists and is runnable.
+- ✅ `Docs/tickets/devlog.md` updated with accurate closeout details.
+- ✅ Work prepared on `feature/TICKET-10-docker-seed-e2e` with explicit staging + `--no-verify` workflow.
+
+### 📊 Performance
+
+- Clean full-stack rebuild cycle: ~25-31s in this environment.
+- End-to-end notebook code-cell run (5 scenarios + assertions): ~17s.
+- Targeted regression suite runtime: ~0.20s for 22 tests.
+- TICKET-10 implementation touched 10 files (2 created, 8 modified).
+
+### 🚀 Next Steps
+
+- Start **TICKET-11** adversarial/edge-case hardening (empty portfolio, nonsense/prompt-injection, ambiguity, rapid-fire turns).
+- Add a lightweight helper script for one-command local bootstrap + seed import if repeated resets are expected during demo prep.
+
+### 💡 Learnings
+
+- Clean DB resets require explicit user/token bootstrap before agent auth can succeed.
+- Real Ghostfolio payloads can differ from fixture assumptions (ratio vs percentage), so integration validation is essential.
+- Follow-up continuity needs both thread plumbing and route recovery heuristics; thread ID reuse alone is not enough.
+- Emitting only delta telemetry per turn keeps SSE-based UI streams readable while preserving complete history in terminal payloads.
 
 ---
 
@@ -1519,9 +1653,9 @@ Each ticket entry follows this standardized structure:
 
 | Metric           | Value           |
 | ---------------- | --------------- |
-| Tickets Complete | 10 / 13                  |
-| Total Dev Time   | ~18.75 hrs              |
-| Tests Passing    | 76 (66 unit, 10 integ.) |
-| Files Created    | 66                      |
-| Files Modified   | 33                      |
+| Tickets Complete | 11 / 13                  |
+| Total Dev Time   | ~23.00 hrs               |
+| Tests Passing    | 80 (67 unit, 13 integ.)  |
+| Files Created    | 68                       |
+| Files Modified   | 41                       |
 | Cursor Rules     | 10              |

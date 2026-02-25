@@ -8,9 +8,11 @@ from typing import Any
 
 try:
     from langgraph.graph import END, START, StateGraph
+    from langgraph.checkpoint.memory import MemorySaver
 except ModuleNotFoundError:
     START = "__start__"
     END = "__end__"
+    MemorySaver = None
 
     class _FallbackDrawableGraph:
         def __init__(
@@ -46,9 +48,18 @@ except ModuleNotFoundError:
             self._nodes = nodes
             self._edges = edges
             self._conditional_edges = conditional_edges
+            self._thread_states: dict[str, dict[str, Any]] = {}
 
-        async def ainvoke(self, state: dict[str, Any]) -> dict[str, Any]:
-            merged_state = dict(state)
+        async def ainvoke(
+            self,
+            state: dict[str, Any],
+            config: dict[str, Any] | None = None,
+        ) -> dict[str, Any]:
+            thread_id = self._thread_id_from_config(config)
+            if thread_id and thread_id in self._thread_states:
+                merged_state = self._merge_state(self._thread_states[thread_id], state)
+            else:
+                merged_state = dict(state)
             next_nodes = self._edges.get(START, [])
             current = next_nodes[0] if next_nodes else END
 
@@ -70,6 +81,9 @@ except ModuleNotFoundError:
                 linear_targets = self._edges.get(current, [])
                 current = linear_targets[0] if linear_targets else END
 
+            if thread_id:
+                self._thread_states[thread_id] = dict(merged_state)
+
             return merged_state
 
         def get_graph(self) -> _FallbackDrawableGraph:
@@ -89,6 +103,21 @@ except ModuleNotFoundError:
                     merged[key] = value
 
             return merged
+
+        @staticmethod
+        def _thread_id_from_config(config: dict[str, Any] | None) -> str | None:
+            if not isinstance(config, dict):
+                return None
+
+            configurable = config.get("configurable")
+            if not isinstance(configurable, dict):
+                return None
+
+            thread_id = configurable.get("thread_id")
+            if isinstance(thread_id, str) and thread_id:
+                return thread_id
+
+            return None
 
     class StateGraph:
         def __init__(self, state_type: Any) -> None:
@@ -113,7 +142,8 @@ except ModuleNotFoundError:
         ) -> None:
             self._conditional_edges[start_node] = (chooser, mapping)
 
-        def compile(self) -> _FallbackCompiledGraph:
+        def compile(self, checkpointer: Any | None = None) -> _FallbackCompiledGraph:
+            del checkpointer
             return _FallbackCompiledGraph(
                 nodes=dict(self._nodes),
                 edges={key: list(value) for key, value in self._edges.items()},
@@ -137,6 +167,8 @@ from agent.graph.nodes import (
     route_after_validator,
 )
 from agent.graph.state import AgentState
+
+_SHARED_CHECKPOINTER = MemorySaver() if MemorySaver is not None else None
 
 
 def build_graph(api_client: Any, router: RouterCallable | None = None) -> Any:
@@ -183,6 +215,8 @@ def build_graph(api_client: Any, router: RouterCallable | None = None) -> Any:
     graph.add_edge("clarifier", END)
     graph.add_edge("synthesizer", END)
     graph.add_edge("error_handler", END)
+    if _SHARED_CHECKPOINTER is not None:
+        return graph.compile(checkpointer=_SHARED_CHECKPOINTER)
     return graph.compile()
 
 

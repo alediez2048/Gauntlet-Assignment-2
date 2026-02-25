@@ -99,6 +99,36 @@ async def test_advise_asset_allocation_flags_concentration_warning(fixtures_dir:
 
 
 @pytest.mark.asyncio
+async def test_advise_asset_allocation_normalizes_fractional_allocations() -> None:
+    details_payload = {
+        "holdings": {
+            "AAPL": {"allocationInPercentage": 0.45, "assetClass": "EQUITY"},
+            "MSFT": {"allocationInPercentage": 0.20, "assetClass": "EQUITY"},
+            "BND": {"allocationInPercentage": 0.20, "assetClass": "FIXED_INCOME"},
+            "USD": {"allocationInPercentage": 0.10, "assetClass": "LIQUIDITY"},
+            "GLD": {"allocationInPercentage": 0.05, "assetClass": "COMMODITY"},
+        }
+    }
+    mock_client = MockGhostfolioClient(portfolio_details=details_payload)
+
+    result = await advise_asset_allocation(mock_client, target_profile="balanced")
+
+    assert result.success is True
+    assert result.data is not None
+    assert result.data["current_allocation"] == {
+        "EQUITY": 65.0,
+        "FIXED_INCOME": 20.0,
+        "LIQUIDITY": 10.0,
+        "COMMODITY": 5.0,
+        "REAL_ESTATE": 0.0,
+        "ALTERNATIVE_INVESTMENT": 0.0,
+    }
+    assert result.data["concentration_warnings"] == [
+        {"symbol": "AAPL", "pct_of_portfolio": 45.0, "threshold": 25.0}
+    ]
+
+
+@pytest.mark.asyncio
 async def test_advise_asset_allocation_invalid_profile_short_circuits_api_call() -> None:
     spy_client = SpyDetailsClient()
 

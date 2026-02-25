@@ -138,6 +138,72 @@ async def test_graph_routes_allocation_query_to_allocation_tool(
 
 
 @pytest.mark.asyncio
+async def test_graph_routes_concentrated_follow_up_to_allocation_tool(
+    mock_ghostfolio_client: MockGhostfolioClient,
+) -> None:
+    result = await _run_graph(
+        mock_ghostfolio_client=mock_ghostfolio_client,
+        route="allocation",
+        tool_name="advise_asset_allocation",
+        tool_args={"target_profile": "balanced"},
+        query="Based on that, where am I most concentrated?",
+    )
+
+    assert result["route"] == "allocation"
+    assert result["tool_name"] == "advise_asset_allocation"
+    assert result["pending_action"] == "valid"
+    assert result["error"] is None
+    assert len(result["tool_call_history"]) == 1
+    assert result["tool_call_history"][0]["tool_name"] == "advise_asset_allocation"
+    assert result["tool_call_history"][0]["success"] is True
+    assert result["final_response"]["category"] == "analysis"
+
+
+@pytest.mark.asyncio
+async def test_graph_uses_same_thread_history_for_ambiguous_follow_up(
+    mock_ghostfolio_client: MockGhostfolioClient,
+) -> None:
+    async def follow_up_router(user_query: str, messages: list[Any]) -> dict[str, Any]:
+        del messages
+        if "diversified" in user_query.lower():
+            return {
+                "route": "allocation",
+                "tool_name": "advise_asset_allocation",
+                "tool_args": {"target_profile": "balanced"},
+                "reason": "test_initial_route",
+            }
+        return {
+            "route": "clarify",
+            "tool_name": None,
+            "tool_args": {},
+            "reason": "test_forced_ambiguous_follow_up",
+        }
+
+    graph = build_graph(api_client=mock_ghostfolio_client, router=follow_up_router)
+    thread_config = {"configurable": {"thread_id": "continuity-thread"}}
+
+    first_turn = await graph.ainvoke(
+        {"messages": [{"role": "user", "content": "Am I diversified enough for a balanced profile?"}]},
+        config=thread_config,
+    )
+    second_turn = await graph.ainvoke(
+        {"messages": [{"role": "user", "content": "Based on that, what should I do next?"}]},
+        config=thread_config,
+    )
+
+    assert first_turn["route"] == "allocation"
+    assert first_turn["tool_name"] == "advise_asset_allocation"
+    assert first_turn["pending_action"] == "valid"
+
+    assert second_turn["route"] == "allocation"
+    assert second_turn["tool_name"] == "advise_asset_allocation"
+    assert second_turn["pending_action"] == "valid"
+    assert second_turn["tool_args"]["target_profile"] == "balanced"
+    assert second_turn["final_response"]["category"] == "analysis"
+    assert len(second_turn["tool_call_history"]) >= 2
+
+
+@pytest.mark.asyncio
 async def test_graph_routes_ambiguous_query_to_clarifier(
     mock_ghostfolio_client: MockGhostfolioClient,
 ) -> None:

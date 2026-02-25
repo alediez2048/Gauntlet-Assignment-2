@@ -79,6 +79,7 @@ _ROUTER_INTENTS: Final[dict[RouteName, tuple[str, ...]]] = {
         "diversification",
         "diversified",
         "concentration",
+        "concentrated",
         "rebalancing",
         "re-balance",
         "overweight",
@@ -93,6 +94,14 @@ _PROMPT_INJECTION_MARKERS: Final[tuple[str, ...]] = (
     "developer message",
     "reveal prompt",
     "show hidden instructions",
+)
+_FOLLOW_UP_MARKERS: Final[tuple[str, ...]] = (
+    "based on that",
+    "based on this",
+    "from that",
+    "following up",
+    "given that",
+    "what should i do next",
 )
 
 
@@ -328,6 +337,62 @@ def _normalize_router_decision(user_query: str, decision: dict[str, Any]) -> dic
     }
 
 
+def _is_follow_up_query(user_query: str) -> bool:
+    lowered_query = user_query.lower()
+    return any(marker in lowered_query for marker in _FOLLOW_UP_MARKERS)
+
+
+def _route_from_recent_tool_history(
+    state: AgentState,
+    user_query: str,
+) -> dict[str, Any] | None:
+    history = state.get("tool_call_history")
+    if not isinstance(history, list) or not history:
+        return None
+
+    for record in reversed(history):
+        if not isinstance(record, dict):
+            continue
+
+        route = record.get("route")
+        tool_name = record.get("tool_name")
+        if (
+            isinstance(route, str)
+            and route in _VALID_ROUTES
+            and route != "clarify"
+            and isinstance(tool_name, str)
+            and tool_name in _TOOL_FUNCTIONS
+        ):
+            prior_args = record.get("tool_args")
+            merged_args = _sanitize_tool_args(
+                cast(ToolName, tool_name),
+                user_query,
+                prior_args if isinstance(prior_args, dict) else None,
+            )
+            return {
+                "route": cast(RouteName, route),
+                "tool_name": cast(ToolName, tool_name),
+                "tool_args": merged_args,
+            }
+
+    return None
+
+
+def _route_from_recent_messages(messages: list[Any]) -> RouteName | None:
+    if len(messages) < 2:
+        return None
+
+    for message in reversed(messages[:-1]):
+        if not _is_human_message(message):
+            continue
+
+        route = _route_from_keywords(_message_to_text(message).strip())
+        if route != "clarify":
+            return route
+
+    return None
+
+
 def make_router_node(dependencies: NodeDependencies) -> Callable[[AgentState], Awaitable[AgentState]]:
     """Builds the Router node with injected routing dependency."""
 
@@ -341,6 +406,31 @@ def make_router_node(dependencies: NodeDependencies) -> Callable[[AgentState], A
         normalized_decision = _normalize_router_decision(user_query, decision)
         route = normalized_decision["route"]
         if route == "clarify":
+            if _is_follow_up_query(user_query):
+                recovered_decision = _route_from_recent_tool_history(state, user_query)
+                if recovered_decision is None:
+                    recovered_route = _route_from_recent_messages(messages)
+                    if recovered_route is not None and recovered_route != "clarify":
+                        recovered_tool = _ROUTE_TO_TOOL[recovered_route]
+                        recovered_decision = {
+                            "route": recovered_route,
+                            "tool_name": recovered_tool,
+                            "tool_args": _sanitize_tool_args(
+                                recovered_tool,
+                                user_query,
+                                None,
+                            ),
+                        }
+                if recovered_decision is not None:
+                    return {
+                        "route": recovered_decision["route"],
+                        "tool_name": recovered_decision["tool_name"],
+                        "tool_args": recovered_decision["tool_args"],
+                        "tool_result": None,
+                        "error": None,
+                        "pending_action": "tool_selected",
+                    }
+
             return {
                 "route": "clarify",
                 "tool_name": None,

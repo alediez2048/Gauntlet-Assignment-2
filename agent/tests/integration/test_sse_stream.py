@@ -21,9 +21,15 @@ class _StubGraph:
         self._state = state or {}
         self._exception = exception
         self.received_state: dict[str, Any] | None = None
+        self.received_config: dict[str, Any] | None = None
 
-    async def ainvoke(self, state: dict[str, Any]) -> dict[str, Any]:
+    async def ainvoke(
+        self,
+        state: dict[str, Any],
+        config: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
         self.received_state = state
+        self.received_config = config
         if self._exception is not None:
             raise self._exception
 
@@ -138,8 +144,10 @@ async def test_chat_sse_emits_done_last_on_success(
     assert isinstance(done_payload["tool_call_history"], list)
 
     assert stub_graph.received_state is not None
-    assert isinstance(stub_graph.received_state.get("thread_id"), str)
     assert stub_graph.received_state["messages"][0]["content"] == "How is my portfolio doing ytd?"
+    assert stub_graph.received_config == {
+        "configurable": {"thread_id": done_payload["thread_id"]}
+    }
 
 
 @pytest.mark.asyncio
@@ -170,6 +178,29 @@ async def test_chat_sse_tool_event_payload_shapes(
     token_payloads = [event["data"] for event in events if event["event"] == "token"]
     assert token_payloads
     assert all(isinstance(payload.get("content"), str) and payload["content"] for payload in token_payloads)
+
+
+@pytest.mark.asyncio
+async def test_chat_sse_reuses_provided_thread_id(
+    async_client: httpx.AsyncClient,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    stub_graph = _StubGraph(state=_successful_graph_state())
+    _patch_graph(monkeypatch, stub_graph)
+
+    events = await _collect_sse_events(
+        async_client,
+        {
+            "message": "Based on that, where am I most concentrated?",
+            "thread_id": "thread-continuity-1",
+        },
+    )
+
+    done_payload = events[-1]["data"]
+    assert done_payload["thread_id"] == "thread-continuity-1"
+    assert stub_graph.received_config == {
+        "configurable": {"thread_id": "thread-continuity-1"}
+    }
 
 
 @pytest.mark.asyncio

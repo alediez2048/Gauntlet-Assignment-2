@@ -68,7 +68,11 @@ def _extract_holdings(payload: dict[str, Any]) -> dict[str, dict[str, Any]]:
 
 def _to_numeric_pct(value: Any) -> float:
     if isinstance(value, (int, float)):
-        return float(value)
+        numeric_value = float(value)
+        # Ghostfolio can return allocation ratios in the 0..1 range.
+        if 0.0 <= numeric_value <= 1.0:
+            return numeric_value * 100.0
+        return numeric_value
 
     return 0.0
 

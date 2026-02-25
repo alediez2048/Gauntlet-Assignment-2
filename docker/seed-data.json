@@ -1,0 +1,280 @@
+{
+  "activities": [
+    {
+      "currency": "USD",
+      "dataSource": "YAHOO",
+      "date": "2023-11-15T00:00:00.000Z",
+      "fee": 2,
+      "quantity": 18,
+      "symbol": "SPY",
+      "type": "BUY",
+      "unitPrice": 450,
+      "assetClass": "EQUITY"
+    },
+    {
+      "currency": "USD",
+      "dataSource": "YAHOO",
+      "date": "2024-01-10T00:00:00.000Z",
+      "fee": 2,
+      "quantity": 20,
+      "symbol": "AAPL",
+      "type": "BUY",
+      "unitPrice": 180,
+      "assetClass": "EQUITY"
+    },
+    {
+      "currency": "USD",
+      "dataSource": "YAHOO",
+      "date": "2024-02-12T00:00:00.000Z",
+      "fee": 2,
+      "quantity": 12,
+      "symbol": "MSFT",
+      "type": "BUY",
+      "unitPrice": 390,
+      "assetClass": "EQUITY"
+    },
+    {
+      "currency": "USD",
+      "dataSource": "YAHOO",
+      "date": "2024-03-05T00:00:00.000Z",
+      "fee": 3,
+      "quantity": 40,
+      "symbol": "NVDA",
+      "type": "BUY",
+      "unitPrice": 720,
+      "assetClass": "EQUITY"
+    },
+    {
+      "currency": "USD",
+      "dataSource": "YAHOO",
+      "date": "2024-04-01T00:00:00.000Z",
+      "fee": 1,
+      "quantity": 40,
+      "symbol": "BND",
+      "type": "BUY",
+      "unitPrice": 73,
+      "assetClass": "FIXED_INCOME"
+    },
+    {
+      "currency": "USD",
+      "dataSource": "YAHOO",
+      "date": "2024-04-15T00:00:00.000Z",
+      "fee": 0,
+      "quantity": 1,
+      "symbol": "AAPL",
+      "type": "DIVIDEND",
+      "unitPrice": 30,
+      "assetClass": "EQUITY"
+    },
+    {
+      "currency": "USD",
+      "date": "2024-05-01T00:00:00.000Z",
+      "fee": 0,
+      "quantity": 1,
+      "symbol": "USD",
+      "type": "FEE",
+      "unitPrice": 12
+    },
+    {
+      "currency": "USD",
+      "dataSource": "YAHOO",
+      "date": "2024-06-18T00:00:00.000Z",
+      "fee": 2,
+      "quantity": 8,
+      "symbol": "AAPL",
+      "type": "SELL",
+      "unitPrice": 205,
+      "assetClass": "EQUITY"
+    },
+    {
+      "currency": "USD",
+      "dataSource": "YAHOO",
+      "date": "2024-07-02T00:00:00.000Z",
+      "fee": 2,
+      "quantity": 25,
+      "symbol": "VNQ",
+      "type": "BUY",
+      "unitPrice": 82,
+      "assetClass": "REAL_ESTATE"
+    },
+    {
+      "currency": "USD",
+      "dataSource": "YAHOO",
+      "date": "2024-08-14T00:00:00.000Z",
+      "fee": 2,
+      "quantity": 10,
+      "symbol": "TSLA",
+      "type": "BUY",
+      "unitPrice": 235,
+      "assetClass": "EQUITY"
+    },
+    {
+      "currency": "USD",
+      "dataSource": "YAHOO",
+      "date": "2024-09-10T00:00:00.000Z",
+      "fee": 2,
+      "quantity": 4,
+      "symbol": "TSLA",
+      "type": "SELL",
+      "unitPrice": 210,
+      "assetClass": "EQUITY"
+    },
+    {
+      "currency": "USD",
+      "date": "2024-10-01T00:00:00.000Z",
+      "fee": 0,
+      "quantity": 1,
+      "symbol": "USD",
+      "type": "INTEREST",
+      "unitPrice": 18
+    },
+    {
+      "currency": "USD",
+      "dataSource": "YAHOO",
+      "date": "2024-12-10T00:00:00.000Z",
+      "fee": 3,
+      "quantity": 20,
+      "symbol": "NVDA",
+      "type": "BUY",
+      "unitPrice": 130,
+      "assetClass": "EQUITY"
+    },
+    {
+      "currency": "USD",
+      "dataSource": "YAHOO",
+      "date": "2025-02-15T00:00:00.000Z",
+      "fee": 2,
+      "quantity": 6,
+      "symbol": "SPY",
+      "type": "SELL",
+      "unitPrice": 510,
+      "assetClass": "EQUITY"
+    },
+    {
+      "currency": "USD",
+      "dataSource": "YAHOO",
+      "date": "2025-03-15T00:00:00.000Z",
+      "fee": 2,
+      "quantity": 5,
+      "symbol": "NVDA",
+      "type": "SELL",
+      "unitPrice": 95,
+      "assetClass": "EQUITY"
+    },
+    {
+      "currency": "USD",
+      "dataSource": "YAHOO",
+      "date": "2025-04-10T00:00:00.000Z",
+      "fee": 0,
+      "quantity": 1,
+      "symbol": "MSFT",
+      "type": "DIVIDEND",
+      "unitPrice": 35,
+      "assetClass": "EQUITY"
+    },
+    {
+      "currency": "USD",
+      "date": "2025-05-01T00:00:00.000Z",
+      "fee": 0,
+      "quantity": 1,
+      "symbol": "USD",
+      "type": "FEE",
+      "unitPrice": 9
+    },
+    {
+      "currency": "USD",
+      "date": "2025-06-01T00:00:00.000Z",
+      "fee": 0,
+      "quantity": 1,
+      "symbol": "USD",
+      "type": "INTEREST",
+      "unitPrice": 15
+    },
+    {
+      "currency": "USD",
+      "dataSource": "YAHOO",
+      "date": "2025-07-01T00:00:00.000Z",
+      "fee": 2,
+      "quantity": 12,
+      "symbol": "AAPL",
+      "type": "BUY",
+      "unitPrice": 210,
+      "assetClass": "EQUITY"
+    },
+    {
+      "currency": "USD",
+      "dataSource": "YAHOO",
+      "date": "2025-09-20T00:00:00.000Z",
+      "fee": 2,
+      "quantity": 8,
+      "symbol": "NVDA",
+      "type": "BUY",
+      "unitPrice": 118,
+      "assetClass": "EQUITY"
+    },
+    {
+      "currency": "USD",
+      "dataSource": "YAHOO",
+      "date": "2025-10-03T00:00:00.000Z",
+      "fee": 1,
+      "quantity": 20,
+      "symbol": "BND",
+      "type": "BUY",
+      "unitPrice": 72,
+      "assetClass": "FIXED_INCOME"
+    },
+    {
+      "currency": "USD",
+      "dataSource": "YAHOO",
+      "date": "2025-11-25T00:00:00.000Z",
+      "fee": 2,
+      "quantity": 4,
+      "symbol": "AAPL",
+      "type": "SELL",
+      "unitPrice": 195,
+      "assetClass": "EQUITY"
+    },
+    {
+      "currency": "USD",
+      "date": "2025-12-15T00:00:00.000Z",
+      "fee": 0,
+      "quantity": 1,
+      "symbol": "MORTGAGE",
+      "type": "LIABILITY",
+      "unitPrice": 300
+    },
+    {
+      "currency": "USD",
+      "dataSource": "YAHOO",
+      "date": "2026-01-10T00:00:00.000Z",
+      "fee": 2,
+      "quantity": 6,
+      "symbol": "NVDA",
+      "type": "BUY",
+      "unitPrice": 140,
+      "assetClass": "EQUITY"
+    },
+    {
+      "currency": "USD",
+      "dataSource": "YAHOO",
+      "date": "2026-01-20T00:00:00.000Z",
+      "fee": 1,
+      "quantity": 10,
+      "symbol": "BND",
+      "type": "BUY",
+      "unitPrice": 71,
+      "assetClass": "FIXED_INCOME"
+    },
+    {
+      "currency": "USD",
+      "dataSource": "YAHOO",
+      "date": "2026-02-05T00:00:00.000Z",
+      "fee": 0,
+      "quantity": 1,
+      "symbol": "SPY",
+      "type": "DIVIDEND",
+      "unitPrice": 22,
+      "assetClass": "EQUITY"
+    }
+  ]
+}
