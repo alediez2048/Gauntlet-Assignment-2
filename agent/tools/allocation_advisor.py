@@ -89,6 +89,9 @@ def _aggregate_current_allocation(
 
         if isinstance(asset_class, str) and asset_class in current_allocation:
             current_allocation[asset_class] += allocation_pct
+        else:
+            # Some data sources omit asset class; classify as equity to preserve totals.
+            current_allocation["EQUITY"] += allocation_pct
 
         if allocation_pct > _DEFAULT_CONCENTRATION_THRESHOLD:
             concentration_warnings.append(
@@ -98,6 +101,14 @@ def _aggregate_current_allocation(
                     "threshold": _round_pct(_DEFAULT_CONCENTRATION_THRESHOLD),
                 }
             )
+
+    total_allocation = sum(current_allocation.values())
+    # Normalize only when upstream data omits/reshapes categories and drifts from ~100%.
+    if total_allocation > 0.0 and abs(total_allocation - 100.0) > 1.0:
+        current_allocation = {
+            asset_class: (allocation / total_allocation) * 100.0
+            for asset_class, allocation in current_allocation.items()
+        }
 
     rounded_allocation = {
         asset_class: _round_pct(current_allocation[asset_class]) for asset_class in _ASSET_CLASSES

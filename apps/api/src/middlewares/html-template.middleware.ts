@@ -121,6 +121,7 @@ export class HtmlTemplateMiddleware implements NestMiddleware {
 
     const currentDate = format(new Date(), DATE_FORMAT);
     const rootUrl = process.env.ROOT_URL || environment.rootUrl;
+    const agentChatUrl = process.env.AGENT_CHAT_URL?.trim();
 
     if (
       path.startsWith('/api/') ||
@@ -154,7 +155,19 @@ export class HtmlTemplateMiddleware implements NestMiddleware {
           })}`
       });
 
-      return response.send(indexHtml);
+      if (!agentChatUrl) {
+        return response.send(indexHtml);
+      }
+
+      const runtimeAgentScript = `<script>window.__GF_AGENT_CHAT_URL__=${JSON.stringify(
+        agentChatUrl
+      )};</script>`;
+      const htmlWithAgentEndpoint = indexHtml.replace(
+        '</head>',
+        `${runtimeAgentScript}</head>`
+      );
+
+      return response.send(htmlWithAgentEndpoint);
     }
   }
 

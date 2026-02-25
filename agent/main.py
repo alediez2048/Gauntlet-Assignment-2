@@ -15,16 +15,34 @@ from pydantic import BaseModel, Field, field_validator
 
 from agent.clients.ghostfolio_client import GhostfolioClient
 from agent.graph.graph import build_graph
+
+_DEFAULT_CORS_ORIGINS: list[str] = [
+    "http://localhost:3333",
+    "https://localhost:3333",
+    "http://localhost:4200",
+    "https://localhost:4200",
+]
+
+
+def _resolve_cors_origins() -> list[str]:
+    """Returns de-duplicated CORS origins from defaults and env overrides."""
+    configured_origins = os.getenv("AGENT_CORS_ORIGINS", "")
+    raw_origins = [*_DEFAULT_CORS_ORIGINS, *configured_origins.split(",")]
+
+    resolved_origins: list[str] = []
+    for raw_origin in raw_origins:
+        origin = raw_origin.strip().rstrip("/")
+        if origin and origin not in resolved_origins:
+            resolved_origins.append(origin)
+
+    return resolved_origins
+
+
 app = FastAPI(title="AgentForge", version="0.1.0")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:3333",
-        "https://localhost:3333",
-        "http://localhost:4200",
-        "https://localhost:4200",
-    ],
+    allow_origins=_resolve_cors_origins(),
     allow_methods=["*"],
     allow_headers=["*"],
 )

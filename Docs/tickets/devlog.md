@@ -1617,6 +1617,147 @@ Each ticket entry follows this standardized structure:
 
 ---
 
+## TICKET-10.1: Full E2E Regression + Railway Deployment 🟢 `MVP release-readiness`
+
+### 🧠 Plain-English Summary
+
+- **What was done:** Executed a full local regression gate, provisioned/deployed the full stack on Railway, validated hosted auth/import + chat scenarios end-to-end, and documented the deploy/runbook workflow.
+- **What it means:** The project is now verified beyond localhost with a repeatable hosted deployment path and a tested smoke/regression matrix.
+- **Success looked like:** Local and hosted health endpoints returned 200, hosted auth exchange succeeded, hosted data import succeeded, and all 7 hosted chat regression checks passed with correct SSE terminal behavior.
+- **How it works (simple):** Validate locally first -> provision Railway services -> configure env wiring/CORS/runtime endpoint injection -> deploy Ghostfolio + agent -> bootstrap hosted token + import data -> run hosted regression matrix.
+
+### 📋 Metadata
+
+- **Status:** Complete
+- **Completed:** Feb 25, 2026
+- **Time Spent:** ~4.0 hrs (estimate: 240-420 min)
+- **Branch:** `feature/TICKET-10-1-e2e-railway-deploy`
+- **Commit:** Pending closeout commit in this session
+
+### 🎯 Scope
+
+- ✅ Created/switch to dedicated ticket branch and ran clean local baseline (`down -v`, `up -d --build`).
+- ✅ Validated local health, auth/bootstrap, seed import, and 7-scenario SSE regression matrix.
+- ✅ Provisioned Railway topology (4 services): `ghostfolio`, `agent`, `Postgres-eRyc`, `Redis`.
+- ✅ Configured Railway domains, cross-service URLs, CORS/env wiring, and runtime agent endpoint injection.
+- ✅ Deployed Ghostfolio + agent services to Railway and validated hosted health checks.
+- ✅ Bootstrapped hosted auth + import flow and executed hosted 7-scenario regression matrix.
+- ✅ Added Railway runbook and updated demo reference docs for hosted flow.
+
+### 🏆 Key Achievements
+
+- Delivered a working hosted stack with public endpoints and validated chat behavior parity against local baseline.
+- Closed hosted allocation regression (`INVALID_ALLOCATION_SUM`) by hardening allocation aggregation for missing/reshaped asset-class data.
+- Implemented runtime-safe endpoint wiring: Ghostfolio now injects `window.__GF_AGENT_CHAT_URL__` from `AGENT_CHAT_URL`, while the agent CORS allowlist is env-extendable via `AGENT_CORS_ORIGINS`.
+- Captured a practical hosted import workaround for data-source symbol validation differences.
+
+### 🔧 Technical Implementation
+
+- **Agent CORS/runtime updates (`agent/main.py`):**
+  - Added `_resolve_cors_origins()` with default localhost origins plus `AGENT_CORS_ORIGINS` env extension.
+- **Ghostfolio runtime endpoint injection (`apps/api/src/middlewares/html-template.middleware.ts`):**
+  - Added `AGENT_CHAT_URL` env support and injected `window.__GF_AGENT_CHAT_URL__` into served HTML.
+- **Railway deployability (`agent/Dockerfile`):**
+  - Updated startup command to honor Railway `PORT` with fallback (`${PORT:-8000}`).
+- **Hosted allocation robustness (`agent/tools/allocation_advisor.py`):**
+  - Added normalization when aggregate allocation drifts from ~100%.
+  - Added fallback classification of missing/unknown asset classes into `EQUITY` to preserve allocation totals.
+- **Deployment/runbook docs:**
+  - Updated hosted flow in `Docs/reference/demo.md`.
+  - Added dedicated runbook `Docs/reference/railway.md` with provisioning, vars, smoke tests, troubleshooting, rollback.
+
+### ⚠️ Issues & Solutions
+
+| Issue | Solution |
+| ----- | -------- |
+| Railway CLI auth not available in automation shell | Completed manual `railway login`, then continued with CLI provisioning/deploy steps. |
+| Railway import rejected `YAHOO` symbols (`symbol ... is not valid for data source`) | Used hosted import transform path: convert `YAHOO` rows to deterministic `MANUAL` assets while preserving activity coverage. |
+| Hosted allocation scenario failed validator (`INVALID_ALLOCATION_SUM`) | Hardened allocation advisor normalization + unknown asset-class fallback, then redeployed agent. |
+| Docker Buildx failed in sandbox during local rebuild | Re-ran compose build with unrestricted permissions for Docker filesystem access. |
+
+### 🐛 Errors / Bugs / Problems
+
+1. **Hosted import payload rejected on Railway (`400 Bad Request`):**
+   - **What happened:** `POST /api/v1/import` failed for `SPY` with data source validation error.
+   - **What was tried:** Standard auth/import sequence using raw `docker/seed-data.json`.
+   - **What fixed it:** Transformed hosted payload to `MANUAL` symbols (deterministic UUID mapping) for affected `YAHOO` rows, then re-imported successfully.
+2. **Hosted allocation route returned `error` despite successful tool execution:**
+   - **What happened:** SSE stream emitted `tool_result.success=true` followed by terminal `error` with `INVALID_ALLOCATION_SUM`.
+   - **What was tried:** Initial normalization-only fix.
+   - **What fixed it:** Added unknown asset-class fallback into `EQUITY` before normalization in `allocation_advisor.py`; redeploy restored successful `done` terminal event.
+3. **Railway service add commands hung interactively:**
+   - **What happened:** `railway add` prompts blocked automation flow.
+   - **What fixed it:** Piped newline (`printf '\n' | ...`) to satisfy interactive prompt and proceed deterministically.
+
+### ✅ Testing
+
+- ✅ Local baseline:
+  - `docker compose -f docker/docker-compose.yml -f docker/docker-compose.agent.yml --env-file .env down -v`
+  - `docker compose -f docker/docker-compose.yml -f docker/docker-compose.agent.yml --env-file .env up -d --build`
+  - `GET http://localhost:3333/api/v1/health` -> 200
+  - `GET http://localhost:8000/health` -> 200
+- ✅ Local auth/import:
+  - `POST /api/v1/user` -> 201
+  - `POST /api/v1/auth/anonymous` -> 201
+  - `POST /api/v1/import` -> 201
+- ✅ Local chat regression:
+  - 7/7 scenarios passed (`performance`, `transactions`, `tax`, `allocation`, `follow-up`, `clarifier`, `invalid-input`)
+  - SSE contract validated (`thinking` first, terminal `done`/`error`)
+- ✅ Unit regression:
+  - `PYTHONPATH=. ./agent/.venv/bin/pytest agent/tests/unit/test_allocation_advisor.py` -> 9 passed
+- ✅ Hosted smoke:
+  - `GET https://ghostfolio-production-61c8.up.railway.app/api/v1/health` -> 200
+  - `GET https://agent-production-d1f1.up.railway.app/health` -> 200
+  - Hosted `POST /api/v1/user` + `POST /api/v1/auth/anonymous` + `POST /api/v1/import` -> success
+- ✅ Hosted chat regression:
+  - 7/7 scenarios passed with expected routes, thread continuity, safe clarifier/error behavior, and clean SSE terminal events
+
+### 📁 Files Changed
+
+**Created (1):**
+
+- `Docs/reference/railway.md`
+
+**Modified (6):**
+
+- `agent/main.py`
+- `agent/Dockerfile`
+- `agent/tools/allocation_advisor.py`
+- `apps/api/src/middlewares/html-template.middleware.ts`
+- `Docs/reference/demo.md`
+- `Docs/tickets/devlog.md` (this entry + running totals)
+
+### 🎯 Acceptance Criteria
+
+- ✅ Local full-stack E2E regression matrix passes.
+- ✅ Railway services are deployed and healthy.
+- ✅ Hosted auth + import workflow succeeds.
+- ✅ Hosted 5+ query golden path succeeds end-to-end.
+- ✅ Follow-up continuity is verified in hosted environment.
+- ✅ Clarifier and invalid-input error paths are validated as safe/non-crashing.
+- ✅ Deployment + verification runbook is documented.
+- ✅ `Docs/tickets/devlog.md` updated with closeout details and running totals.
+- ✅ Work performed on branch `feature/TICKET-10-1-e2e-railway-deploy`.
+
+### 📊 Performance
+
+- Ghostfolio Railway build/deploy: ~262s (full production build).
+- Agent Railway build/deploy: ~93s initial, then ~11-13s incremental redeploys.
+- Local and hosted 7-scenario regression script runtime: ~5-7s per full pass in this environment.
+
+### 🚀 Next Steps
+
+- Start **TICKET-11** edge-case hardening against adversarial prompts, empty portfolios, and partial outage conditions.
+- Optionally add a dedicated hosted import helper script to automate the `YAHOO` -> `MANUAL` portability transform for Railway demos.
+
+### 💡 Learnings
+
+- Hosted environments can enforce stricter market-symbol validation than local Docker assumptions.
+- Runtime endpoint and CORS configuration must be environment-driven to avoid hardcoded localhost regressions.
+- Allocation validation in live data needs resilience for incomplete/missing asset-class metadata.
+
+---
+
 ## Phase 7: Testing & Edge Cases
 
 ---
@@ -1653,9 +1794,9 @@ Each ticket entry follows this standardized structure:
 
 | Metric           | Value           |
 | ---------------- | --------------- |
-| Tickets Complete | 11 / 13                  |
-| Total Dev Time   | ~23.00 hrs               |
-| Tests Passing    | 80 (67 unit, 13 integ.)  |
-| Files Created    | 68                       |
-| Files Modified   | 41                       |
+| Tickets Complete | 12 / 14                  |
+| Total Dev Time   | ~27.00 hrs               |
+| Tests Passing    | 80 automated + hosted/local E2E regression matrices |
+| Files Created    | 69                       |
+| Files Modified   | 47                       |
 | Cursor Rules     | 10              |

@@ -299,3 +299,40 @@ curl -X POST http://localhost:3333/api/v1/import \
   -H "Content-Type: application/json" \
   -d @docker/seed-data.json
 ```
+
+---
+
+## TICKET-10.1 Hosted Railway Run (Current)
+
+Use this for the hosted demo path validated in TICKET-10.1.
+
+### Hosted Endpoints (staging)
+
+- Ghostfolio UI/API: `https://ghostfolio-production-61c8.up.railway.app`
+- Agent API: `https://agent-production-d1f1.up.railway.app`
+- Agent chat endpoint for runtime injection: `https://agent-production-d1f1.up.railway.app/api/agent/chat`
+
+### Required Order (Do Not Skip)
+
+1. **Local gate first**
+   - Run clean local rebuild and health checks before touching hosted rollout.
+2. **Railway health checks**
+   - `GET https://ghostfolio-production-61c8.up.railway.app/api/v1/health`
+   - `GET https://agent-production-d1f1.up.railway.app/health`
+3. **Hosted auth + import bootstrap**
+   - Create user (`POST /api/v1/user`), exchange token (`POST /api/v1/auth/anonymous`), then import activities.
+   - Note: hosted import may reject some `YAHOO` symbols; use the Railway runbook transform path in
+     `Docs/reference/railway.md` when needed.
+4. **Hosted chat regression**
+   - Run all 7 checks: performance, transactions, tax, allocation, follow-up continuity, clarifier, invalid input.
+   - Verify SSE contract (`thinking` first, terminal `done`/`error`, no hangs).
+
+### Runtime Configuration
+
+- Agent CORS is now env-driven via `AGENT_CORS_ORIGINS` (keeps localhost defaults + hosted origins).
+- Ghostfolio injects runtime chat URL via `AGENT_CHAT_URL` into `window.__GF_AGENT_CHAT_URL__`.
+- Frontend reads runtime endpoint from `window.__GF_AGENT_CHAT_URL__` and falls back to localhost only when unset.
+
+### Full Railway Runbook
+
+- See `Docs/reference/railway.md` for step-by-step provisioning, deployment, smoke tests, troubleshooting, and rollback.
