@@ -1,3 +1,6 @@
+import { TokenStorageService } from '@ghostfolio/client/services/token-storage.service';
+import { HEADER_KEY_TOKEN } from '@ghostfolio/common/config';
+
 import { inject, Injectable } from '@angular/core';
 
 import { Observable } from 'rxjs';
@@ -18,6 +21,7 @@ const DEFAULT_ERROR_MESSAGE =
 })
 export class AgentService {
   private readonly agentEndpointConfig = inject(AGENT_ENDPOINT_CONFIG);
+  private readonly tokenStorageService = inject(TokenStorageService);
 
   public streamChat(request: AgentChatRequest): Observable<AgentStreamEvent> {
     return new Observable<AgentStreamEvent>((subscriber) => {
@@ -25,12 +29,18 @@ export class AgentService {
 
       const run = async () => {
         try {
+          const headers: Record<string, string> = {
+            'Content-Type': 'application/json',
+            Accept: 'text/event-stream'
+          };
+          const token = this.tokenStorageService.getToken();
+          if (token) {
+            headers[HEADER_KEY_TOKEN] = `Bearer ${token}`;
+          }
+
           const response = await fetch(this.agentEndpointConfig.chatUrl, {
             body: JSON.stringify(request),
-            headers: {
-              'Content-Type': 'application/json',
-              Accept: 'text/event-stream'
-            },
+            headers,
             method: 'POST',
             signal: abortController.signal
           });

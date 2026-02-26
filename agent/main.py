@@ -3,18 +3,21 @@
 from __future__ import annotations
 
 import json
+import logging
 import os
 from collections.abc import AsyncIterator
 from typing import Any
 from uuid import uuid4
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field, field_validator
 
-from agent.clients.ghostfolio_client import GhostfolioClient
+from agent.clients.ghostfolio_client import GhostfolioClient, GhostfolioClientError
 from agent.graph.graph import build_graph
+
+logger = logging.getLogger(__name__)
 
 try:
     from langchain_openai import ChatOpenAI as _ChatOpenAI
@@ -80,7 +83,7 @@ _SAFE_ERROR_MESSAGES: dict[str, str] = {
     "API_TIMEOUT": "Having trouble reaching portfolio data. Is Ghostfolio running?",
     "API_ERROR": "Received an error from the portfolio service.",
     "EMPTY_PORTFOLIO": "No holdings found. Add investments to Ghostfolio first.",
-    "AUTH_FAILED": "Authentication failed. Check GHOSTFOLIO_ACCESS_TOKEN.",
+    "AUTH_FAILED": "Authentication failed. Please sign in again or check your session.",
 }
 _THREAD_STATE_CACHE: dict[str, dict[str, Any]] = {}
 
@@ -220,9 +223,24 @@ def _map_graph_state_to_events(
     return events
 
 
+def _extract_bearer_token(auth_header: str | None) -> str | None:
+    """Returns the Bearer token from an Authorization header, or None."""
+    if not auth_header or not isinstance(auth_header, str):
+        return None
+    parts = auth_header.strip().split()
+    if len(parts) != 2 or parts[0].lower() != "bearer" or not parts[1]:
+        return None
+    return parts[1]
+
+
 @app.post("/api/agent/chat")
-async def chat(request: ChatRequest) -> StreamingResponse:
-    """Streams agent execution events as typed server-sent events."""
+async def chat(request: ChatRequest, raw_request: Request) -> StreamingResponse:
+    """Streams agent execution events as typed server-sent events.
+
+    When the client sends an Authorization: Bearer <jwt> header (e.g. the logged-in
+    user's Ghostfolio JWT), the agent uses that identity for portfolio data. Otherwise
+    it uses the server's GHOSTFOLIO_ACCESS_TOKEN (single shared portfolio).
+    """
     thread_id = request.thread_id or str(uuid4())
 
     async def event_generator() -> AsyncIterator[str]:
@@ -230,7 +248,26 @@ async def chat(request: ChatRequest) -> StreamingResponse:
 
         try:
             base_url = os.getenv("GHOSTFOLIO_API_URL", "http://localhost:3333")
-            access_token = os.getenv("GHOSTFOLIO_ACCESS_TOKEN", "test-token")
+            auth_header = raw_request.headers.get("Authorization")
+            user_bearer = _extract_bearer_token(auth_header)
+            env_access_token = os.getenv("GHOSTFOLIO_ACCESS_TOKEN", "").strip()
+
+            if user_bearer:
+                logger.info("chat: using request Bearer token (caller identity)")
+                api_client = GhostfolioClient(
+                    base_url, access_token="", bearer_token=user_bearer
+                )
+            elif env_access_token:
+                logger.info("chat: using env GHOSTFOLIO_ACCESS_TOKEN (shared identity)")
+                api_client = GhostfolioClient(base_url, access_token=env_access_token)
+            else:
+                logger.warning("chat: no token; request has no Bearer and env has no GHOSTFOLIO_ACCESS_TOKEN")
+                yield _serialize_sse_event(
+                    "error",
+                    {"code": "AUTH_FAILED", "message": _safe_error_message("AUTH_FAILED")},
+                )
+                return
+
             prior_state = _THREAD_STATE_CACHE.get(thread_id, {})
             prior_messages = prior_state.get("messages")
             prior_tool_history = _coerce_tool_call_history(prior_state.get("tool_call_history"))
@@ -245,7 +282,7 @@ async def chat(request: ChatRequest) -> StreamingResponse:
             if prior_tool_history:
                 graph_input["tool_call_history"] = prior_tool_history
 
-            async with GhostfolioClient(base_url=base_url, access_token=access_token) as api_client:
+            async with api_client:
                 synthesizer = _build_synthesizer_callable()
                 graph = build_graph(api_client=api_client, synthesizer=synthesizer)
                 graph_state = await graph.ainvoke(
@@ -267,7 +304,20 @@ async def chat(request: ChatRequest) -> StreamingResponse:
                 history_offset=prior_history_len,
             ):
                 yield _serialize_sse_event(event_type, payload)
+        except GhostfolioClientError as err:
+            code = err.error_code
+            logger.warning(
+                "chat: GhostfolioClientError code=%s status=%s detail=%s",
+                code,
+                err.status,
+                err.detail,
+            )
+            yield _serialize_sse_event(
+                "error",
+                {"code": code, "message": _safe_error_message(code)},
+            )
         except Exception:
+            logger.exception("chat: unexpected error")
             yield _serialize_sse_event(
                 "error",
                 {

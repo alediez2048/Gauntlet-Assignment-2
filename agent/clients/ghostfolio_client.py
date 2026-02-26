@@ -40,9 +40,14 @@ class GhostfolioClientError(Exception):
 class GhostfolioClient:
     """Client used by tools to query Ghostfolio portfolio endpoints.
 
+    Supports two auth modes:
+    - Pre-supplied Bearer (e.g. user JWT from frontend): pass bearer_token; no exchange.
+    - Anonymous exchange: pass access_token (security token); client exchanges for Bearer.
+
     Args:
         base_url: Ghostfolio base URL.
-        access_token: Ghostfolio security token for anonymous auth exchange.
+        access_token: Ghostfolio security token for anonymous auth exchange. Optional if bearer_token is set.
+        bearer_token: Optional pre-obtained Bearer token (e.g. user JWT). When set, no exchange is done.
         client: Optional injected async client for testing.
         timeout_seconds: Timeout for client-created AsyncClient.
     """
@@ -50,8 +55,9 @@ class GhostfolioClient:
     def __init__(
         self,
         base_url: str,
-        access_token: str,
+        access_token: str = "",
         *,
+        bearer_token: str | None = None,
         client: httpx.AsyncClient | None = None,
         timeout_seconds: float = 15.0,
     ) -> None:
@@ -59,15 +65,20 @@ class GhostfolioClient:
         if not normalized_base_url:
             raise ValueError("base_url is required.")
 
-        normalized_access_token = access_token.strip()
-        if not normalized_access_token:
-            raise ValueError("access_token is required.")
-
         self.base_url = normalized_base_url
-        self.access_token = normalized_access_token
         self._client = client or httpx.AsyncClient(timeout=timeout_seconds)
         self._owns_client = client is None
-        self._bearer_token: str | None = None
+
+        supplied_bearer = (bearer_token or "").strip()
+        if supplied_bearer:
+            self._bearer_token: str | None = supplied_bearer
+            self.access_token = ""
+        else:
+            normalized_access_token = (access_token or "").strip()
+            if not normalized_access_token:
+                raise ValueError("Either access_token or bearer_token is required.")
+            self.access_token = normalized_access_token
+            self._bearer_token = None
 
     async def __aenter__(self) -> "GhostfolioClient":
         return self
@@ -115,6 +126,10 @@ class GhostfolioClient:
         if value not in VALID_DATE_RANGES:
             raise GhostfolioClientError("INVALID_TIME_PERIOD", detail=f"Unsupported range: {value}")
 
+    def _uses_supplied_bearer(self) -> bool:
+        """True when this client was created with a pre-supplied Bearer (e.g. user JWT)."""
+        return self.access_token == "" and self._bearer_token is not None
+
     async def _request_json(
         self,
         path: str,
@@ -125,6 +140,8 @@ class GhostfolioClient:
         response = await self._send_get(path=path, params=params, bearer_token=token)
 
         if response.status_code == 401:
+            if self._uses_supplied_bearer():
+                raise GhostfolioClientError("AUTH_FAILED", status=401)
             clear_bearer_token_cache(self.base_url)
             refreshed_token = await self._ensure_token(force_refresh=True)
             response = await self._send_get(
