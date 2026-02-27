@@ -33,6 +33,7 @@ class ToolCallRecord(TypedDict, total=False):
     tool_args: dict[str, Any]
     success: bool
     error: str | None
+    data: dict[str, Any] | None
 
 
 class FinalResponse(TypedDict, total=False):
@@ -46,7 +47,7 @@ class FinalResponse(TypedDict, total=False):
 
 
 class AgentState(TypedDict, total=False):
-    """State contract for Router -> ToolExecutor -> Validator -> terminal nodes."""
+    """State contract for Router -> ToolExecutor -> Validator -> Orchestrator -> terminal nodes."""
 
     messages: Annotated[list[Any], add_messages]
     portfolio_snapshot: dict[str, Any]
@@ -58,3 +59,7 @@ class AgentState(TypedDict, total=False):
     tool_call_history: list[ToolCallRecord]
     error: str | None
     final_response: FinalResponse
+    reasoning: str | None
+    step_count: int
+    tool_plan: list[dict[str, Any]]
+    retry_count: int

@@ -167,10 +167,12 @@ from agent.graph.nodes import (
     keyword_router,
     make_clarifier_node,
     make_error_handler_node,
+    make_orchestrator_node,
     make_router_node,
     make_synthesizer_node,
     make_tool_executor_node,
     make_validator_node,
+    route_after_orchestrator,
     route_after_router,
     route_after_validator,
 )
@@ -247,6 +249,7 @@ async def build_graph(
     graph.add_node("router", make_router_node(dependencies))
     graph.add_node("tool_executor", make_tool_executor_node(dependencies))
     graph.add_node("validator", make_validator_node())
+    graph.add_node("orchestrator", make_orchestrator_node())
     graph.add_node("synthesizer", make_synthesizer_node(dependencies))
     graph.add_node("clarifier", make_clarifier_node())
     graph.add_node("error_handler", make_error_handler_node())
@@ -261,11 +264,14 @@ async def build_graph(
         },
     )
     graph.add_edge("tool_executor", "validator")
+    graph.add_edge("validator", "orchestrator")
     graph.add_conditional_edges(
-        "validator",
-        route_after_validator,
+        "orchestrator",
+        route_after_orchestrator,
         {
             "valid": "synthesizer",
+            "next_step": "router",
+            "retry": "tool_executor",
             "invalid_or_error": "error_handler",
         },
     )

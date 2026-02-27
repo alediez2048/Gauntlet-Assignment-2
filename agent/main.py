@@ -120,6 +120,10 @@ def _build_router_callable() -> Any | None:
 
             # Extract tool_calls from the response
             tool_calls = getattr(response, "tool_calls", None)
+            # Capture any reasoning text the LLM produced alongside the tool call
+            llm_content = getattr(response, "content", None)
+            llm_reasoning = llm_content.strip() if isinstance(llm_content, str) and llm_content.strip() else None
+
             if tool_calls and len(tool_calls) > 0:
                 tc = tool_calls[0]
                 tool_name = tc.get("name") if isinstance(tc, dict) else getattr(tc, "name", None)
@@ -132,6 +136,7 @@ def _build_router_callable() -> Any | None:
                     "tool_name": tool_name,
                     "tool_args": tool_args,
                     "reason": "function_calling",
+                    "reasoning": llm_reasoning or f"Selected {tool_name} via function calling.",
                 }
 
             # LLM chose not to call a function — treat as clarify
@@ -140,6 +145,7 @@ def _build_router_callable() -> Any | None:
                 "tool_name": None,
                 "tool_args": {},
                 "reason": "no_function_selected",
+                "reasoning": llm_reasoning or "No matching function found for this request.",
             }
         except Exception:
             # Fallback to prompt-based routing if function calling fails
@@ -285,6 +291,12 @@ def _map_graph_state_to_events(
 ) -> list[tuple[str, dict[str, Any]]]:
     """Maps graph output state to frontend-facing SSE events."""
     events: list[tuple[str, dict[str, Any]]] = []
+
+    # Emit chain-of-thought reasoning as a thinking event
+    reasoning = state.get("reasoning")
+    if isinstance(reasoning, str) and reasoning.strip():
+        events.append(("thinking", {"message": reasoning.strip()}))
+
     tool_history = _coerce_tool_call_history(state.get("tool_call_history"))
     emitted_tool_history = (
         tool_history[history_offset:]

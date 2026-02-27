@@ -13,7 +13,7 @@ from typing import Any, Final, cast
 
 from agent.clients.ghostfolio_client import VALID_DATE_RANGES
 from agent.graph.state import AgentState, RouteName, ToolName
-from agent.prompts import SUPPORTED_CAPABILITIES, SYNTHESIS_PROMPT
+from agent.prompts import MULTI_STEP_SYNTHESIS_PROMPT, SUPPORTED_CAPABILITIES, SYNTHESIS_PROMPT
 from agent.tools.allocation_advisor import advise_asset_allocation
 from agent.tools.base import ToolResult
 from agent.tools.compliance_checker import check_compliance
@@ -132,6 +132,39 @@ _FOLLOW_UP_MARKERS: Final[tuple[str, ...]] = (
     "given that",
     "what should i do next",
 )
+
+
+_MULTI_STEP_PATTERNS: Final[dict[tuple[str, ...], list[dict[str, Any]]]] = {
+    ("health check", "full analysis"): [
+        {"route": "portfolio", "tool_name": "analyze_portfolio_performance", "tool_args": {}},
+        {"route": "allocation", "tool_name": "advise_asset_allocation", "tool_args": {}},
+        {"route": "compliance", "tool_name": "check_compliance", "tool_args": {}},
+    ],
+    ("complete review", "full report"): [
+        {"route": "portfolio", "tool_name": "analyze_portfolio_performance", "tool_args": {}},
+        {"route": "transactions", "tool_name": "categorize_transactions", "tool_args": {}},
+        {"route": "tax", "tool_name": "estimate_capital_gains_tax", "tool_args": {}},
+    ],
+    ("portfolio overview",): [
+        {"route": "portfolio", "tool_name": "analyze_portfolio_performance", "tool_args": {}},
+        {"route": "allocation", "tool_name": "advise_asset_allocation", "tool_args": {}},
+    ],
+    ("tax and compliance",): [
+        {"route": "tax", "tool_name": "estimate_capital_gains_tax", "tool_args": {}},
+        {"route": "compliance", "tool_name": "check_compliance", "tool_args": {}},
+    ],
+}
+
+_MAX_STEPS: Final[int] = 3
+
+
+def _detect_multi_step(query: str) -> list[dict[str, Any]] | None:
+    """Returns an ordered tool plan if *query* matches a multi-step trigger, else None."""
+    lowered = query.lower()
+    for triggers, plan in _MULTI_STEP_PATTERNS.items():
+        if any(trigger in lowered for trigger in triggers):
+            return [dict(step) for step in plan]
+    return None
 
 
 SynthesizerCallable = Callable[[str, str], Awaitable[str]]
@@ -376,6 +409,7 @@ async def keyword_router(user_query: str, messages: list[Any]) -> dict[str, Any]
             "tool_name": None,
             "tool_args": {},
             "reason": "ambiguous_or_out_of_scope",
+            "reasoning": f"Analyzed query: '{user_query}'. No confident keyword match found; routing to clarify.",
         }
 
     tool_name = _ROUTE_TO_TOOL[route]
@@ -384,6 +418,7 @@ async def keyword_router(user_query: str, messages: list[Any]) -> dict[str, Any]
         "tool_name": tool_name,
         "tool_args": _default_args_for_tool(tool_name, user_query),
         "reason": "keyword_match",
+        "reasoning": f"Analyzed query: '{user_query}'. Matched keyword pattern for '{route}' route.",
     }
 
 
@@ -473,14 +508,45 @@ def make_router_node(dependencies: NodeDependencies) -> Callable[[AgentState], A
     """Builds the Router node with injected routing dependency."""
 
     async def router_node(state: AgentState) -> AgentState:
+        # --- Loop-back shortcut: orchestrator has pre-planned the next step ---
+        tool_plan = state.get("tool_plan") or []
+        step_count = state.get("step_count", 0)
+        if tool_plan and step_count > 0:
+            next_step = tool_plan[0]
+            remaining_plan = tool_plan[1:]
+            tool_name = next_step["tool_name"]
+            messages = state.get("messages", [])
+            user_query = _latest_user_query(messages)
+            tool_args = _sanitize_tool_args(tool_name, user_query, next_step.get("tool_args"))
+            return {
+                "route": next_step["route"],
+                "tool_name": tool_name,
+                "tool_args": tool_args,
+                "tool_result": None,
+                "error": None,
+                "pending_action": "tool_selected",
+                "tool_plan": remaining_plan,
+                "retry_count": 0,
+                "reasoning": f"Multi-step plan: executing step {step_count + 1} — {tool_name}.",
+            }
+
+        # --- Normal first-pass routing ---
         messages = state.get("messages", [])
         user_query = _latest_user_query(messages)
+
+        # Check for multi-step trigger before LLM routing
+        multi_plan = _detect_multi_step(user_query)
+
         try:
             decision = await dependencies.router(user_query, messages)
         except Exception:
             decision = await keyword_router(user_query, messages)
+
+        reasoning = decision.get("reasoning") or decision.get("reason", "")
+
         normalized_decision = _normalize_router_decision(user_query, decision)
         route = normalized_decision["route"]
+
         if route == "clarify":
             if _is_follow_up_query(user_query):
                 recovered_decision = _route_from_recent_tool_history(state, user_query)
@@ -505,6 +571,7 @@ def make_router_node(dependencies: NodeDependencies) -> Callable[[AgentState], A
                         "tool_result": None,
                         "error": None,
                         "pending_action": "tool_selected",
+                        "reasoning": reasoning or f"Follow-up detected; re-using prior route '{recovered_decision['route']}'.",
                     }
 
             return {
@@ -514,6 +581,27 @@ def make_router_node(dependencies: NodeDependencies) -> Callable[[AgentState], A
                 "tool_result": None,
                 "error": None,
                 "pending_action": "ambiguous_or_unsupported",
+                "reasoning": reasoning,
+            }
+
+        # If multi-step detected, use the first step now and queue the rest
+        if multi_plan is not None:
+            first_step = multi_plan[0]
+            remaining_plan = multi_plan[1:]
+            tool_name = first_step["tool_name"]
+            tool_args = _sanitize_tool_args(tool_name, user_query, first_step.get("tool_args"))
+            plan_names = ", ".join(s["tool_name"] for s in multi_plan)
+            return {
+                "route": first_step["route"],
+                "tool_name": tool_name,
+                "tool_args": tool_args,
+                "tool_result": None,
+                "error": None,
+                "pending_action": "tool_selected",
+                "tool_plan": remaining_plan,
+                "step_count": 0,
+                "retry_count": 0,
+                "reasoning": f"Multi-step plan detected: [{plan_names}]. Starting with {tool_name}.",
             }
 
         return {
@@ -523,6 +611,7 @@ def make_router_node(dependencies: NodeDependencies) -> Callable[[AgentState], A
             "tool_result": None,
             "error": None,
             "pending_action": "tool_selected",
+            "reasoning": reasoning,
         }
 
     return router_node
@@ -587,6 +676,7 @@ def make_tool_executor_node(
                 "tool_args": validated_args if isinstance(tool_name, str) and tool_name in _TOOL_FUNCTIONS else (tool_args if isinstance(tool_args, dict) else {}),
                 "success": tool_result.success,
                 "error": tool_result.error,
+                "data": tool_result.data,
             }
         )
 
@@ -794,6 +884,22 @@ def _build_summary(tool_name: ToolName | None, tool_result: ToolResult | None) -
     )
 
 
+def _build_multi_step_summary(history: list[dict[str, Any]]) -> str:
+    """Builds a combined summary from multiple tool results using deterministic formatting."""
+    sections: list[str] = []
+    for record in history:
+        if not isinstance(record, dict) or not record.get("success"):
+            continue
+        tool_name = record.get("tool_name")
+        data = record.get("data")
+        if tool_name and data:
+            tool_result = ToolResult.ok(data)
+            sections.append(_build_summary(tool_name, tool_result))
+    if not sections:
+        return "Analysis complete."
+    return "Combined analysis:\n\n" + "\n\n".join(sections)
+
+
 def make_synthesizer_node(
     dependencies: NodeDependencies | None = None,
 ) -> Callable[[AgentState], AgentState | Awaitable[AgentState]]:
@@ -804,7 +910,68 @@ def make_synthesizer_node(
     async def synthesizer_node(state: AgentState) -> AgentState:
         tool_name = state.get("tool_name")
         tool_result = state.get("tool_result")
+        step_count = state.get("step_count", 0)
+        history = state.get("tool_call_history") or []
 
+        # --- Multi-step path ---
+        if step_count > 1 and history:
+            user_query = ""
+            messages = state.get("messages")
+            if isinstance(messages, list):
+                for msg in reversed(messages):
+                    text = _message_to_text(msg)
+                    role = msg.get("role") if isinstance(msg, dict) else getattr(msg, "role", None)
+                    if role == "user" and text:
+                        user_query = text
+                        break
+
+            if synthesizer_fn is not None:
+                try:
+                    # Build combined context from all successful results
+                    tool_sections: list[str] = []
+                    for record in history:
+                        if not isinstance(record, dict) or not record.get("success"):
+                            continue
+                        rname = record.get("tool_name", "unknown")
+                        rdata = record.get("data")
+                        if rdata:
+                            rjson = json.dumps(rdata, default=str)[:2000]
+                            tool_sections.append(f"Tool: {rname}\nResult:\n{rjson}")
+                    failed = [r.get("tool_name", "unknown") for r in history
+                              if isinstance(r, dict) and not r.get("success")]
+                    combined_context = (
+                        f"User asked: {user_query}\n\n"
+                        + "\n\n---\n\n".join(tool_sections)
+                    )
+                    if failed:
+                        combined_context += f"\n\nFailed tools: {', '.join(failed)}"
+                    summary = await synthesizer_fn(MULTI_STEP_SYNTHESIS_PROMPT, combined_context)
+                except Exception:
+                    summary = _build_multi_step_summary(history)
+            else:
+                summary = _build_multi_step_summary(history)
+
+            # Collect all successful data for the final response
+            all_data: dict[str, Any] = {}
+            for record in history:
+                if isinstance(record, dict) and record.get("success") and record.get("data"):
+                    rname = record.get("tool_name", "unknown")
+                    all_data[rname] = record["data"]
+
+            final_response: dict[str, Any] = {
+                "category": "analysis",
+                "message": summary,
+                "tool_name": tool_name,
+                "data": all_data,
+                "suggestions": [],
+            }
+            return {
+                "final_response": final_response,
+                "messages": [_assistant_message(summary)],
+                "pending_action": "valid",
+            }
+
+        # --- Single-step path (unchanged) ---
         if synthesizer_fn is not None and tool_result is not None:
             try:
                 tool_json = json.dumps(tool_result.data, default=str)[:4000]
@@ -828,7 +995,7 @@ def make_synthesizer_node(
         else:
             summary = _build_summary(tool_name, tool_result)
 
-        final_response: dict[str, Any] = {
+        final_response = {
             "category": "analysis",
             "message": summary,
             "tool_name": tool_name,
@@ -961,4 +1128,68 @@ def route_after_validator(state: AgentState) -> str:
     if state.get("pending_action") == "valid":
         return "valid"
 
+    return "invalid_or_error"
+
+
+def make_orchestrator_node() -> Callable[[AgentState], AgentState]:
+    """Builds Orchestrator node that manages multi-step tool execution.
+
+    For single-step queries (no ``tool_plan``), acts as a transparent pass-through
+    to the synthesizer.  For multi-step, loops back through the router for
+    additional tool invocations, with one retry on failure.
+    """
+
+    def orchestrator_node(state: AgentState) -> AgentState:
+        step_count = state.get("step_count", 0) + 1
+        tool_plan = state.get("tool_plan") or []
+        retry_count = state.get("retry_count", 0)
+        pending = state.get("pending_action", "valid")
+        is_failure = pending != "valid"
+
+        # -- Failure path --
+        if is_failure:
+            if retry_count < 1:
+                # Allow one retry of the same tool
+                return {
+                    "step_count": step_count,
+                    "retry_count": retry_count + 1,
+                    "pending_action": "retry",
+                }
+            # Retry exhausted — record failure, try next step or finish
+            if tool_plan and step_count < _MAX_STEPS:
+                return {
+                    "step_count": step_count,
+                    "retry_count": 0,
+                    "pending_action": "next_step",
+                }
+            # Check if we had any successful steps
+            history = state.get("tool_call_history") or []
+            has_success = any(r.get("success") for r in history if isinstance(r, dict))
+            if has_success:
+                return {"step_count": step_count, "pending_action": "valid"}
+            return {"step_count": step_count, "pending_action": "invalid_or_error"}
+
+        # -- Success path --
+        if tool_plan and step_count < _MAX_STEPS:
+            return {
+                "step_count": step_count,
+                "retry_count": 0,
+                "pending_action": "next_step",
+            }
+
+        # Done — route to synthesizer
+        return {"step_count": step_count, "pending_action": "valid"}
+
+    return orchestrator_node
+
+
+def route_after_orchestrator(state: AgentState) -> str:
+    """Returns edge key from Orchestrator node to next node."""
+    pending = state.get("pending_action", "valid")
+    if pending == "next_step":
+        return "next_step"
+    if pending == "retry":
+        return "retry"
+    if pending == "valid":
+        return "valid"
     return "invalid_or_error"

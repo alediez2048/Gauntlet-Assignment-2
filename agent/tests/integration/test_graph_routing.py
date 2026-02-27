@@ -263,7 +263,10 @@ async def test_graph_routes_failed_tool_result_to_error_handler(
     assert result["tool_name"] == "analyze_portfolio_performance"
     assert result["pending_action"] == "invalid_or_error"
     assert result["error"] == "API_TIMEOUT"
-    assert len(result["tool_call_history"]) == 1
+    # Orchestrator retries once, so 2 entries (original + retry)
+    assert len(result["tool_call_history"]) == 2
     assert result["tool_call_history"][0]["success"] is False
     assert result["tool_call_history"][0]["error"] == "API_TIMEOUT"
+    assert result["tool_call_history"][1]["success"] is False
+    assert result["tool_call_history"][1]["error"] == "API_TIMEOUT"
     assert result["final_response"]["category"] == "error"
