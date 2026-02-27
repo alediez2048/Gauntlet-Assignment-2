@@ -547,6 +547,27 @@ def make_router_node(dependencies: NodeDependencies) -> Callable[[AgentState], A
         normalized_decision = _normalize_router_decision(user_query, decision)
         route = normalized_decision["route"]
 
+        # Multi-step takes priority — even if the LLM said "clarify", the
+        # user's intent matched a known multi-step trigger phrase.
+        if multi_plan is not None:
+            first_step = multi_plan[0]
+            remaining_plan = multi_plan[1:]
+            tool_name = first_step["tool_name"]
+            tool_args = _sanitize_tool_args(tool_name, user_query, first_step.get("tool_args"))
+            plan_names = ", ".join(s["tool_name"] for s in multi_plan)
+            return {
+                "route": first_step["route"],
+                "tool_name": tool_name,
+                "tool_args": tool_args,
+                "tool_result": None,
+                "error": None,
+                "pending_action": "tool_selected",
+                "tool_plan": remaining_plan,
+                "step_count": 0,
+                "retry_count": 0,
+                "reasoning": f"Multi-step plan detected: [{plan_names}]. Starting with {tool_name}.",
+            }
+
         if route == "clarify":
             if _is_follow_up_query(user_query):
                 recovered_decision = _route_from_recent_tool_history(state, user_query)
@@ -582,26 +603,6 @@ def make_router_node(dependencies: NodeDependencies) -> Callable[[AgentState], A
                 "error": None,
                 "pending_action": "ambiguous_or_unsupported",
                 "reasoning": reasoning,
-            }
-
-        # If multi-step detected, use the first step now and queue the rest
-        if multi_plan is not None:
-            first_step = multi_plan[0]
-            remaining_plan = multi_plan[1:]
-            tool_name = first_step["tool_name"]
-            tool_args = _sanitize_tool_args(tool_name, user_query, first_step.get("tool_args"))
-            plan_names = ", ".join(s["tool_name"] for s in multi_plan)
-            return {
-                "route": first_step["route"],
-                "tool_name": tool_name,
-                "tool_args": tool_args,
-                "tool_result": None,
-                "error": None,
-                "pending_action": "tool_selected",
-                "tool_plan": remaining_plan,
-                "step_count": 0,
-                "retry_count": 0,
-                "reasoning": f"Multi-step plan detected: [{plan_names}]. Starting with {tool_name}.",
             }
 
         return {
