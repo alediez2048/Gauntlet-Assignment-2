@@ -7,21 +7,27 @@ from agent.clients.mock_client import MockGhostfolioClient
 from agent.tools.portfolio_analyzer import analyze_portfolio_performance
 
 
-class SpyPerformanceClient:
+class SpyDetailsClient:
     def __init__(self) -> None:
         self.call_count = 0
 
-    async def get_portfolio_performance(self, time_period: str) -> dict[str, Any]:
+    async def get_portfolio_details(self) -> dict[str, Any]:
         self.call_count += 1
-        return {"performance": {"netPerformance": 1}}
+        return {
+            "summary": {
+                "currentNetWorth": 13750,
+                "netPerformancePercentage": 14.58,
+                "totalInvestment": 12000,
+            }
+        }
 
 
-class ErroringPerformanceClient:
+class ErroringDetailsClient:
     def __init__(self, error: Exception) -> None:
         self.call_count = 0
         self.error = error
 
-    async def get_portfolio_performance(self, time_period: str) -> dict[str, Any]:
+    async def get_portfolio_details(self) -> dict[str, Any]:
         self.call_count += 1
         raise self.error
 
@@ -36,14 +42,16 @@ async def test_analyze_portfolio_performance_happy_path(
     assert result.error is None
     assert result.data is not None
     assert "performance" in result.data
-    assert "chart" in result.data
+    assert result.data["performance"]["currentNetWorth"] == 13750
+    assert result.data["performance"]["netPerformancePercentage"] == 14.58
+    assert result.data["performance"]["totalInvestment"] == 12000
     assert result.metadata["source"] == "portfolio_performance"
     assert result.metadata["time_period"] == "ytd"
 
 
 @pytest.mark.asyncio
 async def test_analyze_portfolio_performance_invalid_period_short_circuits_api_call() -> None:
-    spy_client = SpyPerformanceClient()
+    spy_client = SpyDetailsClient()
 
     result = await analyze_portfolio_performance(spy_client, time_period="monthly")
 
@@ -62,7 +70,7 @@ async def test_analyze_portfolio_performance_invalid_period_short_circuits_api_c
 async def test_analyze_portfolio_performance_maps_client_error_codes(
     error_code: str, status: int | None
 ) -> None:
-    failing_client = ErroringPerformanceClient(
+    failing_client = ErroringDetailsClient(
         GhostfolioClientError(error_code, status=status, detail="internal detail")
     )
 
@@ -81,7 +89,7 @@ async def test_analyze_portfolio_performance_maps_client_error_codes(
 
 @pytest.mark.asyncio
 async def test_analyze_portfolio_performance_maps_unexpected_exceptions_to_api_error() -> None:
-    failing_client = ErroringPerformanceClient(RuntimeError("unexpected low-level detail"))
+    failing_client = ErroringDetailsClient(RuntimeError("unexpected low-level detail"))
 
     result = await analyze_portfolio_performance(failing_client, time_period="ytd")
 
