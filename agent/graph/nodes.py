@@ -793,32 +793,46 @@ def make_validator_node() -> Callable[[AgentState], AgentState]:
     """Builds Validator node for ToolResult success/data checks."""
 
     def validator_node(state: AgentState) -> AgentState:
+        checks_passed = 0
+        prior_count = state.get("verification_count", 0)
+
         tool_result = state.get("tool_result")
         tool_name = state.get("tool_name")
         if tool_result is None:
-            return {"pending_action": "invalid_or_error", "error": "NO_TOOL_RESULT"}
+            return {"pending_action": "invalid_or_error", "error": "NO_TOOL_RESULT",
+                    "verification_count": prior_count + checks_passed}
+        checks_passed += 1  # check 1: result exists
 
         if not tool_result.success:
-            return {
-                "pending_action": "invalid_or_error",
-                "error": tool_result.error or "API_ERROR",
-            }
+            return {"pending_action": "invalid_or_error",
+                    "error": tool_result.error or "API_ERROR",
+                    "verification_count": prior_count + checks_passed}
+        checks_passed += 1  # check 2: success
 
         if not isinstance(tool_name, str):
-            return {"pending_action": "invalid_or_error", "error": "UNSUPPORTED_TOOL"}
+            return {"pending_action": "invalid_or_error", "error": "UNSUPPORTED_TOOL",
+                    "verification_count": prior_count + checks_passed}
+        checks_passed += 1  # check 3: tool_name is valid string
 
         payload = tool_result.data
         if not isinstance(payload, dict) or not payload:
-            return {"pending_action": "invalid_or_error", "error": "EMPTY_TOOL_PAYLOAD"}
+            return {"pending_action": "invalid_or_error", "error": "EMPTY_TOOL_PAYLOAD",
+                    "verification_count": prior_count + checks_passed}
+        checks_passed += 1  # check 4: payload is non-empty dict
 
         if not _payload_has_only_finite_numbers(payload):
-            return {"pending_action": "invalid_or_error", "error": "NON_FINITE_VALUE"}
+            return {"pending_action": "invalid_or_error", "error": "NON_FINITE_VALUE",
+                    "verification_count": prior_count + checks_passed}
+        checks_passed += 1  # check 5: finite numbers
 
         validation_error = _validate_tool_payload(tool_name, payload)
         if validation_error is not None:
-            return {"pending_action": "invalid_or_error", "error": validation_error}
+            return {"pending_action": "invalid_or_error", "error": validation_error,
+                    "verification_count": prior_count + checks_passed}
+        checks_passed += 1  # check 6: tool-specific validation
 
-        return {"pending_action": "valid", "error": None}
+        return {"pending_action": "valid", "error": None,
+                "verification_count": prior_count + checks_passed}
 
     return validator_node
 

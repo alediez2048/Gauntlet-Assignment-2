@@ -178,13 +178,24 @@ const reduceStreamEvent = (
           ? (response['confidence'] as number)
           : null;
 
+      const toolCallHistory = Array.isArray(event.data['tool_call_history'])
+        ? (event.data['tool_call_history'] as unknown[])
+        : [];
+      const toolsUsed = toolCallHistory.length;
+      const verificationCount =
+        typeof event.data['verification_count'] === 'number'
+          ? (event.data['verification_count'] as number)
+          : undefined;
+
       if (message) {
         if (state.activeAssistantIndex === null) {
           blocks.push({
             citations,
             confidence,
             content: message,
-            type: 'assistant'
+            toolsUsed,
+            type: 'assistant',
+            verificationCount
           });
         } else {
           const assistantBlock = blocks[state.activeAssistantIndex];
@@ -194,13 +205,17 @@ const reduceStreamEvent = (
               citations,
               confidence,
               content: message,
-              type: 'assistant'
+              toolsUsed,
+              type: 'assistant',
+              verificationCount
             };
           } else {
             blocks[state.activeAssistantIndex] = {
               ...assistantBlock,
               citations,
-              confidence
+              confidence,
+              toolsUsed,
+              verificationCount
             };
           }
         }

@@ -46,7 +46,9 @@ export interface AgentChatBlock {
   message?: string;
   success?: boolean;
   tool?: string;
+  toolsUsed?: number;
   type: AgentChatBlockType;
+  verificationCount?: number;
 }
 
 export interface AgentFeedbackRequest {

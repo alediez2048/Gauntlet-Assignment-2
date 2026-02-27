@@ -407,6 +407,7 @@ def _map_graph_state_to_events(
         "thread_id": thread_id,
         "response": final_response,
         "tool_call_history": tool_history,
+        "verification_count": state.get("verification_count", 0),
     }
     if token_usage:
         done_payload["token_usage"] = token_usage

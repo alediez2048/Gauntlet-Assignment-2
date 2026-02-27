@@ -75,3 +75,4 @@ class AgentState(TypedDict, total=False):
     step_count: int
     tool_plan: list[dict[str, Any]]
     retry_count: int
+    verification_count: int

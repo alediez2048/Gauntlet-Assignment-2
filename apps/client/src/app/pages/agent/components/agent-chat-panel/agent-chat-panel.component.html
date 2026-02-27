@@ -20,6 +20,17 @@
           Ask about your portfolio performance, allocation, transactions, or
           taxes.
         </p>
+        <div class="agent-panel__suggestions">
+          @for (question of sampleQuestions; track question) {
+            <button
+              class="agent-suggestion-chip"
+              type="button"
+              (click)="onSampleQuestionClick(question)"
+            >
+              {{ question }}
+            </button>
+          }
+        </div>
       }
 
       @for (block of chatState().blocks; track $index) {
@@ -40,17 +51,39 @@
             <div class="agent-bubble agent-bubble--assistant">
               {{ block.content }}
 
-              @if (block.confidence != null) {
-                <span
-                  class="agent-confidence-badge"
-                  [class.agent-confidence-badge--high]="block.confidence >= 0.8"
-                  [class.agent-confidence-badge--low]="block.confidence < 0.5"
-                  [class.agent-confidence-badge--medium]="
-                    block.confidence >= 0.5 && block.confidence < 0.8
-                  "
-                >
-                  {{ (block.confidence * 100).toFixed(0) }}% confidence
-                </span>
+              @if (
+                block.confidence != null ||
+                block.toolsUsed != null ||
+                block.verificationCount != null
+              ) {
+                <div class="agent-meta-summary">
+                  @if (block.confidence != null) {
+                    <span
+                      class="agent-confidence-badge"
+                      [class.agent-confidence-badge--high]="
+                        block.confidence >= 0.8
+                      "
+                      [class.agent-confidence-badge--low]="
+                        block.confidence < 0.5
+                      "
+                      [class.agent-confidence-badge--medium]="
+                        block.confidence >= 0.5 && block.confidence < 0.8
+                      "
+                    >
+                      {{ (block.confidence * 100).toFixed(0) }}% confidence
+                    </span>
+                  }
+                  @if (block.toolsUsed != null) {
+                    <span class="agent-meta-summary__item">
+                      Tools: {{ block.toolsUsed }}
+                    </span>
+                  }
+                  @if (block.verificationCount != null) {
+                    <span class="agent-meta-summary__item">
+                      Verification: {{ block.verificationCount }}
+                    </span>
+                  }
+                </div>
               }
 
               @if (block.citations && block.citations.length > 0) {

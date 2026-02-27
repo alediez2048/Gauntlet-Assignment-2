@@ -58,6 +58,13 @@ export class GfAgentChatPanelComponent implements OnDestroy {
 
   public draftMessage = '';
   public readonly chatState = signal<AgentChatState>(INITIAL_AGENT_CHAT_STATE);
+  public readonly sampleQuestions = [
+    'How is my portfolio performing?',
+    'Estimate my taxes for this year.',
+    'Am I properly diversified?',
+    'Check my portfolio for compliance issues.',
+    'Categorize my recent transactions.'
+  ];
   private streamSubscription?: Subscription;
 
   public constructor(private agentService: AgentService) {}
@@ -108,6 +115,11 @@ export class GfAgentChatPanelComponent implements OnDestroy {
     this.agentService.submitFeedback(request).catch(() => {
       // Feedback is best-effort; do not disrupt the UI on failure.
     });
+  }
+
+  public onSampleQuestionClick(question: string) {
+    this.draftMessage = question;
+    this.onSendMessage();
   }
 
   public onSendMessage() {
