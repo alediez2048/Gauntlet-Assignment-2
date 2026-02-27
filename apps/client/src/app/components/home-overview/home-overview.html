@@ -42,6 +42,19 @@
             </a>
           </li>
         </ol>
+        <div class="d-flex justify-content-center mb-3">
+          <button
+            color="accent"
+            mat-stroked-button
+            type="button"
+            [disabled]="isSeedingData"
+            (click)="onSeedSampleData()"
+          >
+            {{
+              isSeedingData ? 'Loading sample data...' : 'Load Sample Portfolio'
+            }}
+          </button>
+        </div>
         <div class="d-flex justify-content-center">
           @if (user?.accounts?.length === 1) {
             <a

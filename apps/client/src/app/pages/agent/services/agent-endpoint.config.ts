@@ -1,7 +1,7 @@
 import { InjectionToken } from '@angular/core';
 
 export interface AgentEndpointConfig {
-  chatUrl: string;
+  readonly chatUrl: string;
 }
 
 declare global {
@@ -26,12 +26,25 @@ const resolveAgentChatUrl = (): string => {
   return DEFAULT_AGENT_CHAT_URL;
 };
 
+let _cachedUrl: string | null = null;
+
 export const AGENT_ENDPOINT_CONFIG = new InjectionToken<AgentEndpointConfig>(
   'AGENT_ENDPOINT_CONFIG',
   {
     providedIn: 'root',
     factory: () => ({
-      chatUrl: resolveAgentChatUrl()
+      get chatUrl(): string {
+        if (_cachedUrl) {
+          return _cachedUrl;
+        }
+
+        const url = resolveAgentChatUrl();
+        if (url !== DEFAULT_AGENT_CHAT_URL) {
+          _cachedUrl = url;
+        }
+
+        return url;
+      }
     })
   }
 );

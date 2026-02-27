@@ -746,10 +746,14 @@ _ERROR_MESSAGES: Final[dict[str, str]] = {
     "INVALID_TAX_YEAR": "Tax year must be between 2020 and the current year.",
     "INVALID_INCOME_BRACKET": "Income bracket must be low, middle, or high.",
     "INVALID_TARGET_PROFILE": "Target profile must be conservative, balanced, or aggressive.",
-    "EMPTY_PORTFOLIO": "No holdings found. Add investments to Ghostfolio first.",
+    "EMPTY_PORTFOLIO": (
+        "No holdings found. Use the 'Load Sample Portfolio' button on the home page,"
+        " or add your own investments in Ghostfolio."
+    ),
     "API_TIMEOUT": "I could not reach Ghostfolio in time. Please check that it is running.",
     "API_ERROR": "Received an error from the portfolio service. Please try again.",
-    "AUTH_FAILED": "Authentication failed. Check GHOSTFOLIO_ACCESS_TOKEN.",
+    "AUTH_REQUIRED": "Please sign in or create an account to get portfolio insights.",
+    "AUTH_FAILED": "Your session has expired. Please sign in again.",
     "UNSUPPORTED_TOOL": "I could not map your request to a supported tool.",
     "EMPTY_TOOL_PAYLOAD": "I received an empty response and could not continue safely.",
     "NON_FINITE_VALUE": "I received invalid numeric values and stopped safely.",

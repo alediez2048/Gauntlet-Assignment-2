@@ -10,6 +10,8 @@ import pytest_asyncio
 
 from agent import main as main_module
 
+_TEST_BEARER_HEADERS: dict[str, str] = {"Authorization": "Bearer test-jwt"}
+
 
 class _StubGraph:
     def __init__(
@@ -43,8 +45,13 @@ async def async_client() -> AsyncIterator[httpx.AsyncClient]:
         yield client
 
 
-def _patch_graph(monkeypatch: pytest.MonkeyPatch, graph: _StubGraph) -> None:
-    monkeypatch.setattr(main_module, "build_graph", lambda api_client: graph)
+def _patch_graph(monkeypatch: pytest.MonkeyPatch, graph: _StubGraph) -> dict[str, str]:
+    monkeypatch.setattr(
+        main_module,
+        "build_graph",
+        lambda api_client, router=None, synthesizer=None: graph,
+    )
+    return _TEST_BEARER_HEADERS
 
 
 def _parse_sse_events(raw_stream: str) -> list[dict[str, Any]]:
@@ -68,8 +75,11 @@ def _parse_sse_events(raw_stream: str) -> list[dict[str, Any]]:
 async def _collect_sse_events(
     async_client: httpx.AsyncClient,
     payload: dict[str, Any],
+    headers: dict[str, str] | None = None,
 ) -> list[dict[str, Any]]:
-    async with async_client.stream("POST", "/api/agent/chat", json=payload) as response:
+    async with async_client.stream(
+        "POST", "/api/agent/chat", json=payload, headers=headers
+    ) as response:
         assert response.status_code == 200
         stream_chunks: list[str] = []
         async for chunk in response.aiter_text():
@@ -104,16 +114,35 @@ def _successful_graph_state() -> dict[str, Any]:
 
 
 @pytest.mark.asyncio
+async def test_chat_sse_emits_auth_required_when_no_bearer_token(
+    async_client: httpx.AsyncClient,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """When no Bearer token is sent, the agent must return AUTH_REQUIRED."""
+    monkeypatch.setenv("GHOSTFOLIO_ACCESS_TOKEN", "should-not-be-used")
+
+    events = await _collect_sse_events(
+        async_client,
+        {"message": "How is my portfolio doing ytd?"},
+    )
+    event_types = [event["event"] for event in events]
+    assert event_types == ["thinking", "error"]
+    assert events[-1]["data"]["code"] == "AUTH_REQUIRED"
+    assert "sign in" in events[-1]["data"]["message"].lower()
+
+
+@pytest.mark.asyncio
 async def test_chat_sse_emits_thinking_first(
     async_client: httpx.AsyncClient,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     stub_graph = _StubGraph(state=_successful_graph_state())
-    _patch_graph(monkeypatch, stub_graph)
+    headers = _patch_graph(monkeypatch, stub_graph)
 
     events = await _collect_sse_events(
         async_client,
         {"message": "How is my portfolio doing ytd?"},
+        headers=headers,
     )
     assert events[0]["event"] == "thinking"
     assert events[0]["data"] == {"message": "Analyzing your request..."}
@@ -125,11 +154,12 @@ async def test_chat_sse_emits_done_last_on_success(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     stub_graph = _StubGraph(state=_successful_graph_state())
-    _patch_graph(monkeypatch, stub_graph)
+    headers = _patch_graph(monkeypatch, stub_graph)
 
     events = await _collect_sse_events(
         async_client,
         {"message": "How is my portfolio doing ytd?"},
+        headers=headers,
     )
     event_types = [event["event"] for event in events]
 
@@ -156,11 +186,12 @@ async def test_chat_sse_tool_event_payload_shapes(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     stub_graph = _StubGraph(state=_successful_graph_state())
-    _patch_graph(monkeypatch, stub_graph)
+    headers = _patch_graph(monkeypatch, stub_graph)
 
     events = await _collect_sse_events(
         async_client,
         {"message": "How is my portfolio doing ytd?"},
+        headers=headers,
     )
 
     tool_call_payload = events[1]["data"]
@@ -186,7 +217,7 @@ async def test_chat_sse_reuses_provided_thread_id(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     stub_graph = _StubGraph(state=_successful_graph_state())
-    _patch_graph(monkeypatch, stub_graph)
+    headers = _patch_graph(monkeypatch, stub_graph)
 
     events = await _collect_sse_events(
         async_client,
@@ -194,6 +225,7 @@ async def test_chat_sse_reuses_provided_thread_id(
             "message": "Based on that, where am I most concentrated?",
             "thread_id": "thread-continuity-1",
         },
+        headers=headers,
     )
 
     done_payload = events[-1]["data"]
@@ -209,12 +241,32 @@ async def test_chat_sse_emits_error_and_closes_on_graph_exception(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     stub_graph = _StubGraph(exception=RuntimeError("unexpected failure"))
-    _patch_graph(monkeypatch, stub_graph)
+    headers = _patch_graph(monkeypatch, stub_graph)
 
     events = await _collect_sse_events(
         async_client,
         {"message": "How is my portfolio doing ytd?"},
+        headers=headers,
     )
     assert [event["event"] for event in events] == ["thinking", "error"]
     assert events[-1]["data"]["code"] == "API_ERROR"
     assert events[-1]["data"]["message"] == "Received an error from the portfolio service."
+
+
+@pytest.mark.asyncio
+async def test_chat_request_rejects_whitespace_message_with_422(
+    async_client: httpx.AsyncClient,
+) -> None:
+    response = await async_client.post(
+        "/api/agent/chat",
+        json={"message": "   ", "thread_id": "invalid-message-thread"},
+    )
+
+    assert response.status_code == 422
+    payload = response.json()
+    assert isinstance(payload.get("detail"), list)
+    assert any(
+        "message must not be empty" in str(item.get("msg", ""))
+        for item in payload["detail"]
+        if isinstance(item, dict)
+    )

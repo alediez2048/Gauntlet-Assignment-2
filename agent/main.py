@@ -6,8 +6,24 @@ import json
 import logging
 import os
 from collections.abc import AsyncIterator
+from pathlib import Path
 from typing import Any
 from uuid import uuid4
+
+from dotenv import dotenv_values
+
+# Load select keys from the repo-root .env.  GHOSTFOLIO_API_URL is
+# intentionally excluded because .env contains the Docker-internal hostname
+# (http://ghostfolio:3333) while local dev needs http://localhost:3333
+# (the code default).  On Railway, env vars are set directly on the service.
+_REPO_ROOT = Path(__file__).resolve().parent.parent
+_DOTENV_KEYS_TO_LOAD = {"OPENAI_API_KEY", "LANGSMITH_TRACING", "LANGSMITH_ENDPOINT",
+                        "LANGSMITH_API_KEY", "LANGSMITH_PROJECT"}
+_dotenv_vals = dotenv_values(_REPO_ROOT / ".env")
+for _key in _DOTENV_KEYS_TO_LOAD:
+    _val = _dotenv_vals.get(_key)
+    if _val:
+        os.environ[_key] = _val
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
@@ -82,8 +98,12 @@ _SAFE_ERROR_MESSAGES: dict[str, str] = {
     "INVALID_TAX_YEAR": "Tax year must be between 2020 and the current year.",
     "API_TIMEOUT": "Having trouble reaching portfolio data. Is Ghostfolio running?",
     "API_ERROR": "Received an error from the portfolio service.",
-    "EMPTY_PORTFOLIO": "No holdings found. Add investments to Ghostfolio first.",
-    "AUTH_FAILED": "Authentication failed. Please sign in again or check your session.",
+    "EMPTY_PORTFOLIO": (
+        "No holdings found. Use the 'Load Sample Portfolio' button on the home page,"
+        " or add your own investments in Ghostfolio."
+    ),
+    "AUTH_REQUIRED": "Please sign in or create an account to get portfolio insights.",
+    "AUTH_FAILED": "Your session has expired. Please sign in again.",
 }
 _THREAD_STATE_CACHE: dict[str, dict[str, Any]] = {}
 
@@ -237,9 +257,8 @@ def _extract_bearer_token(auth_header: str | None) -> str | None:
 async def chat(request: ChatRequest, raw_request: Request) -> StreamingResponse:
     """Streams agent execution events as typed server-sent events.
 
-    When the client sends an Authorization: Bearer <jwt> header (e.g. the logged-in
-    user's Ghostfolio JWT), the agent uses that identity for portfolio data. Otherwise
-    it uses the server's GHOSTFOLIO_ACCESS_TOKEN (single shared portfolio).
+    Requires an Authorization: Bearer <jwt> header with the logged-in user's
+    Ghostfolio JWT. Returns AUTH_REQUIRED if no token is provided.
     """
     thread_id = request.thread_id or str(uuid4())
 
@@ -250,21 +269,17 @@ async def chat(request: ChatRequest, raw_request: Request) -> StreamingResponse:
             base_url = os.getenv("GHOSTFOLIO_API_URL", "http://localhost:3333")
             auth_header = raw_request.headers.get("Authorization")
             user_bearer = _extract_bearer_token(auth_header)
-            env_access_token = os.getenv("GHOSTFOLIO_ACCESS_TOKEN", "").strip()
 
             if user_bearer:
                 logger.info("chat: using request Bearer token (caller identity)")
                 api_client = GhostfolioClient(
                     base_url, access_token="", bearer_token=user_bearer
                 )
-            elif env_access_token:
-                logger.info("chat: using env GHOSTFOLIO_ACCESS_TOKEN (shared identity)")
-                api_client = GhostfolioClient(base_url, access_token=env_access_token)
             else:
-                logger.warning("chat: no token; request has no Bearer and env has no GHOSTFOLIO_ACCESS_TOKEN")
+                logger.info("chat: no Bearer token provided; returning auth-required")
                 yield _serialize_sse_event(
                     "error",
-                    {"code": "AUTH_FAILED", "message": _safe_error_message("AUTH_FAILED")},
+                    {"code": "AUTH_REQUIRED", "message": _safe_error_message("AUTH_REQUIRED")},
                 )
                 return
 

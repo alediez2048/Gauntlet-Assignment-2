@@ -1,6 +1,7 @@
 import { GfPortfolioPerformanceComponent } from '@ghostfolio/client/components/portfolio-performance/portfolio-performance.component';
 import { LayoutService } from '@ghostfolio/client/core/layout.service';
 import { ImpersonationStorageService } from '@ghostfolio/client/services/impersonation-storage.service';
+import { ImportActivitiesService } from '@ghostfolio/client/services/import-activities.service';
 import { UserService } from '@ghostfolio/client/services/user/user.service';
 import { NUMERICAL_PRECISION_THRESHOLD_6_FIGURES } from '@ghostfolio/common/config';
 import {
@@ -15,6 +16,7 @@ import { GfLineChartComponent } from '@ghostfolio/ui/line-chart';
 import { DataService } from '@ghostfolio/ui/services';
 
 import { CommonModule } from '@angular/common';
+import { HttpClient } from '@angular/common/http';
 import {
   ChangeDetectorRef,
   Component,
@@ -25,7 +27,7 @@ import {
 import { MatButtonModule } from '@angular/material/button';
 import { RouterModule } from '@angular/router';
 import { DeviceDetectorService } from 'ngx-device-detector';
-import { Subject } from 'rxjs';
+import { firstValueFrom, Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
 @Component({
@@ -51,6 +53,7 @@ export class GfHomeOverviewComponent implements OnDestroy, OnInit {
   public isAllTimeHigh: boolean;
   public isAllTimeLow: boolean;
   public isLoadingPerformance = true;
+  public isSeedingData = false;
   public performance: PortfolioPerformance;
   public performanceLabel = $localize`Performance`;
   public precision = 2;
@@ -68,6 +71,8 @@ export class GfHomeOverviewComponent implements OnDestroy, OnInit {
     private changeDetectorRef: ChangeDetectorRef,
     private dataService: DataService,
     private deviceService: DeviceDetectorService,
+    private http: HttpClient,
+    private importActivitiesService: ImportActivitiesService,
     private impersonationStorageService: ImpersonationStorageService,
     private layoutService: LayoutService,
     private userService: UserService
@@ -111,6 +116,29 @@ export class GfHomeOverviewComponent implements OnDestroy, OnInit {
       .subscribe(() => {
         this.update();
       });
+  }
+
+  public async onSeedSampleData() {
+    this.isSeedingData = true;
+    this.changeDetectorRef.markForCheck();
+
+    try {
+      const sampleData = await firstValueFrom(
+        this.http.get<{ activities: any[]; assetProfiles: any[] }>(
+          '/assets/sample-portfolio.json'
+        )
+      );
+
+      await this.importActivitiesService.importJson({
+        activities: sampleData.activities,
+        assetProfiles: sampleData.assetProfiles
+      });
+
+      window.location.reload();
+    } catch {
+      this.isSeedingData = false;
+      this.changeDetectorRef.markForCheck();
+    }
   }
 
   public ngOnDestroy() {
