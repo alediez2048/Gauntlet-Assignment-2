@@ -1,5 +1,6 @@
 import {
   AgentChatState,
+  AgentCitation,
   AgentStreamEvent,
   INITIAL_AGENT_CHAT_STATE
 } from '../models/agent-chat.models';
@@ -156,17 +157,37 @@ const reduceStreamEvent = (
       const threadId = readString(event.data['thread_id']) || state.threadId;
       const response = readRecord(event.data['response']);
       const message = readString(response['message']);
+      const citations: AgentCitation[] = Array.isArray(response['citations'])
+        ? (response['citations'] as AgentCitation[])
+        : [];
+      const confidence =
+        typeof response['confidence'] === 'number'
+          ? (response['confidence'] as number)
+          : null;
 
       if (message) {
         if (state.activeAssistantIndex === null) {
-          blocks.push({ content: message, type: 'assistant' });
+          blocks.push({
+            citations,
+            confidence,
+            content: message,
+            type: 'assistant'
+          });
         } else {
           const assistantBlock = blocks[state.activeAssistantIndex];
           if (!assistantBlock?.content) {
             blocks[state.activeAssistantIndex] = {
               ...assistantBlock,
+              citations,
+              confidence,
               content: message,
               type: 'assistant'
+            };
+          } else {
+            blocks[state.activeAssistantIndex] = {
+              ...assistantBlock,
+              citations,
+              confidence
             };
           }
         }

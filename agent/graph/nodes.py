@@ -12,7 +12,7 @@ from datetime import datetime
 from typing import Any, Final, cast
 
 from agent.clients.ghostfolio_client import VALID_DATE_RANGES
-from agent.graph.state import AgentState, RouteName, ToolName
+from agent.graph.state import AgentState, Citation, RouteName, ToolName
 from agent.prompts import MULTI_STEP_SYNTHESIS_PROMPT, SUPPORTED_CAPABILITIES, SYNTHESIS_PROMPT
 from agent.tools.allocation_advisor import advise_asset_allocation
 from agent.tools.base import ToolResult
@@ -901,6 +901,140 @@ def _build_multi_step_summary(history: list[dict[str, Any]]) -> str:
     return "Combined analysis:\n\n" + "\n\n".join(sections)
 
 
+_TOOL_DISPLAY_NAMES: Final[dict[str, str]] = {
+    "analyze_portfolio_performance": "Portfolio Analysis",
+    "categorize_transactions": "Transaction Summary",
+    "estimate_capital_gains_tax": "Tax Estimate",
+    "advise_asset_allocation": "Allocation Analysis",
+    "check_compliance": "Compliance Check",
+    "get_market_data": "Market Data",
+}
+
+
+def _extract_tool_data_points(
+    tool_name: str,
+    data: dict[str, Any],
+) -> list[tuple[str, str]]:
+    """Return up to 3 (field, formatted_value) pairs for citation from a tool result."""
+    points: list[tuple[str, str]] = []
+
+    if tool_name == "analyze_portfolio_performance":
+        perf = data.get("performance")
+        if isinstance(perf, dict):
+            net_pct = perf.get("netPerformancePercentage")
+            if isinstance(net_pct, (int, float)):
+                points.append(("performance.netPerformancePercentage", f"{net_pct:.2f}%"))
+            total_inv = perf.get("totalInvestment")
+            if isinstance(total_inv, (int, float)):
+                points.append(("performance.totalInvestment", f"${total_inv:,.2f}"))
+            current_val = perf.get("currentValue") or perf.get("currentNetValue")
+            if isinstance(current_val, (int, float)):
+                points.append(("performance.currentValue", f"${current_val:,.2f}"))
+
+    elif tool_name == "categorize_transactions":
+        total = data.get("total_transactions")
+        if isinstance(total, int):
+            points.append(("total_transactions", str(total)))
+        categories = data.get("categories")
+        if isinstance(categories, dict) and categories:
+            top_cat = max(categories, key=lambda k: categories[k] if isinstance(categories[k], (int, float)) else 0)
+            points.append(("categories.top", f"{top_cat} ({categories[top_cat]})"))
+
+    elif tool_name == "estimate_capital_gains_tax":
+        liability = data.get("combined_liability")
+        if isinstance(liability, (int, float)):
+            points.append(("combined_liability", f"${liability:,.2f}"))
+        year = data.get("tax_year")
+        if year is not None:
+            points.append(("tax_year", str(year)))
+
+    elif tool_name == "advise_asset_allocation":
+        alloc = data.get("current_allocation")
+        if isinstance(alloc, dict) and alloc:
+            top_asset = max(alloc, key=lambda k: alloc[k] if isinstance(alloc[k], (int, float)) else 0)
+            points.append(("current_allocation.top", f"{top_asset} ({alloc[top_asset]:.1f}%)"))
+        target = data.get("target_profile")
+        if isinstance(target, str):
+            points.append(("target_profile", target))
+
+    elif tool_name == "check_compliance":
+        violations = data.get("total_violations")
+        if isinstance(violations, int):
+            points.append(("total_violations", str(violations)))
+        warnings = data.get("total_warnings")
+        if isinstance(warnings, int):
+            points.append(("total_warnings", str(warnings)))
+
+    elif tool_name == "get_market_data":
+        total_h = data.get("total_holdings")
+        if isinstance(total_h, int):
+            points.append(("total_holdings", str(total_h)))
+        total_mv = data.get("total_market_value")
+        if isinstance(total_mv, (int, float)):
+            points.append(("total_market_value", f"${total_mv:,.2f}"))
+
+    return points[:3]
+
+
+def _build_citations(history: list[dict[str, Any]]) -> list[Citation]:
+    """Build ordered citations from successful tool call records."""
+    citations: list[Citation] = []
+    counter = 1
+    for record in history:
+        if not isinstance(record, dict) or not record.get("success"):
+            continue
+        tool_name = record.get("tool_name", "")
+        data = record.get("data")
+        if not isinstance(data, dict) or not data:
+            continue
+
+        display_name = _TOOL_DISPLAY_NAMES.get(tool_name, tool_name)
+        data_points = _extract_tool_data_points(tool_name, data)
+
+        for field, value in data_points:
+            citations.append(
+                Citation(
+                    label=f"[{counter}]",
+                    tool_name=tool_name,
+                    display_name=display_name,
+                    field=field,
+                    value=value,
+                )
+            )
+            counter += 1
+
+    return citations
+
+
+def _compute_confidence(history: list[dict[str, Any]], step_count: int) -> float:
+    """Compute a deterministic confidence score (0.0–1.0) from tool execution signals."""
+    if not history:
+        return 0.0
+
+    scores: list[float] = []
+    has_retry = step_count > len(history)
+
+    for record in history:
+        if not isinstance(record, dict):
+            continue
+        score = 1.0
+        if not record.get("success"):
+            score -= 0.3
+        data = record.get("data")
+        if not isinstance(data, dict) or not data:
+            score -= 0.1
+        scores.append(score)
+
+    if not scores:
+        return 0.0
+
+    avg = sum(scores) / len(scores)
+    if has_retry:
+        avg -= 0.1
+
+    return max(0.0, min(1.0, round(avg, 2)))
+
+
 def make_synthesizer_node(
     dependencies: NodeDependencies | None = None,
 ) -> Callable[[AgentState], AgentState | Awaitable[AgentState]]:
@@ -959,12 +1093,17 @@ def make_synthesizer_node(
                     rname = record.get("tool_name", "unknown")
                     all_data[rname] = record["data"]
 
+            citations = _build_citations(history)
+            confidence = _compute_confidence(history, step_count)
+
             final_response: dict[str, Any] = {
                 "category": "analysis",
                 "message": summary,
                 "tool_name": tool_name,
                 "data": all_data,
                 "suggestions": [],
+                "citations": citations,
+                "confidence": confidence,
             }
             return {
                 "final_response": final_response,
@@ -972,7 +1111,7 @@ def make_synthesizer_node(
                 "pending_action": "valid",
             }
 
-        # --- Single-step path (unchanged) ---
+        # --- Single-step path ---
         if synthesizer_fn is not None and tool_result is not None:
             try:
                 tool_json = json.dumps(tool_result.data, default=str)[:4000]
@@ -996,12 +1135,17 @@ def make_synthesizer_node(
         else:
             summary = _build_summary(tool_name, tool_result)
 
+        citations = _build_citations(history)
+        confidence = _compute_confidence(history, step_count)
+
         final_response = {
             "category": "analysis",
             "message": summary,
             "tool_name": tool_name,
             "data": tool_result.data if tool_result is not None else None,
             "suggestions": [],
+            "citations": citations,
+            "confidence": confidence,
         }
         return {
             "final_response": final_response,

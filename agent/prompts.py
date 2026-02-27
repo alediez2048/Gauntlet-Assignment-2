@@ -140,6 +140,8 @@ for the user. Follow these rules strictly:
 6. Never invent numbers — only use data from the tool result.
 7. Never give personalized investment advice (buy/sell/hold).
 8. Use currency formatting ($1,234.56) and percentage formatting (12.34%).
+9. Reference data sources using bracket notation [1], [2] etc.
+   when citing specific numbers. Sources will be listed after your response.
 """.strip()
 
 MULTI_STEP_SYNTHESIS_PROMPT: Final[str] = """
@@ -157,6 +159,8 @@ Combine the results into a single, coherent response. Follow these rules:
 7. Never invent numbers — only use data from the tool results.
 8. Never give personalized investment advice (buy/sell/hold).
 9. Use currency formatting ($1,234.56) and percentage formatting (12.34%).
+10. Reference data sources using bracket notation [1], [2] etc.
+    when citing specific numbers. Sources will be listed after your response.
 """.strip()
 
 SUPPORTED_CAPABILITIES: Final[list[str]] = [

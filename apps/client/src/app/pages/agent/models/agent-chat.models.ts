@@ -27,9 +27,19 @@ export type AgentChatBlockType =
   | 'tool_result'
   | 'error';
 
+export interface AgentCitation {
+  label: string;
+  tool_name: string;
+  display_name: string;
+  field: string;
+  value: string;
+}
+
 export interface AgentChatBlock {
   args?: Record<string, unknown>;
+  citations?: AgentCitation[];
   code?: string;
+  confidence?: number | null;
   content?: string;
   error?: string;
   message?: string;

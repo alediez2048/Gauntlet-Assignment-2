@@ -36,6 +36,16 @@ class ToolCallRecord(TypedDict, total=False):
     data: dict[str, Any] | None
 
 
+class Citation(TypedDict, total=False):
+    """One source attribution linking a claim to a specific tool data point."""
+
+    label: str  # e.g. "[1]"
+    tool_name: str  # e.g. "analyze_portfolio_performance"
+    display_name: str  # e.g. "Portfolio Analysis"
+    field: str  # e.g. "performance.netPerformancePercentage"
+    value: str  # e.g. "5.2%"
+
+
 class FinalResponse(TypedDict, total=False):
     """Normalized response payload used by end nodes."""
 
@@ -44,6 +54,8 @@ class FinalResponse(TypedDict, total=False):
     tool_name: ToolName | None
     data: dict[str, Any] | None
     suggestions: list[str]
+    citations: list[Citation]
+    confidence: float | None
 
 
 class AgentState(TypedDict, total=False):

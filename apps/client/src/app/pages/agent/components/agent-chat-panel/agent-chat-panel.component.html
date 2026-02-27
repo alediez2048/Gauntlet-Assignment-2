@@ -1,7 +1,7 @@
 @if (isOpen) {
   <div class="agent-panel-backdrop" (click)="onRequestClose()"></div>
 
-  <section class="agent-panel" aria-label="Agent Chat Panel" role="dialog">
+  <section aria-label="Agent Chat Panel" class="agent-panel" role="dialog">
     <header class="agent-panel__header">
       <h2 class="mb-0">Agent</h2>
       <button
@@ -25,7 +25,9 @@
       @for (block of chatState().blocks; track $index) {
         <div
           class="agent-panel__message-row"
-          [class.agent-panel__message-row--assistant]="block.type === 'assistant'"
+          [class.agent-panel__message-row--assistant]="
+            block.type === 'assistant'
+          "
           [class.agent-panel__message-row--user]="block.type === 'user'"
         >
           @if (block.type === 'user') {
@@ -37,6 +39,42 @@
           @if (block.type === 'assistant') {
             <div class="agent-bubble agent-bubble--assistant">
               {{ block.content }}
+
+              @if (block.confidence != null) {
+                <span
+                  class="agent-confidence-badge"
+                  [class.agent-confidence-badge--high]="block.confidence >= 0.8"
+                  [class.agent-confidence-badge--low]="block.confidence < 0.5"
+                  [class.agent-confidence-badge--medium]="
+                    block.confidence >= 0.5 && block.confidence < 0.8
+                  "
+                >
+                  {{ (block.confidence * 100).toFixed(0) }}% confidence
+                </span>
+              }
+
+              @if (block.citations && block.citations.length > 0) {
+                <details class="agent-citations">
+                  <summary class="agent-citations__toggle">
+                    Sources ({{ block.citations.length }})
+                  </summary>
+                  <ul class="agent-citations__list">
+                    @for (citation of block.citations; track citation.label) {
+                      <li class="agent-citations__item">
+                        <span class="agent-citations__label">{{
+                          citation.label
+                        }}</span>
+                        <span class="agent-citations__source">{{
+                          citation.display_name
+                        }}</span>
+                        <span class="agent-citations__value">{{
+                          citation.value
+                        }}</span>
+                      </li>
+                    }
+                  </ul>
+                </details>
+              }
             </div>
           }
 
