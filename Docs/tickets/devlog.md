@@ -2018,6 +2018,125 @@ Closed the regression gap found in the TICKET-10.2 validation pass by fixing fai
 
 ---
 
+## TICKET-10.3 (Core Components): Tool Registry, Multi-Step Orchestrator & Chain-of-Thought 🟢
+
+### Plain-English Summary
+
+- Completed the 6-tool architecture with compliance check and market data tools
+- Replaced fragile manual arg parsing with Pydantic-validated schemas and OpenAI native function calling
+- Added multi-step orchestrator enabling composite queries ("full health check" -> 3 tools in sequence)
+- Added chain-of-thought reasoning visible through SSE "thinking" events
+- Fixed multi-step detection priority over LLM clarify routing
+
+### What Changed
+
+**1. Compliance Check & Market Data Tools (commit `8acb34ba`)**
+
+- `check_compliance` — screens portfolio for wash sales, pattern day trading, concentration risk
+- `get_market_data` — fetches current prices and market metrics for portfolio holdings
+
+**2. Formal Tool Registry (commit `bd443a74`)**
+
+- `agent/tools/schemas.py` — 6 Pydantic input models with Literal[] enums and Field validators
+- `agent/tools/registry.py` — ToolDefinition dataclass + TOOL_REGISTRY + OpenAI function schema builder
+- Tool executor migrated to Pydantic validation with graceful fallback
+- Router migrated to OpenAI `tools` parameter (native function calling)
+- Added SQLite-backed checkpointer for LangGraph state persistence
+
+**3. Multi-Step Orchestrator + Chain-of-Thought (commits `9e28bbb6`, `f734493c`)**
+
+- `_detect_multi_step()` — deterministic trigger phrase detection for composite queries
+- `make_orchestrator_node()` — decides after each tool: synthesize, continue, retry, or error
+- Extended graph topology: Router -> ToolExecutor -> Validator -> Orchestrator -> (Synthesizer | Router | Error)
+- `MULTI_STEP_SYNTHESIS_PROMPT` combines multi-tool results into single coherent response
+- Router captures `reasoning` field, emitted as SSE "thinking" events
+- Multi-step detection takes priority over LLM clarify routing
+
+### Commits
+
+| Hash       | Message                                                           |
+| ---------- | ----------------------------------------------------------------- |
+| `8acb34ba` | feat: add compliance_check and market_data tools                  |
+| `bd443a74` | feat: add formal tool registry with Pydantic schemas              |
+| `9e28bbb6` | feat: add multi-step orchestrator and chain-of-thought reasoning  |
+| `f734493c` | fix: multi-step detection takes priority over LLM clarify routing |
+
+### Tests
+
+- 86 automated tests passing (66 unit + 20 integration)
+- 12 new orchestrator unit tests (multi-step detection, routing decisions, retry logic)
+
+### Time Spent
+
+~4 hrs
+
+---
+
+## TICKET-10.4: Citations & Confidence Scoring 🟢
+
+### Plain-English Summary
+
+- Added deterministic citation extraction from tool results — each claim links back to its data source
+- Added confidence scoring (0.0-1.0) computed from tool success/failure signals
+- Frontend renders colored confidence badge (green/yellow/red) and collapsible "Sources" list
+- Both features work for single-step and multi-step paths
+- Deployed to Railway and verified with smoke tests
+
+### What Changed
+
+**1. Backend Citation Builder + Confidence Scorer (agent/graph/nodes.py)**
+
+- `_TOOL_DISPLAY_NAMES` — human-readable labels for all 6 tools
+- `_extract_tool_data_points()` — per-tool extractors pulling 1-3 key data points
+- `_build_citations()` — builds ordered [1], [2] etc. from successful tool call records
+- `_compute_confidence()` — deterministic formula: -0.3 per failure, -0.1 empty data, -0.1 retries
+
+**2. State Schema (agent/graph/state.py)**
+
+- Added `Citation` TypedDict (label, tool_name, display_name, field, value)
+- Added `citations` + `confidence` to `FinalResponse` (all total=False, no breaking changes)
+
+**3. Prompt Updates (agent/prompts.py)**
+
+- Both synthesis prompts now instruct LLM to use [1], [2] bracket notation when citing numbers
+
+**4. Frontend Model + Reducer + Component**
+
+- `AgentCitation` interface and new fields on `AgentChatBlock`
+- Reducer extracts citations/confidence from `done` SSE event
+- Template renders confidence badge + collapsible citations list with dark theme support
+
+### Commits
+
+| Hash       | Message                                                       |
+| ---------- | ------------------------------------------------------------- |
+| `4f6c18f8` | feat: add citations and confidence scoring to agent responses |
+
+### Files Changed
+
+| File                                              | Change                                                                      |
+| ------------------------------------------------- | --------------------------------------------------------------------------- |
+| `agent/graph/state.py`                            | Citation TypedDict, citations + confidence on FinalResponse                 |
+| `agent/graph/nodes.py`                            | Citation builder, confidence scorer, display names, synthesizer integration |
+| `agent/prompts.py`                                | Citation marker instructions in both synthesis prompts                      |
+| `agent/tests/unit/test_citations.py`              | **New** — 18 unit tests                                                     |
+| `apps/client/.../agent-chat.models.ts`            | AgentCitation interface, new AgentChatBlock fields                          |
+| `apps/client/.../agent-chat.reducer.ts`           | Extract citations/confidence from done event                                |
+| `apps/client/.../agent-chat-panel.component.html` | Confidence badge + collapsible citations                                    |
+| `apps/client/.../agent-chat-panel.component.scss` | Styles + dark theme                                                         |
+
+### Tests
+
+- 104 automated tests passing (86 existing + 18 new)
+- Frontend production build passes
+- Railway deployment verified, smoke checks pass with citations in done event payload
+
+### Time Spent
+
+~1.5 hrs
+
+---
+
 ## Status Legend
 
 | Emoji | Meaning              |
@@ -2032,11 +2151,11 @@ Closed the regression gap found in the TICKET-10.2 validation pass by fixing fai
 
 ## Running Totals
 
-| Metric           | Value                                                                             |
-| ---------------- | --------------------------------------------------------------------------------- |
-| Tickets Complete | 14 / 14                                                                           |
-| Total Dev Time   | ~36.00 hrs                                                                        |
-| Tests Passing    | 60 automated (45 unit + 15 integration) + golden-path + local/hosted smoke reruns |
-| Files Created    | 73                                                                                |
-| Files Modified   | 68                                                                                |
-| Cursor Rules     | 10                                                                                |
+| Metric           | Value                                                                              |
+| ---------------- | ---------------------------------------------------------------------------------- |
+| Tickets Complete | 16 / 16                                                                            |
+| Total Dev Time   | ~41.50 hrs                                                                         |
+| Tests Passing    | 104 automated (84 unit + 20 integration) + golden-path + local/hosted smoke reruns |
+| Files Created    | 82                                                                                 |
+| Files Modified   | 76                                                                                 |
+| Cursor Rules     | 10                                                                                 |
