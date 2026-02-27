@@ -3,11 +3,43 @@
   position: fixed;
   right: 2rem;
   z-index: 1002;
+
+  ::ng-deep .mdc-fab {
+    border: 2px solid #000;
+    border-radius: 0.75rem;
+    box-shadow: 4px 4px 0 #000;
+    transition:
+      transform 0.1s,
+      box-shadow 0.1s;
+
+    &:hover {
+      box-shadow: 5px 5px 0 #000;
+      transform: translate(-1px, -1px);
+    }
+
+    &:active {
+      box-shadow: 2px 2px 0 #000;
+      transform: translate(1px, 1px);
+    }
+  }
 }
 
 @media (max-width: 720px) {
   .agent-fab-button {
     bottom: 1rem;
     right: 1rem;
+  }
+}
+
+:host-context(.theme-dark) .agent-fab-button ::ng-deep .mdc-fab {
+  border-color: #e2e8f0;
+  box-shadow: 4px 4px 0 rgba(255, 255, 255, 0.15);
+
+  &:hover {
+    box-shadow: 5px 5px 0 rgba(255, 255, 255, 0.2);
+  }
+
+  &:active {
+    box-shadow: 2px 2px 0 rgba(255, 255, 255, 0.1);
   }
 }

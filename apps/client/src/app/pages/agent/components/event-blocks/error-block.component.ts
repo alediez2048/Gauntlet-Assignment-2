@@ -6,12 +6,21 @@ import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
   styles: [
     `
       .error-block {
-        background: rgba(225, 46, 44, 0.1);
-        border-left: 0.2rem solid rgba(225, 46, 44, 0.8);
+        background: #fecaca;
+        border: 2px solid #991b1b;
         border-radius: 0.5rem;
-        color: #842029;
+        box-shadow: 3px 3px 0 #991b1b;
+        color: #991b1b;
         font-size: 0.9rem;
+        font-weight: 600;
         padding: 0.65rem 0.75rem;
+      }
+
+      :host-context(.theme-dark) .error-block {
+        background: #7f1d1d;
+        border-color: #f87171;
+        box-shadow: 3px 3px 0 rgba(248, 113, 113, 0.3);
+        color: #f87171;
       }
     `
   ],

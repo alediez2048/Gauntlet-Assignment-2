@@ -6,19 +6,37 @@ import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
   styles: [
     `
       .tool-result-block {
+        border: 2px solid #000;
         border-radius: 0.5rem;
+        box-shadow: 3px 3px 0 #000;
         font-size: 0.85rem;
+        font-weight: 500;
         padding: 0.5rem 0.75rem;
       }
 
       .tool-result-block.is-success {
-        background: rgba(42, 145, 52, 0.12);
-        border-left: 0.2rem solid rgba(42, 145, 52, 0.7);
+        background: #bbf7d0;
+        color: #166534;
       }
 
       .tool-result-block.is-error {
-        background: rgba(225, 46, 44, 0.12);
-        border-left: 0.2rem solid rgba(225, 46, 44, 0.7);
+        background: #fecaca;
+        color: #991b1b;
+      }
+
+      :host-context(.theme-dark) .tool-result-block {
+        border-color: #e2e8f0;
+        box-shadow: 3px 3px 0 rgba(255, 255, 255, 0.1);
+      }
+
+      :host-context(.theme-dark) .tool-result-block.is-success {
+        background: #14532d;
+        color: #4ade80;
+      }
+
+      :host-context(.theme-dark) .tool-result-block.is-error {
+        background: #7f1d1d;
+        color: #f87171;
       }
     `
   ],
