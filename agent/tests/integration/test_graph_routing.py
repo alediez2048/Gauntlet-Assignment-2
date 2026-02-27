@@ -32,7 +32,7 @@ async def _run_graph(
     query: str,
     config: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
-    graph = build_graph(
+    graph = await build_graph(
         api_client=mock_ghostfolio_client,
         router=_router_with(
             {
@@ -183,7 +183,7 @@ async def test_graph_uses_same_thread_history_for_ambiguous_follow_up(
             "reason": "test_forced_ambiguous_follow_up",
         }
 
-    graph = build_graph(api_client=mock_ghostfolio_client, router=follow_up_router)
+    graph = await build_graph(api_client=mock_ghostfolio_client, router=follow_up_router)
     thread_config = {"configurable": {"thread_id": "continuity-thread"}}
 
     first_turn = await graph.ainvoke(

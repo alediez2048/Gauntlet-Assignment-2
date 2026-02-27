@@ -46,10 +46,13 @@ async def async_client() -> AsyncIterator[httpx.AsyncClient]:
 
 
 def _patch_graph(monkeypatch: pytest.MonkeyPatch, graph: _StubGraph) -> dict[str, str]:
+    async def _mock_build_graph(api_client: Any, router: Any = None, synthesizer: Any = None) -> _StubGraph:
+        return graph
+
     monkeypatch.setattr(
         main_module,
         "build_graph",
-        lambda api_client, router=None, synthesizer=None: graph,
+        _mock_build_graph,
     )
     return _TEST_BEARER_HEADERS
 

@@ -33,6 +33,7 @@ from pydantic import BaseModel, Field, field_validator
 from agent.clients.ghostfolio_client import GhostfolioClient, GhostfolioClientError
 from agent.graph.graph import build_graph
 from agent.prompts import ROUTING_FEW_SHOT_EXAMPLES, ROUTING_PROMPT, SYSTEM_PROMPT
+from agent.tools.registry import ROUTE_TO_TOOL, build_openai_function_schemas
 
 logger = logging.getLogger(__name__)
 
@@ -63,14 +64,26 @@ def _build_synthesizer_callable() -> Any | None:
 
 
 def _build_router_callable() -> Any | None:
-    """Builds an async LLM-backed router using GPT-4o function calling."""
+    """Builds an async LLM-backed router using OpenAI native function calling.
+
+    The LLM sees formal tool schemas (Pydantic-derived JSON) via the ``tools``
+    parameter and returns a structured ``tool_calls`` response — no manual JSON
+    parsing needed.  Falls back to the old prompt-based approach if function
+    calling fails for a specific request.
+    """
     api_key = os.getenv("OPENAI_API_KEY")
     if not api_key or _ChatOpenAI is None:
         return None
 
     llm = _ChatOpenAI(model="gpt-4o", temperature=0, max_tokens=256)
+    tool_schemas = build_openai_function_schemas()
 
-    # Build few-shot messages from the prompt examples
+    # Build a reverse map: tool_name -> route
+    _tool_to_route: dict[str, str] = {}
+    for route, tool_name in ROUTE_TO_TOOL.items():
+        _tool_to_route[tool_name] = route
+
+    # Build few-shot messages as fallback context
     few_shot_messages: list[dict[str, str]] = []
     for example in ROUTING_FEW_SHOT_EXAMPLES:
         few_shot_messages.append({"role": "user", "content": example["user"]})
@@ -91,22 +104,61 @@ def _build_router_callable() -> Any | None:
         )
 
     async def _route(user_query: str, messages: list[Any]) -> dict[str, Any]:
-        llm_messages = [
+        system_content = (
+            f"{SYSTEM_PROMPT}\n\n"
+            "Select the most appropriate function to answer the user's request. "
+            "If the request is out of scope or unclear, do NOT call any function."
+        )
+        llm_messages: list[dict[str, str]] = [
+            {"role": "system", "content": system_content},
+            {"role": "user", "content": user_query},
+        ]
+
+        # Try native function calling first
+        try:
+            response = await llm.ainvoke(llm_messages, tools=tool_schemas)
+
+            # Extract tool_calls from the response
+            tool_calls = getattr(response, "tool_calls", None)
+            if tool_calls and len(tool_calls) > 0:
+                tc = tool_calls[0]
+                tool_name = tc.get("name") if isinstance(tc, dict) else getattr(tc, "name", None)
+                tool_args = tc.get("args") if isinstance(tc, dict) else getattr(tc, "args", {})
+                if not isinstance(tool_args, dict):
+                    tool_args = {}
+                route = _tool_to_route.get(tool_name, "clarify")
+                return {
+                    "route": route,
+                    "tool_name": tool_name,
+                    "tool_args": tool_args,
+                    "reason": "function_calling",
+                }
+
+            # LLM chose not to call a function — treat as clarify
+            return {
+                "route": "clarify",
+                "tool_name": None,
+                "tool_args": {},
+                "reason": "no_function_selected",
+            }
+        except Exception:
+            # Fallback to prompt-based routing if function calling fails
+            pass
+
+        # Fallback: prompt-based JSON routing (original approach)
+        fallback_messages: list[dict[str, str]] = [
             {"role": "system", "content": f"{SYSTEM_PROMPT}\n\n{ROUTING_PROMPT}"},
             *few_shot_messages,
             {"role": "user", "content": user_query},
         ]
-        response = await llm.ainvoke(llm_messages)
+        response = await llm.ainvoke(fallback_messages)
         text = response.content if hasattr(response, "content") else str(response)
         text = text.strip() if isinstance(text, str) else str(text).strip()
-
-        # Strip markdown code fences if present
         if text.startswith("```"):
             text = "\n".join(text.split("\n")[1:])
         if text.endswith("```"):
             text = "\n".join(text.split("\n")[:-1])
         text = text.strip()
-
         return json.loads(text)
 
     return _route
@@ -352,7 +404,7 @@ async def chat(request: ChatRequest, raw_request: Request) -> StreamingResponse:
             async with api_client:
                 router = _build_router_callable()
                 synthesizer = _build_synthesizer_callable()
-                graph = build_graph(api_client=api_client, router=router, synthesizer=synthesizer)
+                graph = await build_graph(api_client=api_client, router=router, synthesizer=synthesizer)
                 graph_state = await graph.ainvoke(
                     graph_input,
                     config={"configurable": {"thread_id": thread_id}},

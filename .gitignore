@@ -39,6 +39,10 @@ npm-debug.log
 testem.log
 /typings
 
+# Agent data
+agent/.data/
+
 # System Files
 .DS_Store
 Thumbs.db
+.gitnexus

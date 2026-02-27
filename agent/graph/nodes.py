@@ -19,6 +19,7 @@ from agent.tools.base import ToolResult
 from agent.tools.compliance_checker import check_compliance
 from agent.tools.market_data import get_market_data
 from agent.tools.portfolio_analyzer import analyze_portfolio_performance
+from agent.tools.registry import TOOL_REGISTRY
 from agent.tools.tax_estimator import estimate_capital_gains_tax
 from agent.tools.transaction_categorizer import categorize_transactions
 
@@ -530,7 +531,11 @@ def make_router_node(dependencies: NodeDependencies) -> Callable[[AgentState], A
 def make_tool_executor_node(
     dependencies: NodeDependencies,
 ) -> Callable[[AgentState], Awaitable[AgentState]]:
-    """Builds Tool Executor node that calls selected tools."""
+    """Builds Tool Executor node that calls selected tools.
+
+    Uses Pydantic schemas from TOOL_REGISTRY to validate arguments before
+    execution.  Falls back to ``_default_args_for_tool`` when validation fails.
+    """
 
     async def tool_executor_node(state: AgentState) -> AgentState:
         tool_name = state.get("tool_name")
@@ -542,22 +547,44 @@ def make_tool_executor_node(
             tool_result = ToolResult.fail("UNSUPPORTED_TOOL")
         else:
             tool_function = _TOOL_FUNCTIONS[tool_name]
+
+            # Validate args via Pydantic schema from the registry
+            definition = TOOL_REGISTRY.get(tool_name)
+            validated_args = dict(tool_args) if isinstance(tool_args, dict) else {}
+            if definition is not None:
+                try:
+                    validated = definition.input_schema(**validated_args)
+                    validated_args = validated.model_dump()
+                except Exception:
+                    # Pydantic validation failed — merge with query-derived defaults
+                    user_query = ""
+                    messages = state.get("messages")
+                    if isinstance(messages, list):
+                        user_query = _latest_user_query(messages)
+                    fallback = _default_args_for_tool(tool_name, user_query)
+                    fallback.update({k: v for k, v in (tool_args or {}).items() if v is not None})
+                    try:
+                        validated = definition.input_schema(**fallback)
+                        validated_args = validated.model_dump()
+                    except Exception:
+                        validated_args = _default_args_for_tool(tool_name, "")
+
             try:
-                tool_result = await tool_function(dependencies.api_client, **tool_args)
-            except TypeError as _te:
+                tool_result = await tool_function(dependencies.api_client, **validated_args)
+            except TypeError:
                 fallback_args = _default_args_for_tool(tool_name, "")
                 try:
                     tool_result = await tool_function(dependencies.api_client, **fallback_args)
-                except Exception as _fe:
+                except Exception:
                     tool_result = ToolResult.fail("API_ERROR")
-            except Exception as _ex:
+            except Exception:
                 tool_result = ToolResult.fail("API_ERROR")
 
         history.append(
             {
                 "route": route,
                 "tool_name": tool_name,
-                "tool_args": tool_args if isinstance(tool_args, dict) else {},
+                "tool_args": validated_args if isinstance(tool_name, str) and tool_name in _TOOL_FUNCTIONS else (tool_args if isinstance(tool_args, dict) else {}),
                 "success": tool_result.success,
                 "error": tool_result.error,
             }

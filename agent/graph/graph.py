@@ -3,7 +3,9 @@
 from __future__ import annotations
 
 import inspect
+import os
 from collections.abc import Awaitable, Callable
+from pathlib import Path
 from typing import Any
 
 try:
@@ -13,6 +15,11 @@ except ModuleNotFoundError:
     START = "__start__"
     END = "__end__"
     MemorySaver = None
+
+try:
+    from langgraph.checkpoint.sqlite.aio import AsyncSqliteSaver
+except ModuleNotFoundError:
+    AsyncSqliteSaver = None
 
     class _FallbackDrawableGraph:
         def __init__(
@@ -169,10 +176,53 @@ from agent.graph.nodes import (
 )
 from agent.graph.state import AgentState
 
-_SHARED_CHECKPOINTER = MemorySaver() if MemorySaver is not None else None
+_SHARED_CHECKPOINTER: Any = None
+_CHECKPOINTER_INITIALIZED: bool = False
 
 
-def build_graph(
+def _resolve_sqlite_path() -> str:
+    """Returns the SQLite DB path for the persistent checkpointer.
+
+    Uses ``LANGGRAPH_SQLITE_PATH`` env var if set, otherwise writes to
+    ``agent/.data/checkpoints.db`` (relative to the repo root).
+    """
+    custom_path = os.getenv("LANGGRAPH_SQLITE_PATH")
+    if custom_path:
+        return custom_path
+
+    data_dir = Path(__file__).resolve().parent.parent / ".data"
+    data_dir.mkdir(parents=True, exist_ok=True)
+    return str(data_dir / "checkpoints.db")
+
+
+async def _get_checkpointer() -> Any:
+    """Returns a persistent SQLite checkpointer, falling back to in-memory."""
+    global _SHARED_CHECKPOINTER, _CHECKPOINTER_INITIALIZED
+
+    if _CHECKPOINTER_INITIALIZED:
+        return _SHARED_CHECKPOINTER
+
+    _CHECKPOINTER_INITIALIZED = True
+
+    # Try persistent SQLite first
+    if AsyncSqliteSaver is not None:
+        try:
+            db_path = _resolve_sqlite_path()
+            checkpointer = AsyncSqliteSaver.from_conn_string(db_path)
+            await checkpointer.setup()
+            _SHARED_CHECKPOINTER = checkpointer
+            return _SHARED_CHECKPOINTER
+        except Exception:
+            pass
+
+    # Fallback to in-memory
+    if MemorySaver is not None:
+        _SHARED_CHECKPOINTER = MemorySaver()
+
+    return _SHARED_CHECKPOINTER
+
+
+async def build_graph(
     api_client: Any,
     router: RouterCallable | None = None,
     synthesizer: SynthesizerCallable | None = None,
@@ -222,8 +272,10 @@ def build_graph(
     graph.add_edge("clarifier", END)
     graph.add_edge("synthesizer", END)
     graph.add_edge("error_handler", END)
-    if _SHARED_CHECKPOINTER is not None:
-        return graph.compile(checkpointer=_SHARED_CHECKPOINTER)
+
+    checkpointer = await _get_checkpointer()
+    if checkpointer is not None:
+        return graph.compile(checkpointer=checkpointer)
     return graph.compile()
 
 

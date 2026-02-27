@@ -1,6 +1,7 @@
 # AgentForge — pinned for Python 3.11+ (see tech-stack.mdc)
 langchain>=0.3.0,<0.4
 langgraph>=1.0.0,<2.0
+langgraph-checkpoint-sqlite>=2.0.0,<4.0
 langchain-openai>=0.3.0,<0.4
 fastapi>=0.115.0,<0.134
 uvicorn[standard]>=0.32.0,<0.42
