@@ -33,6 +33,12 @@ import { GfToolResultBlockComponent } from '../event-blocks/tool-result-block.co
 const STREAM_INCOMPLETE_MESSAGE =
   'The stream ended before a final response was received.';
 
+interface QuestionCategory {
+  label: string;
+  icon: string;
+  questions: string[];
+}
+
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
@@ -56,13 +62,38 @@ export class GfAgentChatPanelComponent implements OnDestroy {
   private messageContainer?: ElementRef<HTMLElement>;
 
   public draftMessage = '';
+  public expandedCategory: string | null = null;
   public readonly chatState = signal<AgentChatState>(INITIAL_AGENT_CHAT_STATE);
-  public readonly sampleQuestions = [
-    'How is my portfolio performing?',
-    'Estimate my taxes for this year.',
-    'Am I properly diversified?',
-    'Check my portfolio for compliance issues.',
-    'Categorize my recent transactions.'
+  public readonly questionCategories: QuestionCategory[] = [
+    {
+      label: 'Single Tool',
+      icon: 'build',
+      questions: [
+        'How is my portfolio performing?',
+        'Categorize my recent transactions.',
+        'Estimate my taxes for this year.',
+        'Check my portfolio for compliance issues.',
+        'What are the current prices of my holdings?'
+      ]
+    },
+    {
+      label: 'Multi-Tool',
+      icon: 'layers',
+      questions: [
+        'Give me a full financial health checkup.',
+        'Am I diversified enough and tax-efficient?',
+        'Analyze my portfolio and check for compliance issues.'
+      ]
+    },
+    {
+      label: 'Edge Cases',
+      icon: 'explore',
+      questions: [
+        'What is the weather like today?',
+        'Write me a Python script.',
+        'Tell me a joke about stocks.'
+      ]
+    }
   ];
   private streamSubscription?: Subscription;
 
@@ -95,6 +126,10 @@ export class GfAgentChatPanelComponent implements OnDestroy {
   public onRequestClose() {
     this.cancelActiveStream(true);
     this.closeRequested.emit();
+  }
+
+  public onToggleCategory(label: string) {
+    this.expandedCategory = this.expandedCategory === label ? null : label;
   }
 
   public onSampleQuestionClick(question: string) {

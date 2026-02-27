@@ -134,14 +134,44 @@
     </div>
 
     <div class="agent-panel__suggestions">
-      @for (question of sampleQuestions; track question) {
-        <button
-          class="agent-suggestion-chip"
-          type="button"
-          (click)="onSampleQuestionClick(question)"
-        >
-          {{ question }}
-        </button>
+      <div class="agent-category-bar">
+        @for (cat of questionCategories; track cat.label) {
+          <button
+            class="agent-category-chip"
+            type="button"
+            [class.agent-category-chip--expanded]="
+              expandedCategory === cat.label
+            "
+            (click)="onToggleCategory(cat.label)"
+          >
+            <mat-icon class="agent-category-chip__icon">{{
+              cat.icon
+            }}</mat-icon>
+            <span>{{ cat.label }}</span>
+            <mat-icon class="agent-category-chip__arrow">
+              {{
+                expandedCategory === cat.label ? 'expand_less' : 'expand_more'
+              }}
+            </mat-icon>
+          </button>
+        }
+      </div>
+      @if (expandedCategory) {
+        <div class="agent-category-questions">
+          @for (cat of questionCategories; track cat.label) {
+            @if (expandedCategory === cat.label) {
+              @for (q of cat.questions; track q) {
+                <button
+                  class="agent-suggestion-chip"
+                  type="button"
+                  (click)="onSampleQuestionClick(q)"
+                >
+                  {{ q }}
+                </button>
+              }
+            }
+          }
+        </div>
       }
     </div>
 
