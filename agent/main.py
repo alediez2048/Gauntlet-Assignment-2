@@ -32,6 +32,7 @@ from pydantic import BaseModel, Field, field_validator
 
 from agent.clients.ghostfolio_client import GhostfolioClient, GhostfolioClientError
 from agent.graph.graph import build_graph
+from agent.prompts import ROUTING_FEW_SHOT_EXAMPLES, ROUTING_PROMPT, SYSTEM_PROMPT
 
 logger = logging.getLogger(__name__)
 
@@ -59,6 +60,57 @@ def _build_synthesizer_callable() -> Any | None:
         return text.strip() if isinstance(text, str) else str(text).strip()
 
     return _synthesize
+
+
+def _build_router_callable() -> Any | None:
+    """Builds an async LLM-backed router using GPT-4o function calling."""
+    api_key = os.getenv("OPENAI_API_KEY")
+    if not api_key or _ChatOpenAI is None:
+        return None
+
+    llm = _ChatOpenAI(model="gpt-4o", temperature=0, max_tokens=256)
+
+    # Build few-shot messages from the prompt examples
+    few_shot_messages: list[dict[str, str]] = []
+    for example in ROUTING_FEW_SHOT_EXAMPLES:
+        few_shot_messages.append({"role": "user", "content": example["user"]})
+        few_shot_messages.append(
+            {
+                "role": "assistant",
+                "content": json.dumps(
+                    {
+                        "route": example["route"],
+                        "tool_name": example["tool_name"],
+                        "tool_args": json.loads(example["tool_args"])
+                        if isinstance(example["tool_args"], str)
+                        else example["tool_args"],
+                        "reason": "few_shot_example",
+                    }
+                ),
+            }
+        )
+
+    async def _route(user_query: str, messages: list[Any]) -> dict[str, Any]:
+        llm_messages = [
+            {"role": "system", "content": f"{SYSTEM_PROMPT}\n\n{ROUTING_PROMPT}"},
+            *few_shot_messages,
+            {"role": "user", "content": user_query},
+        ]
+        response = await llm.ainvoke(llm_messages)
+        text = response.content if hasattr(response, "content") else str(response)
+        text = text.strip() if isinstance(text, str) else str(text).strip()
+
+        # Strip markdown code fences if present
+        if text.startswith("```"):
+            text = "\n".join(text.split("\n")[1:])
+        if text.endswith("```"):
+            text = "\n".join(text.split("\n")[:-1])
+        text = text.strip()
+
+        return json.loads(text)
+
+    return _route
+
 
 _DEFAULT_CORS_ORIGINS: list[str] = [
     "http://localhost:3333",
@@ -298,8 +350,9 @@ async def chat(request: ChatRequest, raw_request: Request) -> StreamingResponse:
                 graph_input["tool_call_history"] = prior_tool_history
 
             async with api_client:
+                router = _build_router_callable()
                 synthesizer = _build_synthesizer_callable()
-                graph = build_graph(api_client=api_client, synthesizer=synthesizer)
+                graph = build_graph(api_client=api_client, router=router, synthesizer=synthesizer)
                 graph_state = await graph.ainvoke(
                     graph_input,
                     config={"configurable": {"thread_id": thread_id}},
