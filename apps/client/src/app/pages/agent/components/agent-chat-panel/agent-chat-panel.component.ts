@@ -35,7 +35,6 @@ const STREAM_INCOMPLETE_MESSAGE =
 
 interface QuestionCategory {
   label: string;
-  icon: string;
   questions: string[];
 }
 
@@ -67,7 +66,6 @@ export class GfAgentChatPanelComponent implements OnDestroy {
   public readonly questionCategories: QuestionCategory[] = [
     {
       label: 'Single Tool',
-      icon: 'build',
       questions: [
         'How is my portfolio performing?',
         'Categorize my recent transactions.',
@@ -78,7 +76,6 @@ export class GfAgentChatPanelComponent implements OnDestroy {
     },
     {
       label: 'Multi-Tool',
-      icon: 'layers',
       questions: [
         'Give me a full financial health checkup.',
         'Am I diversified enough and tax-efficient?',
@@ -87,7 +84,6 @@ export class GfAgentChatPanelComponent implements OnDestroy {
     },
     {
       label: 'Edge Cases',
-      icon: 'explore',
       questions: [
         'What is the weather like today?',
         'Write me a Python script.',

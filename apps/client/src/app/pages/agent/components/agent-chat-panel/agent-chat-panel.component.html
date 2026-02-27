@@ -144,15 +144,7 @@
             "
             (click)="onToggleCategory(cat.label)"
           >
-            <mat-icon class="agent-category-chip__icon">{{
-              cat.icon
-            }}</mat-icon>
-            <span>{{ cat.label }}</span>
-            <mat-icon class="agent-category-chip__arrow">
-              {{
-                expandedCategory === cat.label ? 'expand_less' : 'expand_more'
-              }}
-            </mat-icon>
+            {{ cat.label }}
           </button>
         }
       </div>
