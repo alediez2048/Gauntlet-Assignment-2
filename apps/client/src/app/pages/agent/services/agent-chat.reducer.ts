@@ -30,6 +30,11 @@ export type AgentChatAction =
     }
   | {
       type: 'reset';
+    }
+  | {
+      blockIndex: number;
+      rating: 'up' | 'down';
+      type: 'set_feedback';
     };
 
 export const reduceAgentChatState = (
@@ -72,6 +77,14 @@ export const reduceAgentChatState = (
     }
     case 'reset': {
       return INITIAL_AGENT_CHAT_STATE;
+    }
+    case 'set_feedback': {
+      const blocks = [...state.blocks];
+      const target = blocks[action.blockIndex];
+      if (target) {
+        blocks[action.blockIndex] = { ...target, feedback: action.rating };
+      }
+      return { ...state, blocks };
     }
     default: {
       return state;

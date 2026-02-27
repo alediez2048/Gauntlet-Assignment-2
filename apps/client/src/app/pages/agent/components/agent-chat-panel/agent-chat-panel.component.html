@@ -75,6 +75,35 @@
                   </ul>
                 </details>
               }
+
+              <div class="agent-feedback">
+                <button
+                  aria-label="Thumbs up"
+                  class="agent-feedback__btn"
+                  mat-icon-button
+                  type="button"
+                  [class.agent-feedback__btn--selected]="
+                    block.feedback === 'up'
+                  "
+                  [disabled]="!!block.feedback"
+                  (click)="onFeedback($index, 'up')"
+                >
+                  <mat-icon>thumb_up</mat-icon>
+                </button>
+                <button
+                  aria-label="Thumbs down"
+                  class="agent-feedback__btn"
+                  mat-icon-button
+                  type="button"
+                  [class.agent-feedback__btn--selected]="
+                    block.feedback === 'down'
+                  "
+                  [disabled]="!!block.feedback"
+                  (click)="onFeedback($index, 'down')"
+                >
+                  <mat-icon>thumb_down</mat-icon>
+                </button>
+              </div>
             </div>
           }
 

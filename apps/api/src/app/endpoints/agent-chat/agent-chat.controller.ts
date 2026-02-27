@@ -1,8 +1,10 @@
 import { Controller, Logger, Post, Req, Res } from '@nestjs/common';
 import { Request, Response } from 'express';
 
-const AGENT_CHAT_URL =
+const AGENT_BASE_URL =
   process.env.AGENT_CHAT_URL ?? 'http://localhost:8000/api/agent/chat';
+const AGENT_CHAT_URL = AGENT_BASE_URL;
+const AGENT_FEEDBACK_URL = AGENT_BASE_URL.replace(/\/chat$/, '/feedback');
 
 @Controller('agent')
 export class AgentChatController {
@@ -82,6 +84,42 @@ export class AgentChatController {
       );
 
       res.end();
+    }
+  }
+
+  @Post('feedback')
+  public async proxyFeedback(
+    @Req() req: Request,
+    @Res() res: Response
+  ): Promise<void> {
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json'
+    };
+
+    const authHeader = req.headers['authorization'];
+    if (authHeader) {
+      headers['Authorization'] = authHeader as string;
+    }
+
+    try {
+      const agentResponse = await fetch(AGENT_FEEDBACK_URL, {
+        body: JSON.stringify(req.body),
+        headers,
+        method: 'POST',
+        signal: AbortSignal.timeout(10_000)
+      });
+
+      const data = await agentResponse.json();
+      res.status(agentResponse.status).json(data);
+    } catch (error) {
+      this.logger.error(
+        `Agent feedback proxy failed: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
+
+      res.status(502).json({
+        message: 'Unable to reach the agent service for feedback.',
+        status: 'error'
+      });
     }
   }
 }

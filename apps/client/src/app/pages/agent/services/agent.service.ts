@@ -2,10 +2,13 @@ import { TokenStorageService } from '@ghostfolio/client/services/token-storage.s
 import { HEADER_KEY_TOKEN } from '@ghostfolio/common/config';
 
 import { inject, Injectable } from '@angular/core';
-
 import { Observable } from 'rxjs';
 
-import { AgentChatRequest, AgentStreamEvent } from '../models/agent-chat.models';
+import {
+  AgentChatRequest,
+  AgentFeedbackRequest,
+  AgentStreamEvent
+} from '../models/agent-chat.models';
 import { AGENT_ENDPOINT_CONFIG } from './agent-endpoint.config';
 import {
   createAgentSseParserState,
@@ -109,6 +112,28 @@ export class AgentService {
         abortController.abort();
       };
     });
+  }
+
+  public async submitFeedback(request: AgentFeedbackRequest): Promise<void> {
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json'
+    };
+    const token = this.tokenStorageService.getToken();
+    if (token) {
+      headers[HEADER_KEY_TOKEN] = `Bearer ${token}`;
+    }
+
+    const response = await fetch(this.agentEndpointConfig.feedbackUrl, {
+      body: JSON.stringify(request),
+      headers,
+      method: 'POST'
+    });
+
+    if (!response.ok) {
+      throw new Error(
+        `Feedback request failed with status ${response.status}.`
+      );
+    }
   }
 
   private toError(error: unknown): Error {

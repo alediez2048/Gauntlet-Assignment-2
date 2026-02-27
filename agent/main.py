@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 import logging
 import os
+import threading
 from collections.abc import AsyncIterator
 from pathlib import Path
 from typing import Any
@@ -43,6 +44,55 @@ except ModuleNotFoundError:
     _ChatOpenAI = None
 
 
+# ---------------------------------------------------------------------------
+# Token usage accumulator (per-request, thread-safe)
+# ---------------------------------------------------------------------------
+
+# Pricing for GPT-4o (per 1M tokens) as of 2025-Q1
+_GPT4O_INPUT_COST_PER_M = 2.50
+_GPT4O_OUTPUT_COST_PER_M = 10.00
+
+
+class _TokenUsageAccumulator:
+    """Accumulates prompt/completion token counts across multiple LLM calls."""
+
+    def __init__(self) -> None:
+        self._lock = threading.Lock()
+        self.prompt_tokens = 0
+        self.completion_tokens = 0
+
+    def add(self, response: Any) -> None:
+        usage = getattr(response, "usage_metadata", None)
+        if not isinstance(usage, dict):
+            response_meta = getattr(response, "response_metadata", None)
+            if isinstance(response_meta, dict):
+                usage = response_meta.get("token_usage")
+        if not isinstance(usage, dict):
+            return
+        prompt = usage.get("input_tokens") or usage.get("prompt_tokens") or 0
+        completion = usage.get("output_tokens") or usage.get("completion_tokens") or 0
+        with self._lock:
+            self.prompt_tokens += int(prompt)
+            self.completion_tokens += int(completion)
+
+    def to_dict(self) -> dict[str, Any]:
+        total = self.prompt_tokens + self.completion_tokens
+        cost = (
+            self.prompt_tokens * _GPT4O_INPUT_COST_PER_M
+            + self.completion_tokens * _GPT4O_OUTPUT_COST_PER_M
+        ) / 1_000_000
+        return {
+            "prompt_tokens": self.prompt_tokens,
+            "completion_tokens": self.completion_tokens,
+            "total_tokens": total,
+            "estimated_cost_usd": round(cost, 6),
+        }
+
+
+# Per-request accumulator stored by thread_id
+_REQUEST_TOKEN_USAGE: dict[str, _TokenUsageAccumulator] = {}
+
+
 def _build_synthesizer_callable() -> Any | None:
     """Builds an async callable that uses GPT-4o to narrate tool results."""
     api_key = os.getenv("OPENAI_API_KEY")
@@ -51,12 +101,14 @@ def _build_synthesizer_callable() -> Any | None:
 
     llm = _ChatOpenAI(model="gpt-4o", temperature=0.3, max_tokens=512)
 
-    async def _synthesize(system_prompt: str, user_content: str) -> str:
+    async def _synthesize(system_prompt: str, user_content: str, *, _token_acc: _TokenUsageAccumulator | None = None) -> str:
         messages = [
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": user_content},
         ]
         response = await llm.ainvoke(messages)
+        if _token_acc is not None:
+            _token_acc.add(response)
         text = response.content if hasattr(response, "content") else str(response)
         return text.strip() if isinstance(text, str) else str(text).strip()
 
@@ -103,7 +155,7 @@ def _build_router_callable() -> Any | None:
             }
         )
 
-    async def _route(user_query: str, messages: list[Any]) -> dict[str, Any]:
+    async def _route(user_query: str, messages: list[Any], *, _token_acc: _TokenUsageAccumulator | None = None) -> dict[str, Any]:
         system_content = (
             f"{SYSTEM_PROMPT}\n\n"
             "Select the most appropriate function to answer the user's request. "
@@ -117,6 +169,8 @@ def _build_router_callable() -> Any | None:
         # Try native function calling first
         try:
             response = await llm.ainvoke(llm_messages, tools=tool_schemas)
+            if _token_acc is not None:
+                _token_acc.add(response)
 
             # Extract tool_calls from the response
             tool_calls = getattr(response, "tool_calls", None)
@@ -158,6 +212,8 @@ def _build_router_callable() -> Any | None:
             {"role": "user", "content": user_query},
         ]
         response = await llm.ainvoke(fallback_messages)
+        if _token_acc is not None:
+            _token_acc.add(response)
         text = response.content if hasattr(response, "content") else str(response)
         text = text.strip() if isinstance(text, str) else str(text).strip()
         if text.startswith("```"):
@@ -288,6 +344,7 @@ def _map_graph_state_to_events(
     *,
     thread_id: str,
     history_offset: int = 0,
+    token_usage: dict[str, Any] | None = None,
 ) -> list[tuple[str, dict[str, Any]]]:
     """Maps graph output state to frontend-facing SSE events."""
     events: list[tuple[str, dict[str, Any]]] = []
@@ -346,16 +403,14 @@ def _map_graph_state_to_events(
         for chunk in _chunk_text(response_message):
             events.append(("token", {"content": chunk}))
 
-    events.append(
-        (
-            "done",
-            {
-                "thread_id": thread_id,
-                "response": final_response,
-                "tool_call_history": tool_history,
-            },
-        )
-    )
+    done_payload: dict[str, Any] = {
+        "thread_id": thread_id,
+        "response": final_response,
+        "tool_call_history": tool_history,
+    }
+    if token_usage:
+        done_payload["token_usage"] = token_usage
+    events.append(("done", done_payload))
     return events
 
 
@@ -414,8 +469,25 @@ async def chat(request: ChatRequest, raw_request: Request) -> StreamingResponse:
                 graph_input["tool_call_history"] = prior_tool_history
 
             async with api_client:
-                router = _build_router_callable()
-                synthesizer = _build_synthesizer_callable()
+                token_acc = _TokenUsageAccumulator()
+                raw_router = _build_router_callable()
+                raw_synthesizer = _build_synthesizer_callable()
+
+                # Wrap callables to inject the token accumulator
+                if raw_router is not None:
+                    _inner_router = raw_router
+                    async def router(q: str, m: list[Any], _acc: _TokenUsageAccumulator = token_acc, _r: Any = _inner_router) -> dict[str, Any]:
+                        return await _r(q, m, _token_acc=_acc)
+                else:
+                    router = None
+
+                if raw_synthesizer is not None:
+                    _inner_synth = raw_synthesizer
+                    async def synthesizer(p: str, c: str, _acc: _TokenUsageAccumulator = token_acc, _s: Any = _inner_synth) -> str:
+                        return await _s(p, c, _token_acc=_acc)
+                else:
+                    synthesizer = None
+
                 graph = await build_graph(api_client=api_client, router=router, synthesizer=synthesizer)
                 graph_state = await graph.ainvoke(
                     graph_input,
@@ -430,10 +502,12 @@ async def chat(request: ChatRequest, raw_request: Request) -> StreamingResponse:
                 "tool_call_history": _coerce_tool_call_history(graph_state.get("tool_call_history")),
             }
 
+            usage_dict = token_acc.to_dict() if token_acc.prompt_tokens or token_acc.completion_tokens else None
             for event_type, payload in _map_graph_state_to_events(
                 graph_state,
                 thread_id=thread_id,
                 history_offset=prior_history_len,
+                token_usage=usage_dict,
             ):
                 yield _serialize_sse_event(event_type, payload)
         except GhostfolioClientError as err:
@@ -465,3 +539,37 @@ async def chat(request: ChatRequest, raw_request: Request) -> StreamingResponse:
 async def health() -> dict[str, str]:
     """Returns a liveness health payload for container checks."""
     return {"status": "ok", "version": _BUILD_VERSION}
+
+
+# ---------------------------------------------------------------------------
+# User feedback
+# ---------------------------------------------------------------------------
+
+_FEEDBACK_STORE: dict[str, list[dict[str, Any]]] = {}
+
+
+class FeedbackRequest(BaseModel):
+    """Incoming payload for `POST /api/agent/feedback`."""
+
+    thread_id: str = Field(min_length=1)
+    message_index: int = Field(ge=0)
+    rating: str = Field(pattern=r"^(up|down)$")
+    comment: str | None = None
+
+
+@app.post("/api/agent/feedback")
+async def submit_feedback(request: FeedbackRequest) -> dict[str, str]:
+    """Records user feedback (thumbs up/down) for a specific agent response."""
+    entry = {
+        "message_index": request.message_index,
+        "rating": request.rating,
+        "comment": request.comment,
+    }
+    _FEEDBACK_STORE.setdefault(request.thread_id, []).append(entry)
+    logger.info(
+        "feedback: thread=%s index=%d rating=%s",
+        request.thread_id,
+        request.message_index,
+        request.rating,
+    )
+    return {"status": "ok"}
