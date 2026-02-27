@@ -35,6 +35,12 @@
   }
 }
 
+.agent-panel__header-actions {
+  align-items: center;
+  display: flex;
+  gap: 0.5rem;
+}
+
 .agent-panel__messages {
   display: flex;
   flex: 1;
@@ -57,6 +63,130 @@
   flex-wrap: wrap;
   gap: 0.5rem;
   padding: 0.6rem 1rem;
+}
+
+.agent-sample-questions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+// ── Eval Runner ──
+
+.agent-eval-runner {
+  border-bottom: 2px solid #000;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  padding-bottom: 0.5rem;
+  width: 100%;
+
+  &__header {
+    align-items: center;
+    display: flex;
+    gap: 0.6rem;
+  }
+
+  &__progress-text {
+    color: #475569;
+    font-size: 0.8rem;
+    font-weight: 700;
+  }
+}
+
+.agent-eval-progress-bar {
+  background: #e2e8f0;
+  border: 2px solid #000;
+  border-radius: 0.35rem;
+  height: 0.6rem;
+  overflow: hidden;
+  width: 100%;
+
+  &__fill {
+    background: #22c55e;
+    height: 100%;
+    transition: width 0.2s ease;
+  }
+}
+
+.agent-eval-summary {
+  display: flex;
+  font-size: 0.8rem;
+  font-weight: 700;
+  gap: 0.75rem;
+
+  &__passed {
+    color: #16a34a;
+  }
+
+  &__failed {
+    color: #dc2626;
+  }
+
+  &__time {
+    color: #475569;
+  }
+}
+
+.agent-eval-error {
+  color: #dc2626;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.agent-eval-results {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  max-height: 10rem;
+  overflow-y: auto;
+  width: 100%;
+}
+
+.agent-eval-result-row {
+  align-items: center;
+  border: 1.5px solid #000;
+  border-radius: 0.35rem;
+  display: flex;
+  font-size: 0.75rem;
+  gap: 0.5rem;
+  padding: 0.2rem 0.5rem;
+
+  &--pass {
+    background: #dcfce7;
+  }
+
+  &--fail {
+    background: #fee2e2;
+  }
+
+  &__badge {
+    border: 1.5px solid #000;
+    border-radius: 0.25rem;
+    font-size: 0.65rem;
+    font-weight: 800;
+    padding: 0.05rem 0.3rem;
+  }
+
+  &--pass &__badge {
+    background: #22c55e;
+    color: #fff;
+  }
+
+  &--fail &__badge {
+    background: #ef4444;
+    color: #fff;
+  }
+
+  &__id {
+    font-weight: 700;
+  }
+
+  &__category {
+    color: #64748b;
+    font-weight: 600;
+    margin-left: auto;
+  }
 }
 
 .agent-category-bar {
@@ -362,6 +492,69 @@
   &--low {
     background: #7f1d1d;
     color: #f87171;
+  }
+}
+
+:host-context(.theme-dark) .agent-eval-runner {
+  border-bottom-color: #e2e8f0;
+
+  &__progress-text {
+    color: rgba(255, 255, 255, 0.6);
+  }
+}
+
+:host-context(.theme-dark) .agent-eval-progress-bar {
+  background: #374151;
+  border-color: #e2e8f0;
+
+  &__fill {
+    background: #16a34a;
+  }
+}
+
+:host-context(.theme-dark) .agent-eval-summary {
+  &__passed {
+    color: #4ade80;
+  }
+
+  &__failed {
+    color: #f87171;
+  }
+
+  &__time {
+    color: rgba(255, 255, 255, 0.6);
+  }
+}
+
+:host-context(.theme-dark) .agent-eval-error {
+  color: #f87171;
+}
+
+:host-context(.theme-dark) .agent-eval-result-row {
+  border-color: #e2e8f0;
+
+  &--pass {
+    background: #14532d;
+  }
+
+  &--fail {
+    background: #7f1d1d;
+  }
+
+  &--pass &__badge {
+    background: #16a34a;
+  }
+
+  &--fail &__badge {
+    background: #dc2626;
+  }
+
+  &__id {
+    color: rgba(255, 255, 255, 0.9);
+  }
+
+  &__category {
+    color: rgba(255, 255, 255, 0.5);
   }
 }
 

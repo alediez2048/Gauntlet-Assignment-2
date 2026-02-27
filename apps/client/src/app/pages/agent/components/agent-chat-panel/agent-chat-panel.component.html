@@ -4,14 +4,21 @@
   <section aria-label="Agent Chat Panel" class="agent-panel" role="dialog">
     <header class="agent-panel__header">
       <h2 class="mb-0">Agent</h2>
-      <button
-        aria-label="Close agent panel"
-        mat-icon-button
-        type="button"
-        (click)="onRequestClose()"
-      >
-        <mat-icon>close</mat-icon>
-      </button>
+      <div class="agent-panel__header-actions">
+        <mat-slide-toggle
+          [checked]="isTestingMode"
+          (change)="onToggleTestingMode()"
+          >Testing</mat-slide-toggle
+        >
+        <button
+          aria-label="Close agent panel"
+          mat-icon-button
+          type="button"
+          (click)="onRequestClose()"
+        >
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
     </header>
 
     <div #messageContainer class="agent-panel__messages">
@@ -134,34 +141,124 @@
     </div>
 
     <div class="agent-panel__suggestions">
-      <div class="agent-category-bar">
-        @for (cat of questionCategories; track cat.label) {
-          <button
-            class="agent-category-chip"
-            type="button"
-            [class.agent-category-chip--expanded]="
-              expandedCategory === cat.label
-            "
-            (click)="onToggleCategory(cat.label)"
-          >
-            {{ cat.label }}
-          </button>
-        }
-      </div>
-      @if (expandedCategory) {
-        <div class="agent-category-questions">
-          @for (cat of questionCategories; track cat.label) {
-            @if (expandedCategory === cat.label) {
-              @for (q of cat.questions; track q) {
-                <button
-                  class="agent-suggestion-chip"
-                  type="button"
-                  (click)="onSampleQuestionClick(q)"
+      @if (isTestingMode) {
+        <div class="agent-eval-runner">
+          <div class="agent-eval-runner__header">
+            @if (evalState().isRunning) {
+              <button
+                class="agent-category-chip agent-category-chip--expanded"
+                type="button"
+                (click)="onCancelEvals()"
+              >
+                Cancel Evals
+              </button>
+            } @else {
+              <button
+                class="agent-category-chip"
+                type="button"
+                (click)="onRunEvals()"
+              >
+                Run All Evals
+              </button>
+            }
+            @if (evalState().isRunning || evalState().completedCases > 0) {
+              <span class="agent-eval-runner__progress-text">
+                {{ evalState().completedCases }} / {{ evalState().totalCases }}
+              </span>
+            }
+          </div>
+
+          @if (evalState().isRunning && evalState().totalCases > 0) {
+            <div class="agent-eval-progress-bar">
+              <div
+                class="agent-eval-progress-bar__fill"
+                [style.width.%]="
+                  (evalState().completedCases / evalState().totalCases) * 100
+                "
+              ></div>
+            </div>
+          }
+
+          @if (evalState().summary) {
+            <div class="agent-eval-summary">
+              <span class="agent-eval-summary__passed">
+                {{ evalState().summary!.passed }} passed
+              </span>
+              <span class="agent-eval-summary__failed">
+                {{ evalState().summary!.failed }} failed
+              </span>
+              <span class="agent-eval-summary__time">
+                {{ evalState().summary!.elapsed_seconds }}s
+              </span>
+            </div>
+          }
+
+          @if (evalState().error) {
+            <div class="agent-eval-error">{{ evalState().error }}</div>
+          }
+
+          @if (evalState().results.length > 0) {
+            <div class="agent-eval-results">
+              @for (r of evalState().results; track r.id) {
+                <div
+                  class="agent-eval-result-row"
+                  [class.agent-eval-result-row--fail]="!r.passed"
+                  [class.agent-eval-result-row--pass]="r.passed"
                 >
-                  {{ q }}
-                </button>
+                  <span class="agent-eval-result-row__badge">
+                    {{ r.passed ? 'PASS' : 'FAIL' }}
+                  </span>
+                  <span class="agent-eval-result-row__id">{{ r.id }}</span>
+                  <span class="agent-eval-result-row__category">{{
+                    r.category
+                  }}</span>
+                </div>
+              }
+            </div>
+          }
+        </div>
+
+        <div class="agent-category-bar">
+          @for (cat of questionCategories; track cat.label) {
+            <button
+              class="agent-category-chip"
+              type="button"
+              [class.agent-category-chip--expanded]="
+                expandedCategory === cat.label
+              "
+              (click)="onToggleCategory(cat.label)"
+            >
+              {{ cat.label }}
+            </button>
+          }
+        </div>
+        @if (expandedCategory) {
+          <div class="agent-category-questions">
+            @for (cat of questionCategories; track cat.label) {
+              @if (expandedCategory === cat.label) {
+                @for (q of cat.questions; track q) {
+                  <button
+                    class="agent-suggestion-chip"
+                    type="button"
+                    (click)="onSampleQuestionClick(q)"
+                  >
+                    {{ q }}
+                  </button>
+                }
               }
             }
+          </div>
+        }
+      } @else {
+        <div class="agent-sample-questions">
+          @for (q of sampleQuestions; track q) {
+            <button
+              class="agent-suggestion-chip"
+              type="button"
+              (click)="onSampleQuestionClick(q)"
+            >
+              {{ q }}
+            </button>
           }
         </div>
       }

@@ -6,7 +6,8 @@ import { Observable } from 'rxjs';
 
 import {
   AgentChatRequest,
-  AgentStreamEvent
+  AgentStreamEvent,
+  EvalStreamEvent
 } from '../models/agent-chat.models';
 import { AGENT_ENDPOINT_CONFIG } from './agent-endpoint.config';
 import {
@@ -14,6 +15,11 @@ import {
   flushAgentSseParserState,
   parseAgentSseChunk
 } from './agent-sse-parser';
+import {
+  createEvalSseParserState,
+  flushEvalSseParserState,
+  parseEvalSseChunk
+} from './eval-sse-parser';
 
 const DEFAULT_ERROR_MESSAGE =
   'Unable to reach the agent service. Verify it is running and try again.';
@@ -90,6 +96,88 @@ export class AgentService {
           }
 
           const flushResult = flushAgentSseParserState(parserState);
+          for (const event of flushResult.events) {
+            subscriber.next(event);
+          }
+
+          subscriber.complete();
+        } catch (error) {
+          if (abortController.signal.aborted) {
+            subscriber.complete();
+            return;
+          }
+
+          subscriber.error(this.toError(error));
+        }
+      };
+
+      void run();
+
+      return () => {
+        abortController.abort();
+      };
+    });
+  }
+
+  public streamEval(): Observable<EvalStreamEvent> {
+    return new Observable<EvalStreamEvent>((subscriber) => {
+      const abortController = new AbortController();
+
+      const run = async () => {
+        try {
+          const response = await fetch(this.agentEndpointConfig.evalUrl, {
+            body: JSON.stringify({}),
+            headers: {
+              'Content-Type': 'application/json',
+              Accept: 'text/event-stream'
+            },
+            method: 'POST',
+            signal: abortController.signal
+          });
+
+          if (!response.ok) {
+            throw new Error(
+              `Eval request failed with status ${response.status}.`
+            );
+          }
+
+          if (!response.body) {
+            throw new Error(
+              'Eval response stream was unavailable for this request.'
+            );
+          }
+
+          const reader = response.body.getReader();
+          const decoder = new TextDecoder();
+          let parserState = createEvalSseParserState();
+
+          while (true) {
+            const { done, value } = await reader.read();
+
+            if (done) {
+              break;
+            }
+
+            const decodedChunk = decoder.decode(value, { stream: true });
+            const parsedChunk = parseEvalSseChunk(decodedChunk, parserState);
+            parserState = parsedChunk.state;
+
+            for (const event of parsedChunk.events) {
+              subscriber.next(event);
+            }
+          }
+
+          const trailingChunk = decoder.decode();
+          if (trailingChunk) {
+            const parsedChunk = parseEvalSseChunk(trailingChunk, parserState);
+            parserState = parsedChunk.state;
+
+            for (const event of parsedChunk.events) {
+              subscriber.next(event);
+            }
+          }
+
+          const flushResult = flushEvalSseParserState(parserState);
           for (const event of flushResult.events) {
             subscriber.next(event);
           }

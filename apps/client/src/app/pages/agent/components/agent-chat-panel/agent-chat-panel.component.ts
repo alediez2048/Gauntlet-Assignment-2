@@ -13,12 +13,18 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { Subscription } from 'rxjs';
 
 import {
   AgentChatRequest,
   AgentChatState,
-  INITIAL_AGENT_CHAT_STATE
+  EvalCaseResult,
+  EvalRunState,
+  EvalStreamEvent,
+  EvalSummary,
+  INITIAL_AGENT_CHAT_STATE,
+  INITIAL_EVAL_RUN_STATE
 } from '../../models/agent-chat.models';
 import {
   AgentChatAction,
@@ -45,6 +51,7 @@ interface QuestionCategory {
     MatFormFieldModule,
     MatIconModule,
     MatInputModule,
+    MatSlideToggleModule,
     GfErrorBlockComponent,
     GfThinkingBlockComponent,
     GfToolCallBlockComponent,
@@ -62,7 +69,15 @@ export class GfAgentChatPanelComponent implements OnDestroy {
 
   public draftMessage = '';
   public expandedCategory: string | null = null;
+  public isTestingMode = false;
+  public readonly sampleQuestions: string[] = [
+    'How is my portfolio doing?',
+    'Show my transactions',
+    'What are my holdings worth?',
+    'Am I well diversified?'
+  ];
   public readonly chatState = signal<AgentChatState>(INITIAL_AGENT_CHAT_STATE);
+  public readonly evalState = signal<EvalRunState>(INITIAL_EVAL_RUN_STATE);
   public readonly questionCategories: QuestionCategory[] = [
     {
       label: 'Single Tool',
@@ -91,6 +106,7 @@ export class GfAgentChatPanelComponent implements OnDestroy {
       ]
     }
   ];
+  private evalSubscription?: Subscription;
   private streamSubscription?: Subscription;
 
   public constructor(private agentService: AgentService) {}
@@ -101,6 +117,7 @@ export class GfAgentChatPanelComponent implements OnDestroy {
 
   public ngOnDestroy() {
     this.cancelActiveStream(false);
+    this.onCancelEvals();
   }
 
   public onCancelStream() {
@@ -124,6 +141,11 @@ export class GfAgentChatPanelComponent implements OnDestroy {
     this.closeRequested.emit();
   }
 
+  public onToggleTestingMode() {
+    this.isTestingMode = !this.isTestingMode;
+    this.expandedCategory = null;
+  }
+
   public onToggleCategory(label: string) {
     this.expandedCategory = this.expandedCategory === label ? null : label;
   }
@@ -131,6 +153,45 @@ export class GfAgentChatPanelComponent implements OnDestroy {
   public onSampleQuestionClick(question: string) {
     this.draftMessage = question;
     this.onSendMessage();
+  }
+
+  public onRunEvals() {
+    if (this.evalState().isRunning) {
+      return;
+    }
+
+    this.onCancelEvals();
+    this.evalState.set({ ...INITIAL_EVAL_RUN_STATE, isRunning: true });
+
+    this.evalSubscription = this.agentService.streamEval().subscribe({
+      complete: () => {
+        this.evalState.update((state) => ({ ...state, isRunning: false }));
+      },
+      error: (error: unknown) => {
+        this.evalState.update((state) => ({
+          ...state,
+          isRunning: false,
+          error:
+            error instanceof Error
+              ? error.message
+              : 'Eval run failed unexpectedly.'
+        }));
+      },
+      next: (event) => {
+        this.evalState.update((state) => this.reduceEvalEvent(state, event));
+      }
+    });
+
+    this.evalSubscription.add(() => {
+      this.evalSubscription = undefined;
+    });
+  }
+
+  public onCancelEvals() {
+    if (this.evalSubscription) {
+      this.evalSubscription.unsubscribe();
+      this.evalState.update((state) => ({ ...state, isRunning: false }));
+    }
   }
 
   public onSendMessage() {
@@ -178,6 +239,38 @@ export class GfAgentChatPanelComponent implements OnDestroy {
     });
 
     this.streamSubscription = subscription;
+  }
+
+  private reduceEvalEvent(
+    state: EvalRunState,
+    event: EvalStreamEvent
+  ): EvalRunState {
+    switch (event.event) {
+      case 'eval_start':
+        return {
+          ...state,
+          totalCases: (event.data['total_cases'] as number) ?? 0
+        };
+      case 'eval_result': {
+        const result = event.data as unknown as EvalCaseResult;
+        return {
+          ...state,
+          completedCases: state.completedCases + 1,
+          results: [...state.results, result]
+        };
+      }
+      case 'eval_done': {
+        const summary = event.data as unknown as EvalSummary;
+        return {
+          ...state,
+          isRunning: false,
+          summary,
+          error: (event.data['error'] as string) ?? null
+        };
+      }
+      default:
+        return state;
+    }
   }
 
   private applyAction(action: AgentChatAction) {
