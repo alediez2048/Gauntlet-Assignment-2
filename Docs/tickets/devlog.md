@@ -798,11 +798,11 @@ Each ticket entry follows this standardized structure:
 
 ### ⚠️ Issues & Solutions
 
-| Issue                                                    | Solution                                                                                                 |
-| -------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
-| `pytest` missing in shell environment                    | Created local virtual environment at `agent/.venv` and ran tests through that interpreter.              |
-| pip SSL cert verification failed when installing deps    | Re-ran installs using trusted-host flags for `pypi.org` and `files.pythonhosted.org`.                  |
-| Full unit suite initially failed collection (no `respx`) | Installed `respx` into local venv and re-ran full suite successfully.                                   |
+| Issue                                                    | Solution                                                                                   |
+| -------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| `pytest` missing in shell environment                    | Created local virtual environment at `agent/.venv` and ran tests through that interpreter. |
+| pip SSL cert verification failed when installing deps    | Re-ran installs using trusted-host flags for `pypi.org` and `files.pythonhosted.org`.      |
+| Full unit suite initially failed collection (no `respx`) | Installed `respx` into local venv and re-ran full suite successfully.                      |
 
 ### 🐛 Errors / Bugs / Problems
 
@@ -933,10 +933,10 @@ Each ticket entry follows this standardized structure:
 
 ### ⚠️ Issues & Solutions
 
-| Issue                                                | Solution                                                                                  |
-| ---------------------------------------------------- | ----------------------------------------------------------------------------------------- |
-| Fixture JSON parse failed with `Extra data`          | Removed unintended duplicate JSON block from the fixture and re-ran targeted tests.      |
-| Allocation test module collected duplicate test code | Removed duplicate appended block so only the intended TICKET-06 test suite remains.      |
+| Issue                                                | Solution                                                                            |
+| ---------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| Fixture JSON parse failed with `Extra data`          | Removed unintended duplicate JSON block from the fixture and re-ran targeted tests. |
+| Allocation test module collected duplicate test code | Removed duplicate appended block so only the intended TICKET-06 test suite remains. |
 
 ### 🐛 Errors / Bugs / Problems
 
@@ -1073,10 +1073,10 @@ Each ticket entry follows this standardized structure:
 
 ### ⚠️ Issues & Solutions
 
-| Issue | Solution |
-| ----- | -------- |
+| Issue                                                                                                        | Solution                                                                                                                                 |
+| ------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------- |
 | Local test environment lacked `langgraph` / `langchain_core`, causing import-time failures in new graph code | Added graceful runtime fallbacks for message handling and graph execution so tests still run deterministically without network installs. |
-| Router output can be malformed in real-world LLM calls | Added normalization + sanitization layer for route/tool/tool_args with safe defaults before execution. |
+| Router output can be malformed in real-world LLM calls                                                       | Added normalization + sanitization layer for route/tool/tool_args with safe defaults before execution.                                   |
 
 ### 🐛 Errors / Bugs / Problems
 
@@ -1213,13 +1213,13 @@ Each ticket entry follows this standardized structure:
 
 ### ⚠️ Issues & Solutions
 
-| Issue | Solution |
-| ----- | -------- |
-| Local `agent/.venv` was missing FastAPI/Pydantic during initial integration test run | Installed minimal runtime deps (`fastapi`, `pydantic`) into the existing venv so endpoint tests could execute. |
-| Initial bulk install from `requirements.txt` hit TLS certificate verification errors for PyPI in local environment | Used `pip --trusted-host` for targeted package install needed by this ticket’s integration tests. |
-| Agent returned `API_ERROR` while Ghostfolio UI at `https://localhost:4200` appeared healthy | Traced runtime calls and confirmed agent was authenticating against a different backend instance (Docker Ghostfolio on 3333) than the dev UI/API context. |
-| Token worked for local host API but failed in containerized path | Added dev agent overlay with `host.docker.internal` target so agent and UI point at the same Ghostfolio data/auth context. |
-| Husky pre-commit hook (`nx affected:lint`) failed due plugin worker startup in local environment | Completed commit using `--no-verify` per local workflow policy for this repository session. |
+| Issue                                                                                                              | Solution                                                                                                                                                  |
+| ------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Local `agent/.venv` was missing FastAPI/Pydantic during initial integration test run                               | Installed minimal runtime deps (`fastapi`, `pydantic`) into the existing venv so endpoint tests could execute.                                            |
+| Initial bulk install from `requirements.txt` hit TLS certificate verification errors for PyPI in local environment | Used `pip --trusted-host` for targeted package install needed by this ticket’s integration tests.                                                         |
+| Agent returned `API_ERROR` while Ghostfolio UI at `https://localhost:4200` appeared healthy                        | Traced runtime calls and confirmed agent was authenticating against a different backend instance (Docker Ghostfolio on 3333) than the dev UI/API context. |
+| Token worked for local host API but failed in containerized path                                                   | Added dev agent overlay with `host.docker.internal` target so agent and UI point at the same Ghostfolio data/auth context.                                |
+| Husky pre-commit hook (`nx affected:lint`) failed due plugin worker startup in local environment                   | Completed commit using `--no-verify` per local workflow policy for this repository session.                                                               |
 
 ### 🐛 Errors / Bugs / Problems
 
@@ -1365,14 +1365,14 @@ Each ticket entry follows this standardized structure:
 
 ### ⚠️ Issues & Solutions
 
-| Issue | Solution |
-| ----- | -------- |
-| Nx plugin workers failed for `nx test`/`nx lint` in this workspace | Switched to direct `jest` and `eslint` commands for targeted verification during ticket kickstart. |
-| Component tests failed with `ReferenceError: $localize is not defined` | Added localized test bootstrap directly in new agent spec files to define `$localize` for i18n templates. |
-| Initial parser test expected a second event without terminal frame delimiter | Corrected fixture to include complete SSE frame termination before assertion. |
-| FAB could overlap chat controls in bottom-right panel region | FAB now renders only when panel is closed; panel header/backdrop handles close interaction. |
-| Browser requests from `https://localhost:4200` failed with `Error (API_ERROR): Failed to fetch` | Added HTTPS localhost origins to FastAPI CORS middleware and rebuilt the `agent` dev container. |
-| Unexpected untracked file (`.cursor/debug.log`) appeared during work | Paused immediately, confirmed with user, then deleted file before proceeding. |
+| Issue                                                                                           | Solution                                                                                                  |
+| ----------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| Nx plugin workers failed for `nx test`/`nx lint` in this workspace                              | Switched to direct `jest` and `eslint` commands for targeted verification during ticket kickstart.        |
+| Component tests failed with `ReferenceError: $localize is not defined`                          | Added localized test bootstrap directly in new agent spec files to define `$localize` for i18n templates. |
+| Initial parser test expected a second event without terminal frame delimiter                    | Corrected fixture to include complete SSE frame termination before assertion.                             |
+| FAB could overlap chat controls in bottom-right panel region                                    | FAB now renders only when panel is closed; panel header/backdrop handles close interaction.               |
+| Browser requests from `https://localhost:4200` failed with `Error (API_ERROR): Failed to fetch` | Added HTTPS localhost origins to FastAPI CORS middleware and rebuilt the `agent` dev container.           |
+| Unexpected untracked file (`.cursor/debug.log`) appeared during work                            | Paused immediately, confirmed with user, then deleted file before proceeding.                             |
 
 ### 🐛 Errors / Bugs / Problems
 
@@ -1530,13 +1530,13 @@ Each ticket entry follows this standardized structure:
 
 ### ⚠️ Issues & Solutions
 
-| Issue | Solution |
-| ----- | -------- |
-| `GHOSTFOLIO_ACCESS_TOKEN` became invalid after `docker compose ... down -v` (fresh DB) | Bootstrapped a new user via `POST /api/v1/user`, persisted returned access token into local `.env`, then recreated agent container. |
-| Allocation validator failed with `INVALID_ALLOCATION_SUM` in live stack | Normalized allocation ratios (0..1) to percentages in allocation tool and verified with new unit test. |
-| Suggested follow-up wording could miss allocation route (`concentrated`) | Added `"concentrated"` keyword and follow-up context recovery in router node. |
-| Same-thread ambiguous follow-up lacked true continuity in fallback runtime | Added thread-aware fallback state persistence and thread-configured graph invocation path. |
-| New notebook file could not be created directly by notebook cell editor until JSON existed | Initialized minimal notebook scaffold, then used notebook cell edits for final content. |
+| Issue                                                                                      | Solution                                                                                                                            |
+| ------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------- |
+| `GHOSTFOLIO_ACCESS_TOKEN` became invalid after `docker compose ... down -v` (fresh DB)     | Bootstrapped a new user via `POST /api/v1/user`, persisted returned access token into local `.env`, then recreated agent container. |
+| Allocation validator failed with `INVALID_ALLOCATION_SUM` in live stack                    | Normalized allocation ratios (0..1) to percentages in allocation tool and verified with new unit test.                              |
+| Suggested follow-up wording could miss allocation route (`concentrated`)                   | Added `"concentrated"` keyword and follow-up context recovery in router node.                                                       |
+| Same-thread ambiguous follow-up lacked true continuity in fallback runtime                 | Added thread-aware fallback state persistence and thread-configured graph invocation path.                                          |
+| New notebook file could not be created directly by notebook cell editor until JSON existed | Initialized minimal notebook scaffold, then used notebook cell edits for final content.                                             |
 
 ### 🐛 Errors / Bugs / Problems
 
@@ -1668,12 +1668,12 @@ Each ticket entry follows this standardized structure:
 
 ### ⚠️ Issues & Solutions
 
-| Issue | Solution |
-| ----- | -------- |
-| Railway CLI auth not available in automation shell | Completed manual `railway login`, then continued with CLI provisioning/deploy steps. |
+| Issue                                                                               | Solution                                                                                                                     |
+| ----------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| Railway CLI auth not available in automation shell                                  | Completed manual `railway login`, then continued with CLI provisioning/deploy steps.                                         |
 | Railway import rejected `YAHOO` symbols (`symbol ... is not valid for data source`) | Used hosted import transform path: convert `YAHOO` rows to deterministic `MANUAL` assets while preserving activity coverage. |
-| Hosted allocation scenario failed validator (`INVALID_ALLOCATION_SUM`) | Hardened allocation advisor normalization + unknown asset-class fallback, then redeployed agent. |
-| Docker Buildx failed in sandbox during local rebuild | Re-ran compose build with unrestricted permissions for Docker filesystem access. |
+| Hosted allocation scenario failed validator (`INVALID_ALLOCATION_SUM`)              | Hardened allocation advisor normalization + unknown asset-class fallback, then redeployed agent.                             |
+| Docker Buildx failed in sandbox during local rebuild                                | Re-ran compose build with unrestricted permissions for Docker filesystem access.                                             |
 
 ### 🐛 Errors / Bugs / Problems
 
@@ -1793,11 +1793,11 @@ Multiple `railway up` commands built images successfully but the running contain
 
 ### Scope
 
-| Area | Details |
-| --- | --- |
-| Agent code | 4 files modified: `prompts.py`, `nodes.py`, `graph.py`, `main.py` |
-| Infrastructure | Docker network cleanup, Railway token + deploy |
-| Testing | Manual E2E on both local and production |
+| Area           | Details                                                           |
+| -------------- | ----------------------------------------------------------------- |
+| Agent code     | 4 files modified: `prompts.py`, `nodes.py`, `graph.py`, `main.py` |
+| Infrastructure | Docker network cleanup, Railway token + deploy                    |
+| Testing        | Manual E2E on both local and production                           |
 
 ### Files Changed
 
@@ -1817,13 +1817,13 @@ Multiple `railway up` commands built images successfully but the running contain
 
 ### Issues Encountered
 
-| Issue | Root Cause | Resolution |
-| --- | --- | --- |
-| Agent API_ERROR on local | Docker network mismatch from inconsistent compose invocations | Single `docker compose` command with `--env-file .env` |
-| Agent API_ERROR on production | Stale `GHOSTFOLIO_ACCESS_TOKEN` after DB reset | Fresh user bootstrap + token update |
-| Railway builds not deploying | Missing `--ci` flag on `railway up` | Restored `--ci`; one earlier build eventually activated |
-| Railway "Hobby deploys are paused" | Platform-level rate limit on Hobby tier | Waited for cooldown; services remained running |
-| Template responses despite code changes | Code not deployed (old container serving) | Verified via `version` field in health endpoint |
+| Issue                                   | Root Cause                                                    | Resolution                                              |
+| --------------------------------------- | ------------------------------------------------------------- | ------------------------------------------------------- |
+| Agent API_ERROR on local                | Docker network mismatch from inconsistent compose invocations | Single `docker compose` command with `--env-file .env`  |
+| Agent API_ERROR on production           | Stale `GHOSTFOLIO_ACCESS_TOKEN` after DB reset                | Fresh user bootstrap + token update                     |
+| Railway builds not deploying            | Missing `--ci` flag on `railway up`                           | Restored `--ci`; one earlier build eventually activated |
+| Railway "Hobby deploys are paused"      | Platform-level rate limit on Hobby tier                       | Waited for cooldown; services remained running          |
+| Template responses despite code changes | Code not deployed (old container serving)                     | Verified via `version` field in health endpoint         |
 
 ### Learnings
 
@@ -1831,6 +1831,73 @@ Multiple `railway up` commands built images successfully but the running contain
 - Add a version/build tag to health endpoints to verify which code is actually running in production.
 - Railway's `--ci` flag is not optional — without it, builds may complete without activating a deployment.
 - LLM synthesis with a template fallback is the right pattern: rich answers when the LLM is available, deterministic answers when it's not.
+
+---
+
+## TICKET-10.2 (Regression Recovery): Integration + Contract Alignment 🟢 `COMPLETED`
+
+> **Branch:** `main` (recovery pass)
+> **Estimated time:** 2 hrs | **Actual time:** ~2.5 hrs
+
+### Summary
+
+Closed the regression gap found in the TICKET-10.2 validation pass by fixing failing integration tests, locking the request/SSE contract behavior to current runtime, standardizing local UI validation instructions, and re-running the target regression matrix.
+
+### Scope
+
+| Area               | Details                                                                                                      |
+| ------------------ | ------------------------------------------------------------------------------------------------------------ |
+| Integration tests  | Fixed `thread_id` config propagation and `build_graph` mock signature compatibility                          |
+| Contract alignment | Added explicit `422` whitespace-input test and validated flat SSE error payload (`code`, `message`)          |
+| Local UI process   | Documented source-based canonical UI validation path and precheck gate                                       |
+| Baselines          | Updated documented seed expectations (`BUY=13` etc.) and allocation fallback note                            |
+| Regression rerun   | Re-executed unit, integration, golden-path notebook, section 5/6/10 equivalents, and production smoke sanity |
+
+### Technical Implementation
+
+1. **Graph integration helper fixed** (`agent/tests/integration/test_graph_routing.py`)
+   - Added configurable invocation support to helper and ensured each run passes a `thread_id`.
+2. **SSE integration harness fixed** (`agent/tests/integration/test_sse_stream.py`)
+   - Updated patched `build_graph` signature to accept `synthesizer` argument.
+   - Set test env access token to avoid auth short-circuiting before patched graph invocation.
+3. **Request validation contract test added** (`agent/tests/integration/test_sse_stream.py`)
+   - Added `test_chat_request_rejects_whitespace_message_with_422`.
+4. **Runbook updates** (`Docs/tickets/ENVIRONMENT-GUIDE.md`)
+   - Corrected user bootstrap to `POST /api/v1/user`.
+   - Added source-based local UI canonical path and mandatory `Open agent chat panel` precheck.
+   - Added current seed baseline expectations and allocation fallback note.
+
+### Issues & Resolutions
+
+| Issue                                                        | Root Cause                                                          | Resolution                                                                               |
+| ------------------------------------------------------------ | ------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| Integration tests still failing in container after edits     | `docker exec` test run used stale container filesystem snapshot     | Executed source-based tests via local venv (`PYTHONPATH=. ./agent/.venv/bin/pytest ...`) |
+| SSE tests returning `AUTH_FAILED` instead of expected stream | Test requests had no bearer and env token absent in test harness    | Set `GHOSTFOLIO_ACCESS_TOKEN` in SSE test patch helper                                   |
+| Local UI inconsistency vs production                         | Local validation path ambiguity (container frontend vs source path) | Documented source-based UI path as canonical and added hard precheck gate                |
+
+### Testing
+
+- ✅ `PYTHONPATH=. ./agent/.venv/bin/pytest agent/tests/unit/ -v --tb=short` -> `45 passed`
+- ✅ `PYTHONPATH=. ./agent/.venv/bin/pytest agent/tests/integration/ -v --tb=short` -> `14 passed`
+- ✅ Executed `agent/tests/e2e/golden_path.ipynb` code cells -> all assertions passed
+- ✅ Section 5 equivalent checks re-run (including `422` whitespace/missing-message validations)
+- ✅ Section 6 SSE happy path and forced error path re-run
+- ✅ Section 10 equivalent checks re-run (counts + allocation fallback + tax content sanity)
+- ✅ Production smoke sanity re-run (`health`, `auth`, `chat`)
+
+### Files Changed
+
+- `agent/tests/integration/test_graph_routing.py`
+- `agent/tests/integration/test_sse_stream.py`
+- `Docs/tickets/ENVIRONMENT-GUIDE.md`
+- `Docs/tickets/TICKET-10.2-regression-report.md` (new)
+- `Docs/tickets/devlog.md` (this entry + running totals)
+
+### Learnings
+
+- LangGraph checkpointer usage must be explicit in integration helpers; missing `configurable.thread_id` invalidates otherwise-correct graph tests.
+- SSE endpoint tests that patch graph execution should also satisfy auth preconditions so they validate stream behavior, not credential gating.
+- Keeping one canonical local UI validation path avoids false negatives caused by stale containerized frontend images.
 
 ---
 
@@ -1854,6 +1921,103 @@ Multiple `railway up` commands built images successfully but the running contain
 
 ---
 
+## TICKET-10.3: Production Auth Gate, LLM Router, Sample Portfolio & Proxy Fix 🟢
+
+### Plain-English Summary
+
+- Fixed the production bug where all users (including unauthenticated) saw the seeded $57K portfolio
+- Implemented three-part auth-gated experience: sign-in prompt → empty portfolio → seeded portfolio
+- Added GPT-4o LLM-backed router replacing keyword-based routing (per TICKET-07 requirements)
+- Fixed production "Failed to fetch" by proxying agent requests through NestJS backend
+
+### What Changed
+
+**1. Agent Auth Gate (agent/main.py, agent/graph/nodes.py)**
+
+- Removed `GHOSTFOLIO_ACCESS_TOKEN` env-var fallback in chat endpoint — now requires Bearer JWT
+- Added `AUTH_REQUIRED` error code for unauthenticated users
+- Updated `EMPTY_PORTFOLIO` message to mention the seed button
+- Added `load_dotenv` to selectively read `OPENAI_API_KEY` from `.env` (fixes GPT-4o synthesizer in local dev)
+
+**2. Sample Portfolio Seed Button (home-overview component, sample-portfolio.json)**
+
+- Created `apps/client/src/assets/sample-portfolio.json` with 26 activities and 7 asset profiles
+- Converted all YAHOO data sources to MANUAL with deterministic UUIDs for production safety
+- Added "Load Sample Portfolio" button on home welcome screen (gated by `activitiesCount === 0`)
+- Uses existing `ImportActivitiesService` for bulk import, reloads page on success
+
+**3. GPT-4o LLM Router (agent/main.py, agent/prompts.py)**
+
+- Built `_build_router_callable()` using GPT-4o with ROUTING_PROMPT and few-shot examples
+- Replaces keyword-based `keyword_router` which failed on natural language queries
+- Falls back gracefully to keyword router if OpenAI API is unavailable
+- All 7 test queries route correctly (portfolio, transactions, tax, allocation, clarify)
+
+**4. NestJS Proxy for Production (agent-chat controller)**
+
+- Created `apps/api/src/app/endpoints/agent-chat/` — NestJS controller that proxies POST `/api/v1/agent/chat` to the Python agent
+- Streams SSE response back to browser with proper headers (`X-Accel-Buffering: no`)
+- Frontend updated to use same-origin `/api/v1/agent/chat` instead of cross-origin agent URL
+- Railway `AGENT_CHAT_URL` changed to `http://agent.railway.internal:8080/api/agent/chat` (internal networking, no CDN)
+- Eliminates CORS and Fastly CDN SSE buffering issues that caused "Failed to fetch" in browsers
+
+**5. Debug Cleanup**
+
+- Removed all `fetch('http://127.0.0.1:7244/...')` debug instrumentation from client code
+- Removed `_debug_log()` functions from `agent/main.py` and `agent/clients/ghostfolio_client.py`
+- Removed `_DEBUG_LOG_PATH` constants and all debug logging calls
+
+### Root Causes Found
+
+| Issue                                                  | Root Cause                                                      | Fix                                        |
+| ------------------------------------------------------ | --------------------------------------------------------------- | ------------------------------------------ |
+| All users see seeded portfolio                         | `GHOSTFOLIO_ACCESS_TOKEN` env-var fallback always triggered     | Removed fallback; require Bearer JWT       |
+| Terse deterministic responses                          | `OPENAI_API_KEY` was stale placeholder in shell env             | Added selective `dotenv_values()` loading  |
+| "I can help with financial analysis" for valid queries | Keyword router couldn't handle natural language                 | Replaced with GPT-4o LLM router            |
+| "Failed to fetch" / "Load failed" in production        | Cross-origin fetch to agent blocked by Fastly CDN SSE buffering | Proxy through NestJS backend (same-origin) |
+| Debug fetch calls breaking production                  | Leftover `http://127.0.0.1:7244` fetches in client code         | Removed all debug instrumentation          |
+
+### Commits
+
+| Hash      | Message                                                                 |
+| --------- | ----------------------------------------------------------------------- |
+| `0063c76` | feat: auth-gate agent chat, add sample portfolio seed button            |
+| `b3e7b0a` | feat: add GPT-4o LLM-backed router for intent classification            |
+| `2177513` | fix: remove debug fetch calls that break production chatbot             |
+| `fdbce97` | feat: proxy agent chat through NestJS to fix production CORS/CDN issues |
+
+### Files Changed
+
+| File                                                                                        | Change                                        |
+| ------------------------------------------------------------------------------------------- | --------------------------------------------- |
+| `agent/main.py`                                                                             | Auth gate, dotenv loading, LLM router builder |
+| `agent/graph/nodes.py`                                                                      | AUTH_REQUIRED error, updated messages         |
+| `agent/clients/ghostfolio_client.py`                                                        | Debug cleanup                                 |
+| `agent/tests/integration/test_sse_stream.py`                                                | Bearer headers, auth-required test            |
+| `apps/api/src/app/endpoints/agent-chat/agent-chat.controller.ts`                            | **New** — NestJS SSE proxy                    |
+| `apps/api/src/app/endpoints/agent-chat/agent-chat.module.ts`                                | **New** — proxy module                        |
+| `apps/api/src/app/app.module.ts`                                                            | Register AgentChatModule                      |
+| `apps/client/src/app/components/home-overview/home-overview.component.ts`                   | Seed button logic                             |
+| `apps/client/src/app/components/home-overview/home-overview.html`                           | Seed button UI                                |
+| `apps/client/src/app/pages/agent/services/agent-endpoint.config.ts`                         | Same-origin proxy URL                         |
+| `apps/client/src/app/pages/agent/services/agent.service.ts`                                 | Debug cleanup                                 |
+| `apps/client/src/app/pages/agent/components/agent-chat-panel/agent-chat-panel.component.ts` | Debug cleanup                                 |
+| `apps/client/src/app/app.component.ts`                                                      | Debug cleanup                                 |
+| `apps/client/src/assets/sample-portfolio.json`                                              | **New** — production-safe seed data           |
+
+### Tests
+
+- 60 automated tests passing (45 unit + 15 integration including new auth-required test)
+- Angular production build clean (only i18n warnings)
+- NestJS API build clean
+- Production smoke tests: all 3 edge cases verified on Railway
+
+### Time Spent
+
+~3.5 hrs (investigation + implementation + production debugging)
+
+---
+
 ## Status Legend
 
 | Emoji | Meaning              |
@@ -1868,11 +2032,11 @@ Multiple `railway up` commands built images successfully but the running contain
 
 ## Running Totals
 
-| Metric           | Value           |
-| ---------------- | --------------- |
-| Tickets Complete | 13 / 14                  |
-| Total Dev Time   | ~30.00 hrs               |
-| Tests Passing    | 80 automated + hosted/local E2E regression matrices |
-| Files Created    | 69                       |
-| Files Modified   | 51                       |
-| Cursor Rules     | 10              |
+| Metric           | Value                                                                             |
+| ---------------- | --------------------------------------------------------------------------------- |
+| Tickets Complete | 14 / 14                                                                           |
+| Total Dev Time   | ~36.00 hrs                                                                        |
+| Tests Passing    | 60 automated (45 unit + 15 integration) + golden-path + local/hosted smoke reruns |
+| Files Created    | 73                                                                                |
+| Files Modified   | 68                                                                                |
+| Cursor Rules     | 10                                                                                |

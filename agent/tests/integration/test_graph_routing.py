@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from collections.abc import Awaitable, Callable
 from typing import Any
+from uuid import uuid4
 
 import pytest
 
@@ -29,6 +30,7 @@ async def _run_graph(
     tool_name: str | None,
     tool_args: dict[str, Any],
     query: str,
+    config: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     graph = build_graph(
         api_client=mock_ghostfolio_client,
@@ -41,11 +43,13 @@ async def _run_graph(
             }
         ),
     )
+    invocation_config = config or {"configurable": {"thread_id": f"integration-{uuid4()}"}}
     return await graph.ainvoke(
         {
             "messages": [{"role": "user", "content": query}],
             "tool_call_history": [],
-        }
+        },
+        config=invocation_config,
     )
 
 
