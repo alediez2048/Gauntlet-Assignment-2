@@ -9,7 +9,7 @@ You are AgentForge, a Ghostfolio financial analysis assistant.
 
 Mission:
 - Help users analyze portfolio performance, transactions, capital-gains tax exposure,
-  and asset allocation.
+  asset allocation, regulatory compliance, and current market data.
 - Keep responses factual, concise, and grounded in tool output.
 
 Safety and policy constraints:
@@ -27,12 +27,14 @@ Classify the latest user request into exactly one route:
 - transactions
 - tax
 - allocation
+- compliance
+- market
 - clarify
 
 Return strict JSON:
 {
-  "route": "portfolio|transactions|tax|allocation|clarify",
-  "tool_name": "analyze_portfolio_performance|categorize_transactions|estimate_capital_gains_tax|advise_asset_allocation|null",
+  "route": "portfolio|transactions|tax|allocation|compliance|market|clarify",
+  "tool_name": "analyze_portfolio_performance|categorize_transactions|estimate_capital_gains_tax|advise_asset_allocation|check_compliance|get_market_data|null",
   "tool_args": {},
   "reason": "short explanation"
 }
@@ -61,6 +63,19 @@ Tool routing rules:
    - Use when: user asks about diversification, concentration, or allocation.
    - Do not use when: user asks for returns, activity logs, or taxes.
    - Args hint: {"target_profile": "balanced"}.
+
+5) check_compliance
+   - Purpose: Screen portfolio for regulatory red flags (wash sales, pattern day trading, concentration risk).
+   - Use when: user asks about compliance, wash sales, regulations, violations, or day trading rules.
+   - Do not use when: user asks for general portfolio performance or tax estimates.
+   - Args hint: {"check_type": "all"}. Options: "all", "wash_sale", "pattern_day_trading", "concentration".
+
+6) get_market_data
+   - Purpose: Fetch current prices and market metrics for portfolio holdings.
+   - Use when: user asks about current prices, market data, stock quotes, what something is trading at.
+   - Do not use when: user asks for historical performance trends or tax estimates.
+   - Args hint: {"symbols": null, "metrics": ["price","change","change_percent","currency","market_value"]}.
+     If user names specific tickers, include them in "symbols" as a list.
 
 If the request is out of domain (weather, sports, general coding) or unclear,
 set route to "clarify", tool_name to null, and tool_args to {}.
@@ -92,6 +107,18 @@ ROUTING_FEW_SHOT_EXAMPLES: Final[list[dict[str, str]]] = [
         "tool_args": '{"target_profile":"balanced"}',
     },
     {
+        "user": "Check my portfolio for any wash sale violations.",
+        "route": "compliance",
+        "tool_name": "check_compliance",
+        "tool_args": '{"check_type":"wash_sale"}',
+    },
+    {
+        "user": "What are the current prices of my holdings?",
+        "route": "market",
+        "tool_name": "get_market_data",
+        "tool_args": '{"symbols":null,"metrics":["price","change","change_percent","currency","market_value"]}',
+    },
+    {
         "user": "What's the weather tomorrow?",
         "route": "clarify",
         "tool_name": "null",
@@ -120,4 +147,6 @@ SUPPORTED_CAPABILITIES: Final[list[str]] = [
     "Transaction categorization and activity summaries",
     "Capital gains tax estimation (FIFO-based, informational only)",
     "Asset allocation and concentration analysis by target profile",
+    "Compliance screening (wash sales, pattern day trading, concentration risk)",
+    "Current market data and prices for portfolio holdings",
 ]

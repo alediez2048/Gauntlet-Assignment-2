@@ -13,12 +13,14 @@ except ModuleNotFoundError:
 
 from agent.tools.base import ToolResult
 
-RouteName = Literal["portfolio", "transactions", "tax", "allocation", "clarify"]
+RouteName = Literal["portfolio", "transactions", "tax", "allocation", "compliance", "market", "clarify"]
 ToolName = Literal[
     "analyze_portfolio_performance",
     "categorize_transactions",
     "estimate_capital_gains_tax",
     "advise_asset_allocation",
+    "check_compliance",
+    "get_market_data",
 ]
 PendingAction = Literal["tool_selected", "ambiguous_or_unsupported", "valid", "invalid_or_error"]
 

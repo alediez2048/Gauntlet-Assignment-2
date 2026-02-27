@@ -16,6 +16,8 @@ from agent.graph.state import AgentState, RouteName, ToolName
 from agent.prompts import SUPPORTED_CAPABILITIES, SYNTHESIS_PROMPT
 from agent.tools.allocation_advisor import advise_asset_allocation
 from agent.tools.base import ToolResult
+from agent.tools.compliance_checker import check_compliance
+from agent.tools.market_data import get_market_data
 from agent.tools.portfolio_analyzer import analyze_portfolio_performance
 from agent.tools.tax_estimator import estimate_capital_gains_tax
 from agent.tools.transaction_categorizer import categorize_transactions
@@ -32,12 +34,16 @@ _ROUTE_TO_TOOL: Final[dict[str, ToolName]] = {
     "transactions": "categorize_transactions",
     "tax": "estimate_capital_gains_tax",
     "allocation": "advise_asset_allocation",
+    "compliance": "check_compliance",
+    "market": "get_market_data",
 }
 _VALID_ROUTES: Final[set[RouteName]] = {
     "portfolio",
     "transactions",
     "tax",
     "allocation",
+    "compliance",
+    "market",
     "clarify",
 }
 _TOOL_FUNCTIONS: Final[dict[ToolName, Callable[..., Awaitable[ToolResult]]]] = {
@@ -45,9 +51,13 @@ _TOOL_FUNCTIONS: Final[dict[ToolName, Callable[..., Awaitable[ToolResult]]]] = {
     "categorize_transactions": categorize_transactions,
     "estimate_capital_gains_tax": estimate_capital_gains_tax,
     "advise_asset_allocation": advise_asset_allocation,
+    "check_compliance": check_compliance,
+    "get_market_data": get_market_data,
 }
 _VALID_INCOME_BRACKETS: Final[set[str]] = {"low", "middle", "high"}
 _VALID_TARGET_PROFILES: Final[set[str]] = {"conservative", "balanced", "aggressive"}
+_VALID_CHECK_TYPES: Final[set[str]] = {"all", "wash_sale", "pattern_day_trading", "concentration"}
+_VALID_MARKET_METRICS: Final[set[str]] = {"price", "change", "change_percent", "currency", "market_value", "quantity", "all"}
 _ROUTER_INTENTS: Final[dict[RouteName, tuple[str, ...]]] = {
     "portfolio": (
         "portfolio",
@@ -79,12 +89,29 @@ _ROUTER_INTENTS: Final[dict[RouteName, tuple[str, ...]]] = {
         "allocation",
         "diversification",
         "diversified",
-        "concentration",
-        "concentrated",
         "rebalancing",
         "re-balance",
         "overweight",
         "underweight",
+    ),
+    "compliance": (
+        "compliance",
+        "wash sale",
+        "pattern day trad",
+        "regulation",
+        "violation",
+        "day trade",
+        "day trading",
+    ),
+    "market": (
+        "market data",
+        "current price",
+        "stock price",
+        "market value",
+        "price of",
+        "prices",
+        "quote",
+        "what is .* trading at",
     ),
     "clarify": (),
 }
@@ -225,6 +252,30 @@ def _extract_target_profile(query: str, default_value: str) -> str:
     return default_value
 
 
+def _extract_check_type(query: str, default_value: str) -> str:
+    lowered_query = query.lower()
+    if "wash sale" in lowered_query:
+        return "wash_sale"
+    if "pattern day trad" in lowered_query or "day trade" in lowered_query or "day trading" in lowered_query:
+        return "pattern_day_trading"
+    if "concentration" in lowered_query or "concentrated" in lowered_query:
+        return "concentration"
+    return default_value
+
+
+def _extract_symbols(query: str) -> list[str] | None:
+    """Extract stock ticker symbols from the query (e.g. SPY, AAPL)."""
+    tickers = re.findall(r"\b[A-Z]{1,5}\b", query)
+    # Filter out common English words that look like tickers
+    stop_words = {"I", "A", "AM", "AN", "AS", "AT", "BE", "BY", "DO", "GO", "HE",
+                  "IF", "IN", "IS", "IT", "ME", "MY", "NO", "OF", "OK", "ON", "OR",
+                  "SO", "TO", "UP", "US", "WE", "THE", "AND", "FOR", "ARE", "BUT",
+                  "NOT", "YOU", "ALL", "ANY", "CAN", "HAS", "HER", "WAS", "ONE",
+                  "OUR", "OUT", "HOW", "WHAT", "WITH", "SHOW", "GET", "MUCH"}
+    filtered = [t for t in tickers if t not in stop_words]
+    return filtered if filtered else None
+
+
 def _default_args_for_tool(tool_name: ToolName, user_query: str) -> dict[str, Any]:
     current_year = datetime.now().year
     if tool_name == "analyze_portfolio_performance":
@@ -236,6 +287,14 @@ def _default_args_for_tool(tool_name: ToolName, user_query: str) -> dict[str, An
             "tax_year": _extract_tax_year(user_query, current_year),
             "income_bracket": _extract_income_bracket(user_query, "middle"),
         }
+    if tool_name == "check_compliance":
+        return {"check_type": _extract_check_type(user_query, "all")}
+    if tool_name == "get_market_data":
+        symbols = _extract_symbols(user_query)
+        args: dict[str, Any] = {"metrics": ["price", "change", "change_percent", "currency", "market_value"]}
+        if symbols:
+            args["symbols"] = symbols
+        return args
 
     return {"target_profile": _extract_target_profile(user_query, "balanced")}
 
@@ -265,6 +324,17 @@ def _sanitize_tool_args(
         bracket = merged_args.get("income_bracket")
         if not isinstance(bracket, str) or bracket not in _VALID_INCOME_BRACKETS:
             merged_args["income_bracket"] = "middle"
+    elif tool_name == "check_compliance":
+        check_type = merged_args.get("check_type")
+        if not isinstance(check_type, str) or check_type not in _VALID_CHECK_TYPES:
+            merged_args["check_type"] = "all"
+    elif tool_name == "get_market_data":
+        symbols = merged_args.get("symbols")
+        if symbols is not None and not isinstance(symbols, list):
+            merged_args["symbols"] = None
+        metrics = merged_args.get("metrics")
+        if not isinstance(metrics, list):
+            merged_args["metrics"] = ["price", "change", "change_percent", "currency", "market_value"]
     else:
         profile = merged_args.get("target_profile")
         if not isinstance(profile, str) or profile not in _VALID_TARGET_PROFILES:
@@ -566,6 +636,26 @@ def _validate_allocation_payload(payload: dict[str, Any]) -> str | None:
     return None
 
 
+def _validate_compliance_payload(payload: dict[str, Any]) -> str | None:
+    total_violations = payload.get("total_violations")
+    if not isinstance(total_violations, int) or total_violations < 0:
+        return "INVALID_COMPLIANCE_PAYLOAD"
+    total_warnings = payload.get("total_warnings")
+    if not isinstance(total_warnings, int) or total_warnings < 0:
+        return "INVALID_COMPLIANCE_PAYLOAD"
+    return None
+
+
+def _validate_market_data_payload(payload: dict[str, Any]) -> str | None:
+    total_holdings = payload.get("total_holdings")
+    if not isinstance(total_holdings, int) or total_holdings < 0:
+        return "INVALID_MARKET_DATA_PAYLOAD"
+    holdings = payload.get("holdings")
+    if not isinstance(holdings, list):
+        return "INVALID_MARKET_DATA_PAYLOAD"
+    return None
+
+
 def _validate_tool_payload(tool_name: ToolName, payload: dict[str, Any]) -> str | None:
     if tool_name == "analyze_portfolio_performance":
         return _validate_portfolio_payload(payload)
@@ -573,6 +663,10 @@ def _validate_tool_payload(tool_name: ToolName, payload: dict[str, Any]) -> str 
         return _validate_transaction_payload(payload)
     if tool_name == "estimate_capital_gains_tax":
         return _validate_tax_payload(payload)
+    if tool_name == "check_compliance":
+        return _validate_compliance_payload(payload)
+    if tool_name == "get_market_data":
+        return _validate_market_data_payload(payload)
 
     return _validate_allocation_payload(payload)
 
@@ -646,6 +740,23 @@ def _build_summary(tool_name: ToolName | None, tool_result: ToolResult | None) -
         return (
             "Capital gains estimate is ready. "
             f"Estimated combined liability for {tax_year} is {_format_currency(liability)}."
+        )
+
+    if tool_name == "check_compliance":
+        total_violations = payload.get("total_violations", 0)
+        total_warnings = payload.get("total_warnings", 0)
+        return (
+            "Compliance screening is complete. "
+            f"Found {total_violations} violation(s) and {total_warnings} warning(s)."
+        )
+
+    if tool_name == "get_market_data":
+        total_holdings = payload.get("total_holdings", 0)
+        total_value = payload.get("total_market_value")
+        value_str = f" with total value ${_format_currency(total_value)}" if total_value else ""
+        return (
+            "Market data retrieved. "
+            f"Showing data for {total_holdings} holding(s){value_str}."
         )
 
     warnings = payload.get("concentration_warnings")
@@ -763,6 +874,11 @@ _ERROR_MESSAGES: Final[dict[str, str]] = {
     "INVALID_ALLOCATION_PAYLOAD": "Allocation data came back in an unexpected format.",
     "INVALID_HOLDINGS_COUNT": "Holdings count was invalid, so I stopped safely.",
     "INVALID_ALLOCATION_SUM": "Allocation percentages do not form a sane total (~100%).",
+    "INVALID_CHECK_TYPE": "Check type must be all, wash_sale, pattern_day_trading, or concentration.",
+    "INVALID_COMPLIANCE_PAYLOAD": "Compliance check data came back in an unexpected format.",
+    "INVALID_METRIC": "One or more requested metrics are not supported.",
+    "INVALID_MARKET_DATA_PAYLOAD": "Market data came back in an unexpected format.",
+    "SYMBOLS_NOT_FOUND": "None of the requested symbols were found in your portfolio.",
 }
 
 
