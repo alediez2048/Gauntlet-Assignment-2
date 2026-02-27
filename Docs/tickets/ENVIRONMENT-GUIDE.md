@@ -49,12 +49,14 @@ If production auth breaks, create a new user on the hosted instance and update t
 ### Troubleshooting: "Can't sign in to production"
 
 1. **Confirm the token works** — Run this (same token as above). You should see `HTTP_CODE:201` and a long `authToken`:
+
    ```bash
    curl -sS -X POST https://ghostfolio-production-61c8.up.railway.app/api/v1/auth/anonymous \
      -H "Content-Type: application/json" \
      -d '{"accessToken":"d33df36f6bfedfca1f9c97a37565bdb19ec7c0247d84e1a114e962ab67ac0aa65a2882aed7ba4ebd609795367ad3d35d819f7bb5c7d9496f1f023e6be0e19592"}' \
      -w "\nHTTP_CODE:%{http_code}"
    ```
+
    If you get `201`, the backend accepts the token; the issue is likely in the browser.
 
 2. **Paste the token cleanly** — Avoid extra spaces or newlines. Copy the token only (no surrounding text). In the login dialog, click the "eye" icon to show the Security Token and confirm it looks like one long hex string with no leading/trailing space.
@@ -87,12 +89,12 @@ docker compose -f docker/docker-compose.yml -f docker/docker-compose.agent.yml -
 
 This starts **4 containers** on the `ghostfolio-development_default` network:
 
-| Container     | Image                        | Port  | Healthcheck  |
-|---------------|------------------------------|-------|--------------|
-| `gf-postgres` | `postgres:15-alpine`        | 5432  | `pg_isready` |
-| `gf-redis`    | `redis:alpine`              | 6379  | `redis-cli ping` |
+| Container     | Image                          | Port | Healthcheck           |
+| ------------- | ------------------------------ | ---- | --------------------- |
+| `gf-postgres` | `postgres:15-alpine`           | 5432 | `pg_isready`          |
+| `gf-redis`    | `redis:alpine`                 | 6379 | `redis-cli ping`      |
 | `ghostfolio`  | `ghostfolio/ghostfolio:latest` | 3333 | `curl /api/v1/health` |
-| `gf-agent`    | built from `agent/Dockerfile` | 8000 | `curl /health` |
+| `gf-agent`    | built from `agent/Dockerfile`  | 8000 | `curl /health`        |
 
 ### 1.2 Verify Health
 
@@ -111,7 +113,7 @@ After a fresh Postgres volume, Ghostfolio starts with no users. Bootstrap:
 
 ```bash
 # 1. Create a user and capture the access token
-ACCESS_TOKEN=$(curl -sS http://localhost:3333/api/v1/user \
+ACCESS_TOKEN=$(curl -sS -X POST http://localhost:3333/api/v1/user \
   | python3 -c "import sys,json; print(json.load(sys.stdin)['accessToken'])")
 
 echo "Access token: $ACCESS_TOKEN"
@@ -161,17 +163,58 @@ Add `-v` to also destroy the Postgres volume (full reset — requires re-seeding
 docker compose -f docker/docker-compose.yml -f docker/docker-compose.agent.yml --env-file .env up -d --build agent
 ```
 
+### 1.7 Canonical Local UI Validation Path (source-based)
+
+Use source-based Ghostfolio frontend/backend for all UI regression checks. Keep Docker Compose as the API/data baseline, but do not treat containerized frontend rendering as the source of truth for UI verification.
+
+From repo root:
+
+```bash
+# Terminal A
+npm run start:server
+
+# Terminal B
+npm run start:client
+```
+
+Then validate in browser:
+
+1. Open `http://localhost:4200/en/` (or the URL printed by `start:client`).
+2. Sign in using the local `GHOSTFOLIO_ACCESS_TOKEN`.
+3. Navigate to `/en/home`.
+4. **Precheck gate (mandatory):** confirm the floating button labeled `Open agent chat panel` is visible.
+
+If the precheck fails, stop UI testing and fix environment wiring first (wrong runtime target, stale build output, or missing frontend integration path).
+
+### 1.8 Seed Baseline Expectations (Current)
+
+When `docker/seed-data.json` is imported successfully, use these values as the baseline for regression checks:
+
+- Total activities: `26`
+- Type counts:
+  - `BUY=13`
+  - `SELL=5`
+  - `DIVIDEND=3`
+  - `FEE=2`
+  - `INTEREST=2`
+  - `LIABILITY=1`
+
+Allocation note:
+
+- In the current local dataset/runtime, holdings can resolve to all `EQUITY` after normalization/fallback.
+- Treat this as expected behavior unless allocation validation fails or total allocation drifts outside tolerance.
+
 ---
 
 ## 2. Production Environment (Railway)
 
 ### 2.1 URLs
 
-| Service     | URL                                                              |
-|-------------|------------------------------------------------------------------|
-| Ghostfolio  | `https://ghostfolio-production-61c8.up.railway.app`              |
-| Agent       | `https://agent-production-d1f1.up.railway.app`                   |
-| Agent chat  | `https://agent-production-d1f1.up.railway.app/api/agent/chat`    |
+| Service    | URL                                                           |
+| ---------- | ------------------------------------------------------------- |
+| Ghostfolio | `https://ghostfolio-production-61c8.up.railway.app`           |
+| Agent      | `https://agent-production-d1f1.up.railway.app`                |
+| Agent chat | `https://agent-production-d1f1.up.railway.app/api/agent/chat` |
 
 ### 2.2 Verify Health
 
@@ -201,6 +244,7 @@ See `Docs/reference/railway.md` for the full variable list.
 ### 2.5 Seed Data on Production
 
 Production may reject `dataSource: "YAHOO"` symbols. Use the MANUAL transform:
+
 - Convert `dataSource` from `YAHOO` to `MANUAL`
 - Replace each symbol with a deterministic UUID
 
@@ -210,16 +254,16 @@ Full details in `Docs/reference/railway.md` → "Hosted Bootstrap + Import".
 
 ## 3. Key Files
 
-| File | Purpose |
-|------|---------|
-| `.env` | Local environment variables (gitignored — never commit) |
-| `docker/docker-compose.yml` | Core stack: postgres, redis, ghostfolio |
-| `docker/docker-compose.agent.yml` | Agent overlay (adds `gf-agent` service) |
-| `docker/seed-data.json` | 26 activities across 6 asset types for testing |
-| `agent/Dockerfile` | Agent container definition |
-| `agent/main.py` | FastAPI entrypoint |
-| `Docs/reference/railway.md` | Full Railway deployment runbook |
-| `Docs/reference/demo.md` | Demo script and validation checklist |
+| File                              | Purpose                                                 |
+| --------------------------------- | ------------------------------------------------------- |
+| `.env`                            | Local environment variables (gitignored — never commit) |
+| `docker/docker-compose.yml`       | Core stack: postgres, redis, ghostfolio                 |
+| `docker/docker-compose.agent.yml` | Agent overlay (adds `gf-agent` service)                 |
+| `docker/seed-data.json`           | 26 activities across 6 asset types for testing          |
+| `agent/Dockerfile`                | Agent container definition                              |
+| `agent/main.py`                   | FastAPI entrypoint                                      |
+| `Docs/reference/railway.md`       | Full Railway deployment runbook                         |
+| `Docs/reference/demo.md`          | Demo script and validation checklist                    |
 
 ---
 
@@ -232,6 +276,7 @@ Full details in `Docs/reference/railway.md` → "Hosted Bootstrap + Import".
 **Cause:** Running docker compose with different `-f` flags or project names creates separate networks.
 
 **Fix:**
+
 ```bash
 # Nuclear cleanup
 docker rm -f gf-agent ghostfolio gf-postgres gf-redis
@@ -256,6 +301,7 @@ docker compose -f docker/docker-compose.yml -f docker/docker-compose.agent.yml -
 **Symptom:** `Bind for 0.0.0.0:3333 failed: port is already allocated`
 
 **Fix:**
+
 ```bash
 # Find what's using the port
 lsof -i :3333
@@ -268,6 +314,7 @@ docker rm -f <container_name>
 **Symptom:** `docker volume ls` shows old volumes like `ghostfolio_postgres`, `ghostfolio_dev_postgres`.
 
 **Fix:**
+
 ```bash
 docker volume rm ghostfolio_postgres ghostfolio_dev_postgres
 # Or prune all unused volumes (careful — destroys data)
@@ -346,12 +393,12 @@ If you prefer to run tests on the host, use a venv with `pip install -r agent/re
 
 ### 6.4 Summary
 
-| Check                    | Blocking for TICKET-12? |
-|--------------------------|--------------------------|
-| Unit tests pass         | Yes                      |
-| Golden-path E2E passes   | Yes                      |
+| Check                      | Blocking for TICKET-12?          |
+| -------------------------- | -------------------------------- |
+| Unit tests pass            | Yes                              |
+| Golden-path E2E passes     | Yes                              |
 | Integration tests all pass | No (fix in TICKET-11 if desired) |
-| Production smoke OK     | Recommended              |
+| Production smoke OK        | Recommended                      |
 
 ---
 

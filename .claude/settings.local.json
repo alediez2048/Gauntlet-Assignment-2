@@ -2,7 +2,13 @@
   "permissions": {
     "allow": [
       "Bash(find apps -type d -name \"*assistant*\" 2>/dev/null | head -10)",
-      "Bash(wc -l apps/client/src/app/pages/*/)"
+      "Bash(wc -l apps/client/src/app/pages/*/)",
+      "Bash(wc -l /Users/jad/Desktop/Gauntlet-Assignment-2/apps/client/src/app/pages/agent/**/*.ts)",
+      "Bash(ls agent/.venv 2>/dev/null || ls agent/venv 2>/dev/null || which pytest 2>/dev/null || pip3 list 2>/dev/null | head -5)",
+      "Bash(agent/.venv/bin/python -m pytest agent/tests/ -v 2>&1)",
+      "Bash(npx nx build client --configuration=production 2>&1 | tail -30)",
+      "Bash(ls agent/.venv/bin/ | grep -i uvicorn 2>/dev/null; agent/.venv/bin/pip list 2>/dev/null | grep -i uvicorn)",
+      "Bash(npx @railway/cli up --service agent --ci --path-as-root --message \"deploy: multi-step orchestrator + chain-of-thought\" agent 2>&1)"
     ]
   }
 }
