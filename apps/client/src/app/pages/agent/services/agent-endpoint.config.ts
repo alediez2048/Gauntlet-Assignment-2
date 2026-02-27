@@ -4,29 +4,10 @@ export interface AgentEndpointConfig {
   readonly chatUrl: string;
 }
 
-declare global {
-  interface Window {
-    __GF_AGENT_CHAT_URL__?: string;
-  }
-}
-
-const DEFAULT_AGENT_CHAT_URL = 'http://localhost:8000/api/agent/chat';
-
-const resolveAgentChatUrl = (): string => {
-  if (typeof window === 'undefined') {
-    return DEFAULT_AGENT_CHAT_URL;
-  }
-
-  const runtimeChatUrl = window.__GF_AGENT_CHAT_URL__;
-
-  if (typeof runtimeChatUrl === 'string' && runtimeChatUrl.trim()) {
-    return runtimeChatUrl.trim();
-  }
-
-  return DEFAULT_AGENT_CHAT_URL;
-};
-
-let _cachedUrl: string | null = null;
+// In production the NestJS backend proxies /api/v1/agent/chat to the Python
+// agent service, keeping the request same-origin (no CORS).  In local dev
+// we fall through to the same proxy on http://localhost:3333.
+const AGENT_CHAT_URL = '/api/v1/agent/chat';
 
 export const AGENT_ENDPOINT_CONFIG = new InjectionToken<AgentEndpointConfig>(
   'AGENT_ENDPOINT_CONFIG',
@@ -34,16 +15,7 @@ export const AGENT_ENDPOINT_CONFIG = new InjectionToken<AgentEndpointConfig>(
     providedIn: 'root',
     factory: () => ({
       get chatUrl(): string {
-        if (_cachedUrl) {
-          return _cachedUrl;
-        }
-
-        const url = resolveAgentChatUrl();
-        if (url !== DEFAULT_AGENT_CHAT_URL) {
-          _cachedUrl = url;
-        }
-
-        return url;
+        return AGENT_CHAT_URL;
       }
     })
   }
