@@ -42,20 +42,12 @@ export interface AgentChatBlock {
   confidence?: number | null;
   content?: string;
   error?: string;
-  feedback?: 'up' | 'down';
   message?: string;
   success?: boolean;
   tool?: string;
   toolsUsed?: number;
   type: AgentChatBlockType;
   verificationCount?: number;
-}
-
-export interface AgentFeedbackRequest {
-  thread_id: string;
-  message_index: number;
-  rating: 'up' | 'down';
-  comment?: string;
 }
 
 export interface AgentChatState {

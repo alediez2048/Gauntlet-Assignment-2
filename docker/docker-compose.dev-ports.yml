@@ -1,0 +1,8 @@
+# Overlay: expose Postgres + Redis ports to host for source-based dev server
+services:
+  postgres:
+    ports:
+      - '5432:5432'
+  redis:
+    ports:
+      - '6379:6379'

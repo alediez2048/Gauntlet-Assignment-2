@@ -18,7 +18,6 @@ import { Subscription } from 'rxjs';
 import {
   AgentChatRequest,
   AgentChatState,
-  AgentFeedbackRequest,
   INITIAL_AGENT_CHAT_STATE
 } from '../../models/agent-chat.models';
 import {
@@ -96,25 +95,6 @@ export class GfAgentChatPanelComponent implements OnDestroy {
   public onRequestClose() {
     this.cancelActiveStream(true);
     this.closeRequested.emit();
-  }
-
-  public onFeedback(blockIndex: number, rating: 'up' | 'down') {
-    const threadId = this.chatState().threadId;
-    if (!threadId) {
-      return;
-    }
-
-    this.applyAction({ blockIndex, rating, type: 'set_feedback' });
-
-    const request: AgentFeedbackRequest = {
-      message_index: blockIndex,
-      rating,
-      thread_id: threadId
-    };
-
-    this.agentService.submitFeedback(request).catch(() => {
-      // Feedback is best-effort; do not disrupt the UI on failure.
-    });
   }
 
   public onSampleQuestionClick(question: string) {

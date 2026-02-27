@@ -15,10 +15,10 @@
   box-shadow: 6px 6px 0 #000;
   display: flex;
   flex-direction: column;
-  height: min(40rem, calc(100vh - 3rem));
+  height: min(56rem, calc(100vh - 3rem));
   position: fixed;
   right: 1.5rem;
-  width: min(30rem, calc(100vw - 2rem));
+  width: min(42rem, calc(100vw - 2rem));
   z-index: 1001;
 }
 
@@ -51,10 +51,12 @@
 }
 
 .agent-panel__suggestions {
+  border-top: 2px solid #000;
   display: flex;
+  flex-shrink: 0;
   flex-wrap: wrap;
   gap: 0.5rem;
-  margin-top: 0.75rem;
+  padding: 0.6rem 1rem;
 }
 
 .agent-suggestion-chip {
@@ -216,37 +218,6 @@
   }
 }
 
-.agent-feedback {
-  display: flex;
-  gap: 0.15rem;
-  margin-top: 0.35rem;
-
-  &__btn {
-    color: rgba(15, 23, 42, 0.4);
-    height: 28px;
-    line-height: 28px;
-    width: 28px;
-
-    .mat-icon {
-      font-size: 16px;
-      height: 16px;
-      width: 16px;
-    }
-
-    &:hover:not(:disabled) {
-      color: #1e293b;
-    }
-
-    &--selected {
-      color: #1d4ed8;
-    }
-
-    &:disabled:not(.agent-feedback__btn--selected) {
-      color: rgba(15, 23, 42, 0.15);
-    }
-  }
-}
-
 // ── Dark Theme Overrides ──
 
 :host-context(.theme-dark) .agent-panel {
@@ -294,6 +265,10 @@
   }
 }
 
+:host-context(.theme-dark) .agent-panel__suggestions {
+  border-top-color: #e2e8f0;
+}
+
 :host-context(.theme-dark) .agent-panel__composer {
   border-top-color: #e2e8f0;
 }
@@ -339,21 +314,5 @@
 
   &__source {
     color: rgba(255, 255, 255, 0.5);
-  }
-}
-
-:host-context(.theme-dark) .agent-feedback__btn {
-  color: rgba(255, 255, 255, 0.3);
-
-  &:hover:not(:disabled) {
-    color: rgba(255, 255, 255, 0.7);
-  }
-
-  &--selected {
-    color: #93c5fd;
-  }
-
-  &:disabled:not(.agent-feedback__btn--selected) {
-    color: rgba(255, 255, 255, 0.12);
   }
 }
