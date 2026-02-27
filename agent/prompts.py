@@ -56,13 +56,13 @@ Tool routing rules:
    - Purpose: Estimate tax liability from realized gains/losses.
    - Use when: user asks about tax implications or capital gains tax.
    - Do not use when: user asks for non-tax transaction summaries or allocation advice.
-   - Args hint: {"tax_year": 2025, "income_bracket": "middle"}.
+   - Args hint: {"tax_year": 2025, "income_bracket": "middle"}. Default to tax_year=2025 and income_bracket="middle" when absent.
 
 4) advise_asset_allocation
    - Purpose: Compare current allocation vs target profile and suggest rebalancing.
    - Use when: user asks about diversification, concentration, or allocation.
    - Do not use when: user asks for returns, activity logs, or taxes.
-   - Args hint: {"target_profile": "balanced"}.
+   - Args hint: {"target_profile": "balanced"}. Default to "balanced" when absent.
 
 5) check_compliance
    - Purpose: Screen portfolio for regulatory red flags (wash sales, pattern day trading, concentration risk).
@@ -77,8 +77,13 @@ Tool routing rules:
    - Args hint: {"symbols": null, "metrics": ["price","change","change_percent","currency","market_value"]}.
      If user names specific tickers, include them in "symbols" as a list.
 
-If the request is out of domain (weather, sports, general coding) or unclear,
-set route to "clarify", tool_name to null, and tool_args to {}.
+IMPORTANT: When the user's request maps to any supported tool, ALWAYS route to
+that tool using default arguments for any missing parameters. Never use "clarify"
+just because the user omitted optional parameters — every tool has sensible defaults.
+
+Only use route "clarify" (tool_name null, tool_args {}) when the request is
+completely out of domain (weather, sports, general coding) or genuinely ambiguous
+between multiple tools.
 """.strip()
 
 ROUTING_FEW_SHOT_EXAMPLES: Final[list[dict[str, str]]] = [
@@ -117,6 +122,30 @@ ROUTING_FEW_SHOT_EXAMPLES: Final[list[dict[str, str]]] = [
         "route": "market",
         "tool_name": "get_market_data",
         "tool_args": '{"symbols":null,"metrics":["price","change","change_percent","currency","market_value"]}',
+    },
+    {
+        "user": "Estimate my taxes for this year.",
+        "route": "tax",
+        "tool_name": "estimate_capital_gains_tax",
+        "tool_args": '{"tax_year":2025,"income_bracket":"middle"}',
+    },
+    {
+        "user": "How is my portfolio performing?",
+        "route": "portfolio",
+        "tool_name": "analyze_portfolio_performance",
+        "tool_args": '{"time_period":"ytd"}',
+    },
+    {
+        "user": "Am I properly diversified?",
+        "route": "allocation",
+        "tool_name": "advise_asset_allocation",
+        "tool_args": '{"target_profile":"balanced"}',
+    },
+    {
+        "user": "Categorize my recent transactions.",
+        "route": "transactions",
+        "tool_name": "categorize_transactions",
+        "tool_args": '{"date_range":"max"}',
     },
     {
         "user": "What's the weather tomorrow?",

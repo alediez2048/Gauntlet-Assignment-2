@@ -159,7 +159,10 @@ def _build_router_callable() -> Any | None:
         system_content = (
             f"{SYSTEM_PROMPT}\n\n"
             "Select the most appropriate function to answer the user's request. "
-            "If the request is out of scope or unclear, do NOT call any function."
+            "Every tool has sensible defaults — ALWAYS call a function when the request "
+            "maps to a supported capability, even if the user omits optional parameters. "
+            "Only skip calling a function when the request is completely out of scope "
+            "(weather, sports, general coding, etc.)."
         )
         llm_messages: list[dict[str, str]] = [
             {"role": "system", "content": system_content},
@@ -193,16 +196,10 @@ def _build_router_callable() -> Any | None:
                     "reasoning": llm_reasoning or f"Selected {tool_name} via function calling.",
                 }
 
-            # LLM chose not to call a function — treat as clarify
-            return {
-                "route": "clarify",
-                "tool_name": None,
-                "tool_args": {},
-                "reason": "no_function_selected",
-                "reasoning": llm_reasoning or "No matching function found for this request.",
-            }
+            # LLM chose not to call a function — fall through to
+            # prompt-based routing which has few-shot examples and is
+            # more reliable at selecting tools with default args.
         except Exception:
-            # Fallback to prompt-based routing if function calling fails
             pass
 
         # Fallback: prompt-based JSON routing (original approach)
