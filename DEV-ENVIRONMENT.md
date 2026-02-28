@@ -250,6 +250,30 @@ curl http://localhost:8000/health
 
 ---
 
+## Claude Code Skills
+
+Custom skills are available in `.claude/skills/` to accelerate common workflows:
+
+| Skill             | Directory                       | Trigger Phrases                    |
+| ----------------- | ------------------------------- | ---------------------------------- |
+| **dev-start**     | `.claude/skills/dev-start/`     | "start dev", "boot up servers"     |
+| **test-all**      | `.claude/skills/test-all/`      | "run tests", "test everything"     |
+| **deploy**        | `.claude/skills/deploy/`        | "deploy to railway", "ship it"     |
+| **eval-agent**    | `.claude/skills/eval-agent/`    | "run evals", "test agent routing"  |
+| **db-migrate**    | `.claude/skills/db-migrate/`    | "migrate database", "add column"   |
+| **docker-health** | `.claude/skills/docker-health/` | "check services", "what's running" |
+
+Additionally, **GitNexus** skills are available for code intelligence:
+
+| Skill               | Directory                                  | Purpose                        |
+| ------------------- | ------------------------------------------ | ------------------------------ |
+| **exploring**       | `.claude/skills/gitnexus/exploring/`       | Navigate unfamiliar code       |
+| **impact-analysis** | `.claude/skills/gitnexus/impact-analysis/` | Blast radius before changes    |
+| **debugging**       | `.claude/skills/gitnexus/debugging/`       | Trace bugs through call chains |
+| **refactoring**     | `.claude/skills/gitnexus/refactoring/`     | Plan safe refactors            |
+
+---
+
 ## File Reference
 
 | Config File                                                    | Purpose                     |
