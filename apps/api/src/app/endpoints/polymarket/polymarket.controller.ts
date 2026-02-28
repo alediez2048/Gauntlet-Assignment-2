@@ -22,7 +22,7 @@ import { StatusCodes } from 'http-status-codes';
 
 import { PolymarketService } from './polymarket.service';
 
-@Controller('api/v1/polymarket')
+@Controller('polymarket')
 export class PolymarketController {
   private readonly logger = new Logger(PolymarketController.name);
 
