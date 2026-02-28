@@ -1,0 +1,210 @@
+// ---------------------------------------------------------------------------
+// Polyfolio Neobrutalist Design System — Global Material Overrides
+// ---------------------------------------------------------------------------
+// Design tokens extracted from the agent chat panel's proven neobrutalist system.
+// Single import in styles.scss applies the look to every Material component.
+// Remove the import to revert all styling.
+// ---------------------------------------------------------------------------
+
+// ── Design Tokens ──────────────────────────────────────────────────────────
+
+$neo-border-light: 2px solid #000;
+$neo-border-dark: 2px solid #e2e8f0;
+$neo-shadow-light: 4px 4px 0 #000;
+$neo-shadow-hover-light: 6px 6px 0 #000;
+$neo-shadow-active-light: 2px 2px 0 #000;
+$neo-shadow-dark: 4px 4px 0 rgba(255, 255, 255, 0.15);
+$neo-shadow-hover-dark: 6px 6px 0 rgba(255, 255, 255, 0.2);
+$neo-shadow-active-dark: 2px 2px 0 rgba(255, 255, 255, 0.1);
+$neo-radius: 0.5rem;
+$neo-radius-lg: 0.75rem;
+
+// ── Cards ──────────────────────────────────────────────────────────────────
+
+.mat-mdc-card {
+  border: $neo-border-light;
+  border-radius: $neo-radius-lg !important;
+  box-shadow: $neo-shadow-light !important;
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease;
+
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: $neo-shadow-hover-light !important;
+  }
+}
+
+// ── Buttons ────────────────────────────────────────────────────────────────
+
+.mat-mdc-unelevated-button,
+.mat-mdc-raised-button,
+.mat-mdc-outlined-button {
+  border: $neo-border-light !important;
+  border-radius: $neo-radius !important;
+  box-shadow: $neo-shadow-light;
+  font-weight: 700;
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease;
+
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: $neo-shadow-hover-light;
+  }
+
+  &:active {
+    transform: translateY(1px);
+    box-shadow: $neo-shadow-active-light;
+  }
+}
+
+// ── Toolbar ────────────────────────────────────────────────────────────────
+
+.mat-toolbar {
+  border-bottom: $neo-border-light;
+}
+
+// ── Tables ─────────────────────────────────────────────────────────────────
+
+.mat-mdc-table {
+  border: $neo-border-light;
+  border-radius: $neo-radius !important;
+  overflow: hidden;
+
+  .mat-mdc-header-row {
+    font-weight: 800;
+  }
+
+  .mat-mdc-row {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+  }
+}
+
+// ── Dialogs ────────────────────────────────────────────────────────────────
+
+.mat-mdc-dialog-container {
+  .mdc-dialog__surface {
+    border: $neo-border-light !important;
+    border-radius: $neo-radius-lg !important;
+    box-shadow: $neo-shadow-hover-light !important;
+  }
+}
+
+// ── Chips ──────────────────────────────────────────────────────────────────
+
+.mat-mdc-chip {
+  border: $neo-border-light !important;
+  border-radius: $neo-radius !important;
+  box-shadow: 2px 2px 0 #000;
+  font-weight: 700;
+}
+
+// ── Tabs ───────────────────────────────────────────────────────────────────
+
+.mat-mdc-tab-nav-bar {
+  border-bottom: $neo-border-light;
+}
+
+// ── FAB ────────────────────────────────────────────────────────────────────
+
+.mat-mdc-fab,
+.mat-mdc-mini-fab {
+  border: $neo-border-light !important;
+  box-shadow: $neo-shadow-light !important;
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease;
+
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: $neo-shadow-hover-light !important;
+  }
+
+  &:active {
+    transform: translateY(1px);
+    box-shadow: $neo-shadow-active-light !important;
+  }
+}
+
+// ── Form Fields ────────────────────────────────────────────────────────────
+
+.mdc-text-field--outlined {
+  .mdc-notched-outline {
+    .mdc-notched-outline__leading,
+    .mdc-notched-outline__notch,
+    .mdc-notched-outline__trailing {
+      border-width: 2px !important;
+    }
+  }
+}
+
+// ── Dark Mode Overrides ────────────────────────────────────────────────────
+
+body.theme-dark {
+  .mat-mdc-card {
+    border: $neo-border-dark;
+    box-shadow: $neo-shadow-dark !important;
+
+    &:hover {
+      box-shadow: $neo-shadow-hover-dark !important;
+    }
+  }
+
+  .mat-mdc-unelevated-button,
+  .mat-mdc-raised-button,
+  .mat-mdc-outlined-button {
+    border-color: #e2e8f0 !important;
+    box-shadow: $neo-shadow-dark;
+
+    &:hover {
+      box-shadow: $neo-shadow-hover-dark;
+    }
+
+    &:active {
+      box-shadow: $neo-shadow-active-dark;
+    }
+  }
+
+  .mat-toolbar {
+    border-bottom: $neo-border-dark;
+  }
+
+  .mat-mdc-table {
+    border: $neo-border-dark;
+
+    .mat-mdc-row {
+      border-bottom-color: rgba(255, 255, 255, 0.12);
+    }
+  }
+
+  .mat-mdc-dialog-container {
+    .mdc-dialog__surface {
+      border: $neo-border-dark !important;
+      box-shadow: $neo-shadow-hover-dark !important;
+    }
+  }
+
+  .mat-mdc-chip {
+    border: $neo-border-dark !important;
+    box-shadow: 2px 2px 0 rgba(255, 255, 255, 0.15);
+  }
+
+  .mat-mdc-tab-nav-bar {
+    border-bottom: $neo-border-dark;
+  }
+
+  .mat-mdc-fab,
+  .mat-mdc-mini-fab {
+    border: $neo-border-dark !important;
+    box-shadow: $neo-shadow-dark !important;
+
+    &:hover {
+      box-shadow: $neo-shadow-hover-dark !important;
+    }
+
+    &:active {
+      box-shadow: $neo-shadow-active-dark !important;
+    }
+  }
+}

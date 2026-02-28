@@ -198,7 +198,7 @@ export class GfAppComponent implements OnDestroy, OnInit {
               index === -1
                 ? ''
                 : this.title.getTitle().substring(0, index).trim();
-            this.pageTitle = title.length <= 15 ? title : 'Ghostfolio';
+            this.pageTitle = title.length <= 15 ? title : 'Polyfolio';
 
             this.changeDetectorRef.markForCheck();
           });

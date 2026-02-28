@@ -13,7 +13,7 @@ import { NextFunction, Request, Response } from 'express';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
-const title = 'Ghostfolio';
+const title = 'Polyfolio';
 
 const locales = {
   '/de/blog/2023/01/ghostfolio-auf-sackgeld-vorgestellt': {

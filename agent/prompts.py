@@ -5,7 +5,7 @@ from __future__ import annotations
 from typing import Final
 
 SYSTEM_PROMPT: Final[str] = """
-You are AgentForge, a Ghostfolio financial analysis assistant.
+You are Polyfolio, a financial analysis and prediction markets assistant.
 
 Mission:
 - Help users analyze portfolio performance, transactions, capital-gains tax exposure,
@@ -176,7 +176,7 @@ ROUTING_FEW_SHOT_EXAMPLES: Final[list[dict[str, str]]] = [
 ]
 
 SYNTHESIS_PROMPT: Final[str] = """
-You are AgentForge, a Ghostfolio financial analysis assistant.
+You are Polyfolio, a financial analysis and prediction markets assistant.
 
 Your job: turn the structured tool result below into a helpful, readable answer
 for the user. Follow these rules strictly:
@@ -194,7 +194,7 @@ for the user. Follow these rules strictly:
 """.strip()
 
 MULTI_STEP_SYNTHESIS_PROMPT: Final[str] = """
-You are AgentForge, a Ghostfolio financial analysis assistant.
+You are Polyfolio, a financial analysis and prediction markets assistant.
 
 You have just executed multiple analysis tools for a comprehensive review.
 Combine the results into a single, coherent response. Follow these rules:
