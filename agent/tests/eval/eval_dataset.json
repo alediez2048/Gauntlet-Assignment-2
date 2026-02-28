@@ -1142,5 +1142,121 @@
       "advise_asset_allocation",
       "check_compliance"
     ]
+  },
+  {
+    "id": "hp_predictions_browse_01",
+    "category": "happy_path",
+    "input": "Show me the latest prediction markets",
+    "expected_route": "predictions",
+    "expected_tool": "explore_prediction_markets",
+    "expected_args": { "action": "browse" },
+    "expected_category": "analysis",
+    "expected_output_contains": ["markets", "total_markets"],
+    "expected_error": null,
+    "pass_criteria": "Routes to prediction markets tool with browse action",
+    "eval_types": [
+      "tool_selection",
+      "tool_execution",
+      "correctness",
+      "latency"
+    ],
+    "consistency_runs": 1,
+    "latency_threshold_seconds": 5.0,
+    "multi_step_expected_tools": null
+  },
+  {
+    "id": "hp_predictions_search_02",
+    "category": "happy_path",
+    "input": "Search prediction markets for Bitcoin",
+    "expected_route": "predictions",
+    "expected_tool": "explore_prediction_markets",
+    "expected_args": { "action": "search", "query": "Bitcoin" },
+    "expected_category": "analysis",
+    "expected_output_contains": ["markets"],
+    "expected_error": null,
+    "pass_criteria": "Routes to prediction markets tool with search action and Bitcoin query",
+    "eval_types": [
+      "tool_selection",
+      "tool_execution",
+      "correctness",
+      "latency"
+    ],
+    "consistency_runs": 1,
+    "latency_threshold_seconds": 5.0,
+    "multi_step_expected_tools": null
+  },
+  {
+    "id": "hp_predictions_positions_03",
+    "category": "happy_path",
+    "input": "Show my Polymarket positions",
+    "expected_route": "predictions",
+    "expected_tool": "explore_prediction_markets",
+    "expected_args": { "action": "positions" },
+    "expected_category": "analysis",
+    "expected_output_contains": ["positions", "total_positions"],
+    "expected_error": null,
+    "pass_criteria": "Routes to prediction markets tool with positions action",
+    "eval_types": [
+      "tool_selection",
+      "tool_execution",
+      "correctness",
+      "latency"
+    ],
+    "consistency_runs": 1,
+    "latency_threshold_seconds": 5.0,
+    "multi_step_expected_tools": null
+  },
+  {
+    "id": "hp_predictions_polymarket_04",
+    "category": "happy_path",
+    "input": "What are the odds on Polymarket?",
+    "expected_route": "predictions",
+    "expected_tool": "explore_prediction_markets",
+    "expected_args": { "action": "browse" },
+    "expected_category": "analysis",
+    "expected_output_contains": ["markets"],
+    "expected_error": null,
+    "pass_criteria": "Routes to prediction markets tool with browse action for Polymarket query",
+    "eval_types": [
+      "tool_selection",
+      "tool_execution",
+      "correctness",
+      "latency"
+    ],
+    "consistency_runs": 1,
+    "latency_threshold_seconds": 5.0,
+    "multi_step_expected_tools": null
+  },
+  {
+    "id": "ec_predictions_category_05",
+    "category": "edge_case",
+    "input": "Browse crypto prediction markets",
+    "expected_route": "predictions",
+    "expected_tool": "explore_prediction_markets",
+    "expected_args": { "action": "browse", "category": "Crypto" },
+    "expected_category": "analysis",
+    "expected_output_contains": ["markets"],
+    "expected_error": null,
+    "pass_criteria": "Routes to prediction markets with browse action and Crypto category",
+    "eval_types": ["tool_selection", "tool_execution", "correctness"],
+    "consistency_runs": 1,
+    "latency_threshold_seconds": 5.0,
+    "multi_step_expected_tools": null
+  },
+  {
+    "id": "cons_predictions_06",
+    "category": "consistency",
+    "input": "Show me prediction markets for events",
+    "expected_route": "predictions",
+    "expected_tool": "explore_prediction_markets",
+    "expected_args": { "action": "browse" },
+    "expected_category": "analysis",
+    "expected_output_contains": ["markets"],
+    "expected_error": null,
+    "pass_criteria": "Consistency: identical prediction markets result across 3 runs",
+    "eval_types": ["consistency"],
+    "consistency_runs": 3,
+    "latency_threshold_seconds": 5.0,
+    "multi_step_expected_tools": null
   }
 ]
