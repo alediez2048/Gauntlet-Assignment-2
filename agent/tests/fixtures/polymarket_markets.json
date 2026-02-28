@@ -1,0 +1,57 @@
+{
+  "markets": [
+    {
+      "question": "Will Bitcoin reach $100k by end of 2026?",
+      "slug": "will-bitcoin-reach-100k-2026",
+      "outcomes": ["Yes", "No"],
+      "outcomePrices": "[0.65, 0.35]",
+      "volume24hr": 1250000.0,
+      "category": "Crypto",
+      "endDate": "2026-12-31T23:59:59Z",
+      "description": "This market resolves to Yes if Bitcoin reaches $100,000 USD.",
+      "active": true,
+      "lastTradePrice": 0.65,
+      "bestBid": 0.64,
+      "bestAsk": 0.66
+    },
+    {
+      "question": "Will the Fed cut rates in March 2026?",
+      "slug": "fed-rate-cut-march-2026",
+      "outcomes": ["Yes", "No"],
+      "outcomePrices": "[0.42, 0.58]",
+      "volume24hr": 890000.0,
+      "category": "Economics",
+      "endDate": "2026-03-31T23:59:59Z",
+      "description": "This market resolves to Yes if the Federal Reserve cuts interest rates.",
+      "active": true,
+      "lastTradePrice": 0.42,
+      "bestBid": 0.41,
+      "bestAsk": 0.43
+    },
+    {
+      "question": "Will Ethereum flip Bitcoin by market cap in 2026?",
+      "slug": "eth-flip-btc-2026",
+      "outcomes": ["Yes", "No"],
+      "outcomePrices": "[0.08, 0.92]",
+      "volume24hr": 340000.0,
+      "category": "Crypto",
+      "endDate": "2026-12-31T23:59:59Z",
+      "description": "This market resolves to Yes if Ethereum's market cap exceeds Bitcoin's.",
+      "active": true,
+      "lastTradePrice": 0.08,
+      "bestBid": 0.07,
+      "bestAsk": 0.09
+    }
+  ],
+  "positions": [
+    {
+      "id": "pos-001",
+      "slug": "will-bitcoin-reach-100k-2026",
+      "question": "Will Bitcoin reach $100k by end of 2026?",
+      "outcome": "Yes",
+      "outcomePrice": 0.65,
+      "quantity": 100,
+      "date": "2026-02-15T10:30:00Z"
+    }
+  ]
+}

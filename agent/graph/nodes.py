@@ -19,6 +19,7 @@ from agent.tools.base import ToolResult
 from agent.tools.compliance_checker import check_compliance
 from agent.tools.market_data import get_market_data
 from agent.tools.portfolio_analyzer import analyze_portfolio_performance
+from agent.tools.prediction_markets import explore_prediction_markets
 from agent.tools.registry import TOOL_REGISTRY
 from agent.tools.tax_estimator import estimate_capital_gains_tax
 from agent.tools.transaction_categorizer import categorize_transactions
@@ -37,6 +38,7 @@ _ROUTE_TO_TOOL: Final[dict[str, ToolName]] = {
     "allocation": "advise_asset_allocation",
     "compliance": "check_compliance",
     "market": "get_market_data",
+    "predictions": "explore_prediction_markets",
 }
 _VALID_ROUTES: Final[set[RouteName]] = {
     "portfolio",
@@ -45,6 +47,7 @@ _VALID_ROUTES: Final[set[RouteName]] = {
     "allocation",
     "compliance",
     "market",
+    "predictions",
     "clarify",
 }
 _TOOL_FUNCTIONS: Final[dict[ToolName, Callable[..., Awaitable[ToolResult]]]] = {
@@ -54,6 +57,7 @@ _TOOL_FUNCTIONS: Final[dict[ToolName, Callable[..., Awaitable[ToolResult]]]] = {
     "advise_asset_allocation": advise_asset_allocation,
     "check_compliance": check_compliance,
     "get_market_data": get_market_data,
+    "explore_prediction_markets": explore_prediction_markets,
 }
 _VALID_INCOME_BRACKETS: Final[set[str]] = {"low", "middle", "high"}
 _VALID_TARGET_PROFILES: Final[set[str]] = {"conservative", "balanced", "aggressive"}
@@ -114,6 +118,16 @@ _ROUTER_INTENTS: Final[dict[RouteName, tuple[str, ...]]] = {
         "quote",
         "what is .* trading at",
     ),
+    "predictions": (
+        "polymarket",
+        "prediction market",
+        "prediction",
+        "bet",
+        "odds",
+        "event market",
+        "forecast market",
+        "will .* happen",
+    ),
     "clarify": (),
 }
 _PROMPT_INJECTION_MARKERS: Final[tuple[str, ...]] = (
@@ -152,6 +166,10 @@ _MULTI_STEP_PATTERNS: Final[dict[tuple[str, ...], list[dict[str, Any]]]] = {
     ("tax and compliance",): [
         {"route": "tax", "tool_name": "estimate_capital_gains_tax", "tool_args": {}},
         {"route": "compliance", "tool_name": "check_compliance", "tool_args": {}},
+    ],
+    ("prediction overview", "market outlook"): [
+        {"route": "predictions", "tool_name": "explore_prediction_markets", "tool_args": {}},
+        {"route": "market", "tool_name": "get_market_data", "tool_args": {}},
     ],
 }
 
@@ -329,6 +347,26 @@ def _default_args_for_tool(tool_name: ToolName, user_query: str) -> dict[str, An
         if symbols:
             args["symbols"] = symbols
         return args
+    if tool_name == "explore_prediction_markets":
+        lowered = user_query.lower()
+        pm_args: dict[str, Any] = {"action": "browse"}
+        if "position" in lowered or "my poly" in lowered:
+            pm_args["action"] = "positions"
+        elif "search" in lowered:
+            pm_args["action"] = "search"
+            # Extract query after "search ... for" or "search"
+            for prefix in ("search prediction markets for ", "search for ", "search "):
+                if prefix in lowered:
+                    idx = lowered.index(prefix) + len(prefix)
+                    pm_args["query"] = user_query[idx:].strip().rstrip("?.!")
+                    break
+        if "crypto" in lowered:
+            pm_args["category"] = "Crypto"
+        elif "politic" in lowered:
+            pm_args["category"] = "Politics"
+        elif "econom" in lowered:
+            pm_args["category"] = "Economics"
+        return pm_args
 
     return {"target_profile": _extract_target_profile(user_query, "balanced")}
 
@@ -362,6 +400,10 @@ def _sanitize_tool_args(
         check_type = merged_args.get("check_type")
         if not isinstance(check_type, str) or check_type not in _VALID_CHECK_TYPES:
             merged_args["check_type"] = "all"
+    elif tool_name == "explore_prediction_markets":
+        action = merged_args.get("action")
+        if not isinstance(action, str) or action not in {"browse", "search", "analyze", "positions"}:
+            merged_args["action"] = "browse"
     elif tool_name == "get_market_data":
         symbols = merged_args.get("symbols")
         if symbols is not None and not isinstance(symbols, list):
@@ -774,6 +816,21 @@ def _validate_market_data_payload(payload: dict[str, Any]) -> str | None:
     return None
 
 
+def _validate_prediction_market_payload(payload: dict[str, Any]) -> str | None:
+    action = payload.get("action")
+    if not isinstance(action, str):
+        return "INVALID_PREDICTION_MARKET_PAYLOAD"
+    if action in ("browse", "search"):
+        markets = payload.get("markets")
+        if not isinstance(markets, list):
+            return "INVALID_PREDICTION_MARKET_PAYLOAD"
+    elif action == "positions":
+        positions = payload.get("positions")
+        if not isinstance(positions, list):
+            return "INVALID_PREDICTION_MARKET_PAYLOAD"
+    return None
+
+
 def _validate_tool_payload(tool_name: ToolName, payload: dict[str, Any]) -> str | None:
     if tool_name == "analyze_portfolio_performance":
         return _validate_portfolio_payload(payload)
@@ -785,6 +842,8 @@ def _validate_tool_payload(tool_name: ToolName, payload: dict[str, Any]) -> str 
         return _validate_compliance_payload(payload)
     if tool_name == "get_market_data":
         return _validate_market_data_payload(payload)
+    if tool_name == "explore_prediction_markets":
+        return _validate_prediction_market_payload(payload)
 
     return _validate_allocation_payload(payload)
 
@@ -891,6 +950,17 @@ def _build_summary(tool_name: ToolName | None, tool_result: ToolResult | None) -
             f"Showing data for {total_holdings} holding(s){value_str}."
         )
 
+    if tool_name == "explore_prediction_markets":
+        action = payload.get("action", "browse")
+        if action == "positions":
+            total_pos = payload.get("total_positions", 0)
+            return f"Found {total_pos} Polymarket position(s)."
+        if action == "analyze":
+            question = payload.get("question", "market")
+            return f"Analysis ready for: {question}"
+        total_markets = payload.get("total_markets", 0)
+        return f"Showing {total_markets} prediction market(s) from Polymarket."
+
     warnings = payload.get("concentration_warnings")
     warning_count = len(warnings) if isinstance(warnings, list) else 0
     return (
@@ -922,6 +992,7 @@ _TOOL_DISPLAY_NAMES: Final[dict[str, str]] = {
     "advise_asset_allocation": "Allocation Analysis",
     "check_compliance": "Compliance Check",
     "get_market_data": "Market Data",
+    "explore_prediction_markets": "Prediction Markets",
 }
 
 
@@ -986,6 +1057,30 @@ def _extract_tool_data_points(
         total_mv = data.get("total_market_value")
         if isinstance(total_mv, (int, float)):
             points.append(("total_market_value", f"${total_mv:,.2f}"))
+
+    elif tool_name == "explore_prediction_markets":
+        action = data.get("action")
+        if action in ("browse", "search"):
+            total_m = data.get("total_markets")
+            if isinstance(total_m, int):
+                points.append(("total_markets", str(total_m)))
+            markets = data.get("markets")
+            if isinstance(markets, list) and markets:
+                top = markets[0]
+                q = top.get("question", "")
+                if q:
+                    points.append(("top_market", q))
+        elif action == "positions":
+            total_p = data.get("total_positions")
+            if isinstance(total_p, int):
+                points.append(("total_positions", str(total_p)))
+        elif action == "analyze":
+            question = data.get("question")
+            if isinstance(question, str):
+                points.append(("question", question))
+            vol = data.get("volume_24h")
+            if isinstance(vol, (int, float)):
+                points.append(("volume_24h", f"${vol:,.0f}"))
 
     return points[:3]
 

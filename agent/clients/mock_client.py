@@ -71,6 +71,35 @@ class MockGhostfolioClient:
 
         return copy.deepcopy(self._orders)
 
+    async def get_polymarket_markets(
+        self,
+        category: str | None = None,
+        query: str | None = None,
+    ) -> list[dict[str, Any]]:
+        """Returns mock Polymarket markets."""
+        fixture = self._load_json_fixture("polymarket_markets.json")
+        markets = fixture.get("markets", [])
+        if category:
+            cat = category.lower()
+            markets = [m for m in markets if cat in (m.get("category", "") or "").lower()]
+        if query:
+            q = query.lower()
+            markets = [m for m in markets if q in (m.get("question", "") or "").lower()]
+        return copy.deepcopy(markets)
+
+    async def get_polymarket_market(self, slug: str) -> dict[str, Any]:
+        """Returns a single mock Polymarket market by slug."""
+        fixture = self._load_json_fixture("polymarket_markets.json")
+        for market in fixture.get("markets", []):
+            if market.get("slug") == slug:
+                return copy.deepcopy(market)
+        return {}
+
+    async def get_polymarket_positions(self) -> list[dict[str, Any]]:
+        """Returns mock Polymarket positions."""
+        fixture = self._load_json_fixture("polymarket_markets.json")
+        return copy.deepcopy(fixture.get("positions", []))
+
     def _validate_date_range(self, value: str) -> None:
         if value not in VALID_DATE_RANGES:
             raise GhostfolioClientError("INVALID_TIME_PERIOD", detail=f"Unsupported range: {value}")

@@ -29,12 +29,13 @@ Classify the latest user request into exactly one route:
 - allocation
 - compliance
 - market
+- predictions
 - clarify
 
 Return strict JSON:
 {
-  "route": "portfolio|transactions|tax|allocation|compliance|market|clarify",
-  "tool_name": "analyze_portfolio_performance|categorize_transactions|estimate_capital_gains_tax|advise_asset_allocation|check_compliance|get_market_data|null",
+  "route": "portfolio|transactions|tax|allocation|compliance|market|predictions|clarify",
+  "tool_name": "analyze_portfolio_performance|categorize_transactions|estimate_capital_gains_tax|advise_asset_allocation|check_compliance|get_market_data|explore_prediction_markets|null",
   "tool_args": {},
   "reason": "short explanation"
 }
@@ -76,6 +77,13 @@ Tool routing rules:
    - Do not use when: user asks for historical performance trends or tax estimates.
    - Args hint: {"symbols": null, "metrics": ["price","change","change_percent","currency","market_value"]}.
      If user names specific tickers, include them in "symbols" as a list.
+
+7) explore_prediction_markets
+   - Purpose: Browse, search, or analyze Polymarket prediction markets and view positions.
+   - Use when: user asks about prediction markets, Polymarket, odds, bets, event outcomes, forecasts.
+   - Do not use when: user asks about traditional portfolio performance or stock prices.
+   - Args hint: {"action": "browse", "query": null, "category": null, "market_slug": null}.
+     Actions: "browse" (list active markets), "search" (filter by query), "analyze" (single market detail), "positions" (user's positions).
 
 IMPORTANT: When the user's request maps to any supported tool, ALWAYS route to
 that tool using default arguments for any missing parameters. Never use "clarify"
@@ -148,6 +156,18 @@ ROUTING_FEW_SHOT_EXAMPLES: Final[list[dict[str, str]]] = [
         "tool_args": '{"date_range":"max"}',
     },
     {
+        "user": "Show me the latest prediction markets",
+        "route": "predictions",
+        "tool_name": "explore_prediction_markets",
+        "tool_args": '{"action":"browse"}',
+    },
+    {
+        "user": "What are the odds on Polymarket for Bitcoin?",
+        "route": "predictions",
+        "tool_name": "explore_prediction_markets",
+        "tool_args": '{"action":"search","query":"Bitcoin"}',
+    },
+    {
         "user": "What's the weather tomorrow?",
         "route": "clarify",
         "tool_name": "null",
@@ -199,4 +219,5 @@ SUPPORTED_CAPABILITIES: Final[list[str]] = [
     "Asset allocation and concentration analysis by target profile",
     "Compliance screening (wash sales, pattern day trading, concentration risk)",
     "Current market data and prices for portfolio holdings",
+    "Polymarket prediction markets — browse, search, analyze, and track positions",
 ]

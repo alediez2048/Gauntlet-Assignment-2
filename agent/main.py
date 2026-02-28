@@ -268,6 +268,10 @@ _SAFE_ERROR_MESSAGES: dict[str, str] = {
     ),
     "AUTH_REQUIRED": "Please sign in or create an account to get portfolio insights.",
     "AUTH_FAILED": "Your session has expired. Please sign in again.",
+    "POLYMARKET_TIMEOUT": "Having trouble reaching Polymarket. Please try again shortly.",
+    "POLYMARKET_API_ERROR": "Received an error from the Polymarket service.",
+    "NO_MARKETS_FOUND": "No prediction markets found matching your criteria.",
+    "MARKET_NOT_FOUND": "Could not find the specified prediction market.",
 }
 _THREAD_STATE_CACHE: dict[str, dict[str, Any]] = {}
 

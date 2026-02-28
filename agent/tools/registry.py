@@ -19,11 +19,13 @@ from agent.tools.base import ToolResult
 from agent.tools.compliance_checker import check_compliance
 from agent.tools.market_data import get_market_data
 from agent.tools.portfolio_analyzer import analyze_portfolio_performance
+from agent.tools.prediction_markets import explore_prediction_markets
 from agent.tools.schemas import (
     AllocationAdvisorInput,
     ComplianceCheckInput,
     MarketDataInput,
     PortfolioAnalysisInput,
+    PredictionMarketInput,
     TaxEstimateInput,
     TransactionCategorizeInput,
 )
@@ -84,6 +86,13 @@ TOOL_REGISTRY: Final[dict[str, ToolDefinition]] = {
         route="market",
         input_schema=MarketDataInput,
         callable=get_market_data,
+    ),
+    "explore_prediction_markets": ToolDefinition(
+        name="explore_prediction_markets",
+        description="Browse, search, or analyze Polymarket prediction markets and manage positions.",
+        route="predictions",
+        input_schema=PredictionMarketInput,
+        callable=explore_prediction_markets,
     ),
 }
 

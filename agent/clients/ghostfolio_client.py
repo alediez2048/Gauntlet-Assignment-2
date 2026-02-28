@@ -121,6 +121,33 @@ class GhostfolioClient:
 
         return await self._request_json("/api/v1/order", params=params)
 
+    async def get_polymarket_markets(
+        self,
+        category: str | None = None,
+        query: str | None = None,
+    ) -> list[dict[str, Any]]:
+        """Returns active Polymarket prediction markets."""
+        params: dict[str, str] = {}
+        if category:
+            params["category"] = category
+        result = await self._request_json(
+            "/api/v1/polymarket/markets", params=params or None
+        )
+        markets = result if isinstance(result, list) else result.get("markets", [result])
+        if query:
+            q = query.lower()
+            markets = [m for m in markets if q in (m.get("question", "") or "").lower()]
+        return markets
+
+    async def get_polymarket_market(self, slug: str) -> dict[str, Any]:
+        """Returns a single Polymarket market by slug."""
+        return await self._request_json(f"/api/v1/polymarket/markets/{slug}")
+
+    async def get_polymarket_positions(self) -> list[dict[str, Any]]:
+        """Returns user's Polymarket positions."""
+        result = await self._request_json("/api/v1/polymarket/positions")
+        return result if isinstance(result, list) else result.get("positions", [])
+
     def _validate_date_range(self, value: str) -> None:
         """Validates Ghostfolio-supported date range values."""
         if value not in VALID_DATE_RANGES:

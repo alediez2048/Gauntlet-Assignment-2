@@ -75,3 +75,24 @@ class MarketDataInput(BaseModel):
         default=["price", "change", "change_percent", "currency", "market_value"],
         description="Data points to return. Options: price, change, change_percent, currency, market_value, quantity, all.",
     )
+
+
+class PredictionMarketInput(BaseModel):
+    """Browse, search, or analyze Polymarket prediction markets and manage positions."""
+
+    action: Literal["browse", "search", "analyze", "positions"] = Field(
+        default="browse",
+        description="Action to perform: browse active markets, search by query, analyze a specific market, or view positions.",
+    )
+    query: str | None = Field(
+        default=None,
+        description="Search query for filtering markets (used with 'search' action).",
+    )
+    category: str | None = Field(
+        default=None,
+        description="Category filter (e.g. 'Crypto', 'Politics', 'Economics').",
+    )
+    market_slug: str | None = Field(
+        default=None,
+        description="Specific market slug for the 'analyze' action.",
+    )
