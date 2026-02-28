@@ -1,0 +1,143 @@
+import { PrismaService } from '@ghostfolio/api/services/prisma/prisma.service';
+
+import { Injectable, Logger } from '@nestjs/common';
+import { DataSource } from '@prisma/client';
+
+const GAMMA_API_BASE = 'https://gamma-api.polymarket.com';
+
+@Injectable()
+export class PolymarketService {
+  private readonly logger = new Logger(PolymarketService.name);
+
+  public constructor(private readonly prismaService: PrismaService) {}
+
+  public async getMarkets(params: {
+    active?: boolean;
+    category?: string;
+    limit?: number;
+  }): Promise<any[]> {
+    const url = new URL(`${GAMMA_API_BASE}/markets`);
+
+    if (params.active !== undefined) {
+      url.searchParams.set('active', String(params.active));
+    }
+
+    if (params.category) {
+      url.searchParams.set('tag', params.category);
+    }
+
+    url.searchParams.set('limit', String(params.limit ?? 20));
+
+    const response = await fetch(url.toString(), {
+      signal: AbortSignal.timeout(10_000)
+    });
+
+    if (!response.ok) {
+      this.logger.error(`Gamma API error: ${response.status}`);
+      throw new Error(`Gamma API returned ${response.status}`);
+    }
+
+    return response.json();
+  }
+
+  public async getMarketBySlug(slug: string): Promise<any> {
+    const url = `${GAMMA_API_BASE}/markets/${encodeURIComponent(slug)}`;
+
+    const response = await fetch(url, {
+      signal: AbortSignal.timeout(10_000)
+    });
+
+    if (!response.ok) {
+      this.logger.error(`Gamma API error for slug ${slug}: ${response.status}`);
+      throw new Error(`Gamma API returned ${response.status}`);
+    }
+
+    return response.json();
+  }
+
+  public async createPosition(
+    userId: string,
+    data: {
+      slug: string;
+      question: string;
+      outcome: string;
+      outcomePrice: number;
+      quantity: number;
+    }
+  ) {
+    const symbolProfile = await this.prismaService.symbolProfile.upsert({
+      create: {
+        currency: 'USD',
+        dataSource: DataSource.POLYMARKET,
+        name: data.question,
+        symbol: data.slug
+      },
+      update: {
+        name: data.question
+      },
+      where: {
+        dataSource_symbol: {
+          dataSource: DataSource.POLYMARKET,
+          symbol: data.slug
+        }
+      }
+    });
+
+    const order = await this.prismaService.order.create({
+      data: {
+        comment: `${data.outcome} @ ${data.outcomePrice}`,
+        currency: 'USD',
+        date: new Date(),
+        fee: 0,
+        quantity: data.quantity,
+        type: 'BUY',
+        unitPrice: data.outcomePrice,
+        SymbolProfile: {
+          connect: { id: symbolProfile.id }
+        },
+        user: {
+          connect: { id: userId }
+        }
+      }
+    });
+
+    return { order, symbolProfile };
+  }
+
+  public async getPositions(userId: string) {
+    return this.prismaService.order.findMany({
+      where: {
+        userId,
+        SymbolProfile: {
+          dataSource: DataSource.POLYMARKET
+        }
+      },
+      include: {
+        SymbolProfile: true
+      },
+      orderBy: {
+        date: 'desc'
+      }
+    });
+  }
+
+  public async deletePosition(userId: string, orderId: string) {
+    const order = await this.prismaService.order.findFirst({
+      where: {
+        id: orderId,
+        userId,
+        SymbolProfile: {
+          dataSource: DataSource.POLYMARKET
+        }
+      }
+    });
+
+    if (!order) {
+      return null;
+    }
+
+    return this.prismaService.order.delete({
+      where: { id: orderId }
+    });
+  }
+}

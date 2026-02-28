@@ -39,6 +39,7 @@ import { BenchmarksModule } from './endpoints/benchmarks/benchmarks.module';
 import { GhostfolioModule } from './endpoints/data-providers/ghostfolio/ghostfolio.module';
 import { MarketDataModule } from './endpoints/market-data/market-data.module';
 import { PlatformsModule } from './endpoints/platforms/platforms.module';
+import { PolymarketModule } from './endpoints/polymarket/polymarket.module';
 import { PublicModule } from './endpoints/public/public.module';
 import { SitemapModule } from './endpoints/sitemap/sitemap.module';
 import { TagsModule } from './endpoints/tags/tags.module';
@@ -99,6 +100,7 @@ import { UserModule } from './user/user.module';
     OrderModule,
     PlatformModule,
     PlatformsModule,
+    PolymarketModule,
     PortfolioModule,
     PortfolioSnapshotQueueModule,
     PrismaModule,
