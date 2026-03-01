@@ -13,7 +13,7 @@ from typing import Any, Final, cast
 
 from agent.clients.ghostfolio_client import VALID_DATE_RANGES
 from agent.graph.state import AgentState, Citation, RouteName, ToolName
-from agent.prompts import MULTI_STEP_SYNTHESIS_PROMPT, SUPPORTED_CAPABILITIES, SYNTHESIS_PROMPT
+from agent.prompts import MULTI_STEP_SYNTHESIS_PROMPT, PREDICTION_MARKETS_SYNTHESIS_PROMPT, SUPPORTED_CAPABILITIES, SYNTHESIS_PROMPT
 from agent.tools.allocation_advisor import advise_asset_allocation
 from agent.tools.base import ToolResult
 from agent.tools.compliance_checker import check_compliance
@@ -1238,7 +1238,12 @@ def make_synthesizer_node(
                     f"Tool used: {tool_name}\n\n"
                     f"Tool result (JSON):\n{tool_json}"
                 )
-                summary = await synthesizer_fn(SYNTHESIS_PROMPT, prompt_context)
+                synth_prompt = (
+                    PREDICTION_MARKETS_SYNTHESIS_PROMPT
+                    if tool_name == "explore_prediction_markets"
+                    else SYNTHESIS_PROMPT
+                )
+                summary = await synthesizer_fn(synth_prompt, prompt_context)
             except Exception:
                 summary = _build_summary(tool_name, tool_result)
         else:

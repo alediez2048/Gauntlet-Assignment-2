@@ -18,9 +18,10 @@ export class PolymarketService {
   }): Promise<any[]> {
     const url = new URL(`${GAMMA_API_BASE}/markets`);
 
-    if (params.active !== undefined) {
-      url.searchParams.set('active', String(params.active));
-    }
+    // Default to active markets sorted by 24h volume (most traded first)
+    url.searchParams.set('active', String(params.active ?? true));
+    url.searchParams.set('order', 'volume24hr');
+    url.searchParams.set('ascending', 'false');
 
     if (params.category) {
       url.searchParams.set('tag', params.category);
