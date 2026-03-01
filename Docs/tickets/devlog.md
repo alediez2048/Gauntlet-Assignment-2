@@ -2137,6 +2137,114 @@ Closed the regression gap found in the TICKET-10.2 validation pass by fixing fai
 
 ---
 
+## TICKET-10.5: Prediction Markets Deep Enhancement + Reallocation Analysis 🟢
+
+### Plain-English Summary
+
+- Expanded the `explore_prediction_markets` tool from 4 actions to 9: browse, search, analyze, positions, **simulate**, **trending**, **compare**, **scenario**
+- Added `prediction_helpers.py` — pure domain logic for Kelly criterion, expected value, implied probability, market efficiency scoring, and full portfolio reallocation scenario modeling
+- Scenario action models "what if I move X% from my portfolio into a prediction market?" with win/lose cases, tax estimates, compliance flags, and allocation drift analysis
+- Multi-step routing detects combined queries (e.g. "tax implications if I reallocate to a prediction market") and chains scenario + tax or scenario + compliance tools automatically
+- Fixed critical production bugs: Gamma API slug resolution (path vs query param), `currentValueInBaseCurrency` field name mismatch, variable shadowing in simulate/scenario handlers, progressive word-level search for fuzzy market matching
+- 377 automated tests passing (272 unit + 18 integration + 87 eval)
+
+### What Changed
+
+**1. Domain Logic Layer — `agent/tools/prediction_helpers.py` (new, ~180 LOC)**
+
+- `implied_probability(price)` — price to probability %
+- `kelly_fraction(prob, odds, bankroll)` — bet sizing hint, capped at 25%
+- `expected_value(prob, payout, cost)` — EV with profitability flag
+- `market_efficiency_score(bid, ask, volume)` — spread, liquidity grade (A-F), efficiency rating
+- `portfolio_exposure_pct(position_value, net_worth)` — concentration %
+- `format_market_summary(market)` — standardize raw Gamma API dicts
+- `compute_scenario(...)` — full reallocation scenario: baseline, win/lose cases, tax estimates, compliance flags, allocation drift
+- `pro_rata_liquidation(holdings, amount)` — proportional sell across holdings
+
+**2. Prediction Markets Tool — `agent/tools/prediction_markets.py` (~570 LOC, +400 LOC)**
+
+- 5 new action handlers: `_handle_simulate`, `_handle_trending`, `_handle_compare`, `_handle_scenario`, `_resolve_slug`
+- Enriched existing actions: browse/search add implied probabilities + liquidity grade; analyze adds EV, Kelly hint, market efficiency; positions adds unrealized P&L + exposure %
+- Scenario handler: slug resolution via search, portfolio details fetch, allocation validation, `compute_scenario()` call, full structured response
+- Fixed variable shadowing: `summary` from `format_market_summary()` was overwritten by portfolio `details.get("summary")` in simulate and scenario handlers
+- Fixed `currentValueInBaseCurrency` vs `currentNetWorth` field name for real Ghostfolio API compatibility
+
+**3. NestJS Backend Fixes — `polymarket.service.ts` + `polymarket.controller.ts`**
+
+- Fixed `getMarketBySlug`: changed from path-based `/markets/{slug}` (returns 422) to query param `?slug=X`
+- Fixed `getMarkets`: added `query` parameter, fetches 100 markets for search, progressive word-level text matching
+- Controller: added `@Query('query')` parameter, null handling for slug lookup
+
+**4. Python Client Fixes — `ghostfolio_client.py`**
+
+- `get_polymarket_market`: added try/except for 404 errors + progressive slug fallback search (drops words until match found)
+- `get_polymarket_markets`: passes `query` param to NestJS backend
+
+**5. Routing & Multi-Step — `nodes.py` + `prompts.py` + `schemas.py` + `main.py`**
+
+- Extended `PredictionMarketInput` schema: 9 actions + simulate/scenario/compare fields
+- `_default_args_for_tool`: extracts allocation mode (all_in/percent/fixed), dollar amounts, percentages, market topics from user queries
+- `_extract_market_query`: fallback content-word extraction for unknown topics (e.g. "jesus return")
+- `_sanitize_tool_args`: enriches scenario args when multi-step forces action=scenario but default_args didn't extract allocation
+- `_detect_multi_step`: added heuristic keyword detection for combined tax+prediction and compliance+prediction queries
+- 7 new error codes in `_SAFE_ERROR_MESSAGES`
+- Updated synthesis prompts with formatting rules for all 9 actions
+
+**6. Fixtures & Tests**
+
+- Extended `polymarket_markets.json`: 6 markets (added S&P 500, ETH ETF), 2 positions with different entry prices
+- 29 new unit tests (helpers, enrichment, new actions, scenario)
+- 5 new integration routing tests
+- 18 new eval cases (87 total)
+
+### Issues & Solutions
+
+| Problem                                                       | Root Cause                                                                  | Fix                                                          |
+| ------------------------------------------------------------- | --------------------------------------------------------------------------- | ------------------------------------------------------------ |
+| All Polymarket queries returning errors                       | Gamma API returns 422 for `/markets/{slug}` path                            | Changed to `?slug=X` query param in NestJS                   |
+| Search returning no results                                   | Only 20 markets fetched, no text search API                                 | Fetch 100 + progressive word-level client-side matching      |
+| `POLYMARKET_API_ERROR` on simulate                            | Variable `summary` shadowed by portfolio details                            | Renamed portfolio summary to `port_summary`                  |
+| `EMPTY_PORTFOLIO` on scenario                                 | Real API uses `currentValueInBaseCurrency`, code expected `currentNetWorth` | Try both field names with fallback                           |
+| Multi-step "tax implications if I reallocate" went to clarify | Regex-style patterns but literal substring matching                         | Replaced with literal triggers + heuristic keyword detection |
+| "go all in" queries missing allocation_mode                   | "go all in" not in scenario keyword list                                    | Added to keyword list + enrichment in `_sanitize_tool_args`  |
+| Unknown market topics (e.g. "jesus") returned null query      | `_extract_market_query` only had hardcoded topics                           | Added fallback content-word extraction                       |
+
+### Commits
+
+| Hash          | Message                                                                     |
+| ------------- | --------------------------------------------------------------------------- |
+| (this commit) | feat(agent): deep prediction markets enhancement with reallocation analysis |
+
+### Files Changed
+
+| File                                            | Change                                                              |
+| ----------------------------------------------- | ------------------------------------------------------------------- |
+| `agent/tools/prediction_helpers.py`             | **New** — pure domain logic (~180 LOC)                              |
+| `agent/tools/prediction_markets.py`             | 5 new action handlers, enriched existing actions, bug fixes         |
+| `agent/tools/schemas.py`                        | Extended PredictionMarketInput for 9 actions                        |
+| `agent/graph/nodes.py`                          | Routing, multi-step patterns, arg extraction, content-word fallback |
+| `agent/prompts.py`                              | Synthesis prompt updates, few-shot examples                         |
+| `agent/main.py`                                 | 7 new error codes                                                   |
+| `agent/clients/ghostfolio_client.py`            | Slug fallback search, query passthrough                             |
+| `apps/api/.../polymarket.service.ts`            | Slug query param fix, progressive word search                       |
+| `apps/api/.../polymarket.controller.ts`         | Query param, null handling                                          |
+| `agent/tests/unit/test_prediction_markets.py`   | 29 new unit tests                                                   |
+| `agent/tests/integration/test_graph_routing.py` | 5 new integration tests                                             |
+| `agent/tests/eval/eval_dataset.json`            | 18 new eval cases (87 total)                                        |
+| `agent/tests/fixtures/polymarket_markets.json`  | Extended fixtures                                                   |
+
+### Tests
+
+- 377 automated tests passing (272 unit + 18 integration + 87 eval)
+- All 9 prediction market actions manually verified against live Gamma API
+- Multi-step scenario+tax and scenario+compliance flows verified
+
+### Time Spent
+
+~6 hrs
+
+---
+
 ## Status Legend
 
 | Emoji | Meaning              |
@@ -2151,11 +2259,11 @@ Closed the regression gap found in the TICKET-10.2 validation pass by fixing fai
 
 ## Running Totals
 
-| Metric           | Value                                                                              |
-| ---------------- | ---------------------------------------------------------------------------------- |
-| Tickets Complete | 16 / 16                                                                            |
-| Total Dev Time   | ~41.50 hrs                                                                         |
-| Tests Passing    | 104 automated (84 unit + 20 integration) + golden-path + local/hosted smoke reruns |
-| Files Created    | 82                                                                                 |
-| Files Modified   | 76                                                                                 |
-| Cursor Rules     | 10                                                                                 |
+| Metric           | Value                                                                                  |
+| ---------------- | -------------------------------------------------------------------------------------- |
+| Tickets Complete | 17 / 17                                                                                |
+| Total Dev Time   | ~47.50 hrs                                                                             |
+| Tests Passing    | 377 automated (272 unit + 18 integration + 87 eval) + golden-path + manual smoke tests |
+| Files Created    | 83                                                                                     |
+| Files Modified   | 89                                                                                     |
+| Cursor Rules     | 10                                                                                     |

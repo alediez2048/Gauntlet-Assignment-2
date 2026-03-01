@@ -35,13 +35,15 @@ export class PolymarketController {
   public async getMarkets(
     @Query('active') active?: string,
     @Query('category') category?: string,
-    @Query('limit') limit?: string
+    @Query('limit') limit?: string,
+    @Query('query') query?: string
   ) {
     try {
       return await this.polymarketService.getMarkets({
         active: active !== undefined ? active === 'true' : undefined,
         category: category || undefined,
-        limit: limit ? parseInt(limit, 10) : 20
+        limit: limit ? parseInt(limit, 10) : 20,
+        query: query || undefined
       });
     } catch (error) {
       this.logger.error(
@@ -58,8 +60,15 @@ export class PolymarketController {
   @Get('markets/:slug')
   public async getMarketBySlug(@Param('slug') slug: string) {
     try {
-      return await this.polymarketService.getMarketBySlug(slug);
+      const market = await this.polymarketService.getMarketBySlug(slug);
+      if (!market) {
+        throw new HttpException('Market not found', StatusCodes.NOT_FOUND);
+      }
+      return market;
     } catch (error) {
+      if (error instanceof HttpException) {
+        throw error;
+      }
       this.logger.error(
         `Failed to fetch market ${slug}: ${error instanceof Error ? error.message : 'Unknown'}`
       );

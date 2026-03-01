@@ -78,11 +78,14 @@ class MarketDataInput(BaseModel):
 
 
 class PredictionMarketInput(BaseModel):
-    """Browse, search, or analyze Polymarket prediction markets and manage positions."""
+    """Browse, search, analyze, simulate, compare, or model Polymarket prediction markets."""
 
-    action: Literal["browse", "search", "analyze", "positions"] = Field(
+    action: Literal["browse", "search", "analyze", "positions", "simulate", "trending", "compare", "scenario"] = Field(
         default="browse",
-        description="Action to perform: browse active markets, search by query, analyze a specific market, or view positions.",
+        description=(
+            "Action to perform: browse active markets, search by query, analyze a specific market, "
+            "view positions, simulate a bet, show trending markets, compare markets, or run a scenario."
+        ),
     )
     query: str | None = Field(
         default=None,
@@ -94,5 +97,33 @@ class PredictionMarketInput(BaseModel):
     )
     market_slug: str | None = Field(
         default=None,
-        description="Specific market slug for the 'analyze' action.",
+        description="Specific market slug for analyze, simulate, or scenario actions.",
+    )
+    amount: float | None = Field(
+        default=None,
+        description="Dollar amount for the simulate action.",
+    )
+    outcome: str | None = Field(
+        default=None,
+        description="Outcome side: 'Yes' or 'No' (used with simulate and scenario).",
+    )
+    market_slugs: list[str] | None = Field(
+        default=None,
+        description="List of 2-3 market slugs for the compare action.",
+    )
+    allocation_mode: Literal["fixed", "percent", "all_in"] | None = Field(
+        default=None,
+        description="Allocation mode for scenario: fixed dollar amount, percentage of portfolio, or all-in.",
+    )
+    allocation_value: float | None = Field(
+        default=None,
+        description="Dollar amount or percentage value for the scenario action (depends on allocation_mode).",
+    )
+    time_horizon: Literal["1m", "3m", "6m", "1y"] | None = Field(
+        default=None,
+        description="Time horizon for scenario action. Defaults to 6 months.",
+    )
+    income_bracket: Literal["low", "middle", "high"] | None = Field(
+        default=None,
+        description="Income bracket for scenario tax estimation. Defaults to 'middle'.",
     )

@@ -12,7 +12,8 @@
       "active": true,
       "lastTradePrice": 0.65,
       "bestBid": 0.64,
-      "bestAsk": 0.66
+      "bestAsk": 0.66,
+      "priceChange24h": 0.03
     },
     {
       "question": "Will the Fed cut rates in March 2026?",
@@ -26,7 +27,8 @@
       "active": true,
       "lastTradePrice": 0.42,
       "bestBid": 0.41,
-      "bestAsk": 0.43
+      "bestAsk": 0.43,
+      "priceChange24h": -0.02
     },
     {
       "question": "Will Ethereum flip Bitcoin by market cap in 2026?",
@@ -40,7 +42,53 @@
       "active": true,
       "lastTradePrice": 0.08,
       "bestBid": 0.07,
-      "bestAsk": 0.09
+      "bestAsk": 0.09,
+      "priceChange24h": 0.01
+    },
+    {
+      "question": "Will the S&P 500 reach 6000 by end of 2026?",
+      "slug": "sp500-6000-2026",
+      "outcomes": ["Yes", "No"],
+      "outcomePrices": "[0.55, 0.45]",
+      "volume24hr": 720000.0,
+      "category": "Economics",
+      "endDate": "2026-12-31T23:59:59Z",
+      "description": "This market resolves to Yes if the S&P 500 index reaches 6000.",
+      "active": true,
+      "lastTradePrice": 0.55,
+      "bestBid": 0.54,
+      "bestAsk": 0.56,
+      "priceChange24h": 0.01
+    },
+    {
+      "question": "Will an Ethereum ETF be approved in 2026?",
+      "slug": "eth-etf-approval-2026",
+      "outcomes": ["Yes", "No"],
+      "outcomePrices": "[0.72, 0.28]",
+      "volume24hr": 560000.0,
+      "category": "Crypto",
+      "endDate": "2026-12-31T23:59:59Z",
+      "description": "This market resolves to Yes if an Ethereum ETF receives SEC approval.",
+      "active": true,
+      "lastTradePrice": 0.72,
+      "bestBid": 0.71,
+      "bestAsk": 0.73,
+      "priceChange24h": 0.04
+    },
+    {
+      "question": "Will the moon landing happen in 2025?",
+      "slug": "moon-landing-2025",
+      "outcomes": ["Yes", "No"],
+      "outcomePrices": "[0.15, 0.85]",
+      "volume24hr": 50000.0,
+      "category": "Science",
+      "endDate": "2025-12-31T23:59:59Z",
+      "description": "This market resolves to Yes if a crewed moon landing occurs in 2025.",
+      "active": false,
+      "lastTradePrice": 0.15,
+      "bestBid": 0.14,
+      "bestAsk": 0.16,
+      "priceChange24h": 0.0
     }
   ],
   "positions": [
@@ -50,8 +98,19 @@
       "question": "Will Bitcoin reach $100k by end of 2026?",
       "outcome": "Yes",
       "outcomePrice": 0.65,
+      "entryPrice": 0.55,
       "quantity": 100,
       "date": "2026-02-15T10:30:00Z"
+    },
+    {
+      "id": "pos-002",
+      "slug": "fed-rate-cut-march-2026",
+      "question": "Will the Fed cut rates in March 2026?",
+      "outcome": "Yes",
+      "outcomePrice": 0.42,
+      "entryPrice": 0.5,
+      "quantity": 200,
+      "date": "2026-02-10T14:00:00Z"
     }
   ]
 }

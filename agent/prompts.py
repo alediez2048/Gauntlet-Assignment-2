@@ -79,11 +79,20 @@ Tool routing rules:
      If user names specific tickers, include them in "symbols" as a list.
 
 7) explore_prediction_markets
-   - Purpose: Browse, search, or analyze Polymarket prediction markets and view positions.
-   - Use when: user asks about prediction markets, Polymarket, odds, bets, event outcomes, forecasts.
+   - Purpose: Browse, search, analyze, simulate, compare, trend, or model prediction markets.
+   - Use when: user asks about prediction markets, Polymarket, odds, bets, event outcomes, forecasts,
+     simulating a bet, trending markets, comparing markets, or reallocation scenarios involving prediction markets.
    - Do not use when: user asks about traditional portfolio performance or stock prices.
    - Args hint: {"action": "browse", "query": null, "category": null, "market_slug": null}.
-     Actions: "browse" (list active markets), "search" (filter by query), "analyze" (single market detail), "positions" (user's positions).
+     Actions:
+       "browse" — list active markets
+       "search" — filter by query
+       "analyze" — single market detail with EV, Kelly, efficiency
+       "positions" — user's positions with P&L
+       "simulate" — what-if bet simulation (requires market_slug + amount)
+       "trending" — top markets by volume
+       "compare" — side-by-side comparison (requires market_slugs list of 2-3 slugs)
+       "scenario" — portfolio reallocation modeling (requires allocation_mode + allocation_value)
 
 IMPORTANT: When the user's request maps to any supported tool, ALWAYS route to
 that tool using default arguments for any missing parameters. Never use "clarify"
@@ -168,6 +177,42 @@ ROUTING_FEW_SHOT_EXAMPLES: Final[list[dict[str, str]]] = [
         "tool_args": '{"action":"search","query":"Bitcoin"}',
     },
     {
+        "user": "What if I bet $500 on Bitcoin 100k?",
+        "route": "predictions",
+        "tool_name": "explore_prediction_markets",
+        "tool_args": '{"action":"simulate","market_slug":"will-bitcoin-reach-100k-2026","amount":500,"outcome":"Yes"}',
+    },
+    {
+        "user": "What's trending on Polymarket?",
+        "route": "predictions",
+        "tool_name": "explore_prediction_markets",
+        "tool_args": '{"action":"trending"}',
+    },
+    {
+        "user": "Compare Bitcoin 100k and Fed rate cut markets",
+        "route": "predictions",
+        "tool_name": "explore_prediction_markets",
+        "tool_args": '{"action":"compare","market_slugs":["will-bitcoin-reach-100k-2026","fed-rate-cut-march-2026"]}',
+    },
+    {
+        "user": "How would my portfolio look if I move 20% into Bitcoin 100k?",
+        "route": "predictions",
+        "tool_name": "explore_prediction_markets",
+        "tool_args": '{"action":"scenario","market_slug":"will-bitcoin-reach-100k-2026","allocation_mode":"percent","allocation_value":20}',
+    },
+    {
+        "user": "What are the tax implications if I reallocate to Bitcoin 100k?",
+        "route": "predictions",
+        "tool_name": "explore_prediction_markets",
+        "tool_args": '{"action":"scenario","market_slug":"will-bitcoin-reach-100k-2026","allocation_mode":"percent","allocation_value":20}',
+    },
+    {
+        "user": "If I liquidate for Bitcoin 100k, what compliance issues?",
+        "route": "predictions",
+        "tool_name": "explore_prediction_markets",
+        "tool_args": '{"action":"scenario","market_slug":"will-bitcoin-reach-100k-2026","allocation_mode":"percent","allocation_value":50}',
+    },
+    {
         "user": "What's the weather tomorrow?",
         "route": "clarify",
         "tool_name": "null",
@@ -230,8 +275,21 @@ Follow these rules strictly:
 6. Never give personalized investment advice (buy/sell/hold).
 7. Format percentages from prices (0.62 = 62%).
 8. If action is "positions" and the list is empty, say "You have no Polymarket positions yet."
-9. If action is "analyze", give a detailed breakdown of that single market.
+   If positions exist, show unrealized P&L and exposure percentage.
+9. If action is "analyze", give a detailed breakdown including EV analysis, Kelly hint, and market efficiency.
+   Label Kelly output as "informational hint only".
 10. Do NOT start with "The key insight" — just show the list.
+11. If action is "simulate", show the bet simulation with potential profit/loss, EV, Kelly hint, and risk level.
+12. If action is "trending", list the top markets sorted by volume with odds and liquidity grades.
+13. If action is "compare", show a side-by-side table of the markets with the comparison matrix winners.
+14. If action is "scenario", present the reallocation scenario in sections:
+    - Allocation summary (amount, mode, source)
+    - Win/lose case analysis with payouts and returns
+    - EV and Kelly hint (labeled as informational only)
+    - Risk assessment (concentration, allocation drift, risk level)
+    - Tax estimates (liquidation tax, win-case tax, lose-case offset)
+    - Compliance flags if any
+    - Always end with the disclaimer.
 """.strip()
 
 SUPPORTED_CAPABILITIES: Final[list[str]] = [
@@ -241,5 +299,6 @@ SUPPORTED_CAPABILITIES: Final[list[str]] = [
     "Asset allocation and concentration analysis by target profile",
     "Compliance screening (wash sales, pattern day trading, concentration risk)",
     "Current market data and prices for portfolio holdings",
-    "Polymarket prediction markets — browse, search, analyze, and track positions",
+    "Polymarket prediction markets — browse, search, analyze, simulate, compare, trending, and track positions",
+    "Portfolio reallocation scenarios — model what-if scenarios for prediction market investments with tax and compliance analysis",
 ]

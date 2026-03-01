@@ -270,3 +270,123 @@ async def test_graph_routes_failed_tool_result_to_error_handler(
     assert result["tool_call_history"][1]["success"] is False
     assert result["tool_call_history"][1]["error"] == "API_TIMEOUT"
     assert result["final_response"]["category"] == "error"
+
+
+# =====================================================================
+# New prediction market integration tests (I1-I5)
+# =====================================================================
+
+
+@pytest.mark.asyncio
+async def test_graph_routes_simulate_query(
+    mock_ghostfolio_client: MockGhostfolioClient,
+) -> None:
+    """I1: Simulate action routes through the graph successfully."""
+    result = await _run_graph(
+        mock_ghostfolio_client=mock_ghostfolio_client,
+        route="predictions",
+        tool_name="explore_prediction_markets",
+        tool_args={
+            "action": "simulate",
+            "market_slug": "will-bitcoin-reach-100k-2026",
+            "amount": 500,
+            "outcome": "Yes",
+        },
+        query="What if I bet $500 on Bitcoin 100k?",
+    )
+
+    assert result["route"] == "predictions"
+    assert result["tool_name"] == "explore_prediction_markets"
+    assert result["pending_action"] == "valid"
+    assert len(result["tool_call_history"]) == 1
+    assert result["tool_call_history"][0]["success"] is True
+
+
+@pytest.mark.asyncio
+async def test_graph_routes_trending_query(
+    mock_ghostfolio_client: MockGhostfolioClient,
+) -> None:
+    """I2: Trending action routes through the graph successfully."""
+    result = await _run_graph(
+        mock_ghostfolio_client=mock_ghostfolio_client,
+        route="predictions",
+        tool_name="explore_prediction_markets",
+        tool_args={"action": "trending"},
+        query="What's trending on Polymarket?",
+    )
+
+    assert result["route"] == "predictions"
+    assert result["pending_action"] == "valid"
+    assert len(result["tool_call_history"]) == 1
+    assert result["tool_call_history"][0]["success"] is True
+
+
+@pytest.mark.asyncio
+async def test_graph_routes_compare_query(
+    mock_ghostfolio_client: MockGhostfolioClient,
+) -> None:
+    """I3: Compare action routes through the graph successfully."""
+    result = await _run_graph(
+        mock_ghostfolio_client=mock_ghostfolio_client,
+        route="predictions",
+        tool_name="explore_prediction_markets",
+        tool_args={
+            "action": "compare",
+            "market_slugs": ["will-bitcoin-reach-100k-2026", "fed-rate-cut-march-2026"],
+        },
+        query="Compare Bitcoin 100k vs Fed rate cut markets",
+    )
+
+    assert result["route"] == "predictions"
+    assert result["pending_action"] == "valid"
+    assert len(result["tool_call_history"]) == 1
+    assert result["tool_call_history"][0]["success"] is True
+
+
+@pytest.mark.asyncio
+async def test_graph_routes_scenario_query(
+    mock_ghostfolio_client: MockGhostfolioClient,
+) -> None:
+    """I4: Scenario action routes through the graph successfully."""
+    result = await _run_graph(
+        mock_ghostfolio_client=mock_ghostfolio_client,
+        route="predictions",
+        tool_name="explore_prediction_markets",
+        tool_args={
+            "action": "scenario",
+            "market_slug": "will-bitcoin-reach-100k-2026",
+            "allocation_mode": "percent",
+            "allocation_value": 20,
+            "outcome": "Yes",
+        },
+        query="How would my portfolio look if I move 20% into Bitcoin 100k?",
+    )
+
+    assert result["route"] == "predictions"
+    assert result["pending_action"] == "valid"
+    assert len(result["tool_call_history"]) == 1
+    assert result["tool_call_history"][0]["success"] is True
+    assert result["final_response"]["category"] == "analysis"
+
+
+@pytest.mark.asyncio
+async def test_graph_multi_step_scenario_tax_compliance(
+    mock_ghostfolio_client: MockGhostfolioClient,
+) -> None:
+    """I5: Multi-step scenario+tax+compliance routes through keyword router."""
+    from agent.graph.nodes import keyword_router
+
+    graph = await build_graph(api_client=mock_ghostfolio_client, router=keyword_router)
+    result = await graph.ainvoke(
+        {
+            "messages": [{"role": "user", "content": "Run a reallocation analysis for prediction markets"}],
+            "tool_call_history": [],
+        },
+        config={"configurable": {"thread_id": f"multistep-{uuid4()}"}},
+    )
+
+    # The multi-step pattern "reallocation analysis" triggers 3 tools
+    history = result.get("tool_call_history", [])
+    executed_tools = [r["tool_name"] for r in history if isinstance(r, dict)]
+    assert "explore_prediction_markets" in executed_tools
+    assert len(history) >= 2  # At least scenario + one more step

@@ -127,6 +127,16 @@ _ROUTER_INTENTS: Final[dict[RouteName, tuple[str, ...]]] = {
         "event market",
         "forecast market",
         "will .* happen",
+        "simulate",
+        "trending",
+        "compare",
+        "scenario",
+        "reallocate",
+        "reallocation",
+        "move .* into",
+        "what if i move",
+        "what if i put",
+        "what would happen",
     ),
     "clarify": (),
 }
@@ -171,6 +181,23 @@ _MULTI_STEP_PATTERNS: Final[dict[tuple[str, ...], list[dict[str, Any]]]] = {
         {"route": "predictions", "tool_name": "explore_prediction_markets", "tool_args": {}},
         {"route": "market", "tool_name": "get_market_data", "tool_args": {}},
     ],
+    ("reallocation analysis", "portfolio scenario"): [
+        {"route": "predictions", "tool_name": "explore_prediction_markets",
+         "tool_args": {"action": "scenario"}},
+        {"route": "tax", "tool_name": "estimate_capital_gains_tax", "tool_args": {}},
+        {"route": "compliance", "tool_name": "check_compliance", "tool_args": {}},
+    ],
+    ("reallocation tax", "tax if i move", "tax if i reallocate",
+     "tax implications if i reallocate", "tax implications if i move"): [
+        {"route": "predictions", "tool_name": "explore_prediction_markets",
+         "tool_args": {"action": "scenario"}},
+        {"route": "tax", "tool_name": "estimate_capital_gains_tax", "tool_args": {}},
+    ],
+    ("reallocation risk", "compliance if i reallocate", "risk if i reallocate"): [
+        {"route": "predictions", "tool_name": "explore_prediction_markets",
+         "tool_args": {"action": "scenario"}},
+        {"route": "compliance", "tool_name": "check_compliance", "tool_args": {}},
+    ],
 }
 
 _MAX_STEPS: Final[int] = 3
@@ -182,6 +209,23 @@ def _detect_multi_step(query: str) -> list[dict[str, Any]] | None:
     for triggers, plan in _MULTI_STEP_PATTERNS.items():
         if any(trigger in lowered for trigger in triggers):
             return [dict(step) for step in plan]
+
+    # Heuristic: query mentions BOTH tax/compliance AND prediction market terms
+    prediction_terms = {"polymarket", "prediction", "reallocate", "reallocation", "bet", "market"}
+    has_prediction = any(t in lowered for t in prediction_terms)
+    if has_prediction and any(t in lowered for t in ("tax", "capital gains")):
+        return [
+            {"route": "predictions", "tool_name": "explore_prediction_markets",
+             "tool_args": {"action": "scenario"}},
+            {"route": "tax", "tool_name": "estimate_capital_gains_tax", "tool_args": {}},
+        ]
+    if has_prediction and any(t in lowered for t in ("compliance", "wash sale", "risk")):
+        return [
+            {"route": "predictions", "tool_name": "explore_prediction_markets",
+             "tool_args": {"action": "scenario"}},
+            {"route": "compliance", "tool_name": "check_compliance", "tool_args": {}},
+        ]
+
     return None
 
 
@@ -328,6 +372,38 @@ def _extract_symbols(query: str) -> list[str] | None:
     return filtered if filtered else None
 
 
+def _extract_market_query(user_query: str) -> str | None:
+    """Extract a search term from user query for market slug resolution.
+
+    Looks for known market topic words (Bitcoin, Fed, Ethereum, etc.) or
+    falls back to extracting key content words from the query.
+    """
+    lowered = user_query.lower()
+    # Known market topics
+    topics = ["bitcoin", "fed", "ethereum", "eth", "crypto", "rate cut", "s&p", "election"]
+    for topic in topics:
+        if topic in lowered:
+            return topic.capitalize() if topic != "s&p" else topic
+
+    # Fallback: extract content words by removing common stop/action words
+    stop_words = {
+        "a", "an", "the", "to", "of", "in", "by", "for", "and", "or", "is", "my",
+        "if", "i", "on", "it", "be", "at", "as", "do", "so", "up", "no", "not",
+        "what", "how", "would", "could", "should", "will", "can", "may", "might",
+        "go", "all", "have", "has", "with", "from", "into", "this", "that",
+        "show", "me", "get", "give", "tell", "let", "make", "find", "search",
+        "prediction", "market", "markets", "polymarket", "portfolio", "bet",
+        "simulate", "scenario", "compare", "analyze", "browse", "trending",
+        "compliance", "tax", "issues", "implications", "risk", "allocation",
+        "reallocate", "reallocation", "move", "put", "invest", "allocate",
+    }
+    words = re.split(r"[\s\-,?.!\"']+", lowered)
+    content_words = [w for w in words if len(w) >= 3 and w not in stop_words]
+    if content_words:
+        return " ".join(content_words[:3])
+    return None
+
+
 def _default_args_for_tool(tool_name: ToolName, user_query: str) -> dict[str, Any]:
     current_year = datetime.now().year
     if tool_name == "analyze_portfolio_performance":
@@ -352,6 +428,35 @@ def _default_args_for_tool(tool_name: ToolName, user_query: str) -> dict[str, An
         pm_args: dict[str, Any] = {"action": "browse"}
         if "position" in lowered or "my poly" in lowered:
             pm_args["action"] = "positions"
+        elif any(kw in lowered for kw in ("scenario", "reallocat", "what if i move", "what if i put", "what would happen", "go all in", "all in on", "all-in on")):
+            pm_args["action"] = "scenario"
+            # Try to extract allocation
+            pct_match = re.search(r"(\d+)\s*%", lowered)
+            dollar_match = re.search(r"\$\s*([\d,]+(?:\.\d+)?)", lowered)
+            if "all in" in lowered or "all-in" in lowered:
+                pm_args["allocation_mode"] = "all_in"
+            elif pct_match:
+                pm_args["allocation_mode"] = "percent"
+                pm_args["allocation_value"] = float(pct_match.group(1))
+            elif dollar_match:
+                pm_args["allocation_mode"] = "fixed"
+                pm_args["allocation_value"] = float(dollar_match.group(1).replace(",", ""))
+            else:
+                pm_args["allocation_mode"] = "percent"
+                pm_args["allocation_value"] = 20.0  # sensible default
+            # Extract search query for slug resolution
+            pm_args["query"] = _extract_market_query(user_query)
+        elif "simulat" in lowered or "what if i bet" in lowered:
+            pm_args["action"] = "simulate"
+            dollar_match = re.search(r"\$\s*([\d,]+(?:\.\d+)?)", lowered)
+            if dollar_match:
+                pm_args["amount"] = float(dollar_match.group(1).replace(",", ""))
+            # Extract search query for slug resolution
+            pm_args["query"] = _extract_market_query(user_query)
+        elif "trending" in lowered or "top market" in lowered or "popular" in lowered:
+            pm_args["action"] = "trending"
+        elif "compare" in lowered or "vs" in lowered or "versus" in lowered:
+            pm_args["action"] = "compare"
         elif "search" in lowered:
             pm_args["action"] = "search"
             # Extract query after "search ... for" or "search"
@@ -402,8 +507,57 @@ def _sanitize_tool_args(
             merged_args["check_type"] = "all"
     elif tool_name == "explore_prediction_markets":
         action = merged_args.get("action")
-        if not isinstance(action, str) or action not in {"browse", "search", "analyze", "positions"}:
+        valid_actions = {"browse", "search", "analyze", "positions", "simulate", "trending", "compare", "scenario"}
+        if not isinstance(action, str) or action not in valid_actions:
             merged_args["action"] = "browse"
+        # Validate amount for simulate
+        if merged_args.get("action") == "simulate":
+            amt = merged_args.get("amount")
+            if amt is not None:
+                try:
+                    merged_args["amount"] = float(amt)
+                except (ValueError, TypeError):
+                    merged_args.pop("amount", None)
+        # Validate and enrich allocation_mode/value for scenario
+        if merged_args.get("action") == "scenario":
+            am = merged_args.get("allocation_mode")
+            if am not in {"fixed", "percent", "all_in", None}:
+                merged_args["allocation_mode"] = None
+            # If multi-step forced scenario but default_args didn't extract allocation,
+            # try extracting from user_query now
+            if not merged_args.get("allocation_mode"):
+                lowered_q = user_query.lower()
+                if "all in" in lowered_q or "all-in" in lowered_q:
+                    merged_args["allocation_mode"] = "all_in"
+                else:
+                    pct_m = re.search(r"(\d+)\s*%", lowered_q)
+                    dollar_m = re.search(r"\$\s*([\d,]+(?:\.\d+)?)", lowered_q)
+                    if pct_m:
+                        merged_args["allocation_mode"] = "percent"
+                        merged_args["allocation_value"] = float(pct_m.group(1))
+                    elif dollar_m:
+                        merged_args["allocation_mode"] = "fixed"
+                        merged_args["allocation_value"] = float(dollar_m.group(1).replace(",", ""))
+                    else:
+                        merged_args["allocation_mode"] = "percent"
+                        merged_args["allocation_value"] = 20.0
+            # Ensure query is set for slug resolution
+            if not merged_args.get("query") and not merged_args.get("market_slug"):
+                merged_args["query"] = _extract_market_query(user_query)
+            av = merged_args.get("allocation_value")
+            if av is not None:
+                try:
+                    merged_args["allocation_value"] = float(av)
+                except (ValueError, TypeError):
+                    merged_args.pop("allocation_value", None)
+            th = merged_args.get("time_horizon")
+            if th not in {"1m", "3m", "6m", "1y", None}:
+                merged_args.pop("time_horizon", None)
+        # Validate market_slugs for compare
+        if merged_args.get("action") == "compare":
+            slugs = merged_args.get("market_slugs")
+            if slugs is not None and not isinstance(slugs, list):
+                merged_args.pop("market_slugs", None)
     elif tool_name == "get_market_data":
         symbols = merged_args.get("symbols")
         if symbols is not None and not isinstance(symbols, list):
@@ -828,6 +982,22 @@ def _validate_prediction_market_payload(payload: dict[str, Any]) -> str | None:
         positions = payload.get("positions")
         if not isinstance(positions, list):
             return "INVALID_PREDICTION_MARKET_PAYLOAD"
+    elif action == "simulate":
+        if "potential_profit" not in payload or "ev_analysis" not in payload:
+            return "INVALID_PREDICTION_MARKET_PAYLOAD"
+    elif action == "trending":
+        trending = payload.get("trending_markets")
+        if not isinstance(trending, list):
+            return "INVALID_PREDICTION_MARKET_PAYLOAD"
+    elif action == "compare":
+        markets = payload.get("markets")
+        matrix = payload.get("comparison_matrix")
+        if not isinstance(markets, list) or not isinstance(matrix, dict):
+            return "INVALID_PREDICTION_MARKET_PAYLOAD"
+    elif action == "scenario":
+        for key in ("market", "allocation", "baseline", "scenario_metrics", "risk_assessment", "tax_estimate"):
+            if key not in payload:
+                return "INVALID_PREDICTION_MARKET_PAYLOAD"
     return None
 
 
@@ -954,10 +1124,30 @@ def _build_summary(tool_name: ToolName | None, tool_result: ToolResult | None) -
         action = payload.get("action", "browse")
         if action == "positions":
             total_pos = payload.get("total_positions", 0)
-            return f"Found {total_pos} Polymarket position(s)."
+            exposure = payload.get("exposure_pct", 0)
+            return f"Found {total_pos} Polymarket position(s) ({exposure:.1f}% portfolio exposure)."
         if action == "analyze":
             question = payload.get("question", "market")
-            return f"Analysis ready for: {question}"
+            ev = payload.get("ev_analysis", {})
+            ev_str = f" EV: ${ev.get('ev', 0):.2f}" if isinstance(ev, dict) else ""
+            return f"Analysis ready for: {question}.{ev_str}"
+        if action == "simulate":
+            market = payload.get("market", {})
+            question = market.get("question", "market") if isinstance(market, dict) else "market"
+            r_level = payload.get("risk_level", "unknown")
+            return f"Simulation complete for: {question}. Risk level: {r_level}."
+        if action == "trending":
+            total = payload.get("total", 0)
+            return f"Showing {total} trending prediction market(s)."
+        if action == "compare":
+            markets = payload.get("markets", [])
+            return f"Comparing {len(markets)} prediction market(s)."
+        if action == "scenario":
+            alloc = payload.get("allocation", {})
+            amt = alloc.get("resolved_amount", 0) if isinstance(alloc, dict) else 0
+            risk = payload.get("risk_assessment", {})
+            r_level = risk.get("risk_level", "unknown") if isinstance(risk, dict) else "unknown"
+            return f"Reallocation scenario modeled: ${amt:,.2f} allocated. Risk level: {r_level}."
         total_markets = payload.get("total_markets", 0)
         return f"Showing {total_markets} prediction market(s) from Polymarket."
 
@@ -1074,6 +1264,9 @@ def _extract_tool_data_points(
             total_p = data.get("total_positions")
             if isinstance(total_p, int):
                 points.append(("total_positions", str(total_p)))
+            exposure = data.get("exposure_pct")
+            if isinstance(exposure, (int, float)):
+                points.append(("exposure_pct", f"{exposure:.1f}%"))
         elif action == "analyze":
             question = data.get("question")
             if isinstance(question, str):
@@ -1081,6 +1274,46 @@ def _extract_tool_data_points(
             vol = data.get("volume_24h")
             if isinstance(vol, (int, float)):
                 points.append(("volume_24h", f"${vol:,.0f}"))
+            ev = data.get("ev_analysis")
+            if isinstance(ev, dict):
+                ev_val = ev.get("ev")
+                if isinstance(ev_val, (int, float)):
+                    points.append(("ev", f"${ev_val:,.2f}"))
+        elif action == "simulate":
+            profit = data.get("potential_profit")
+            if isinstance(profit, (int, float)):
+                points.append(("potential_profit", f"${profit:,.2f}"))
+            r_level = data.get("risk_level")
+            if isinstance(r_level, str):
+                points.append(("risk_level", r_level))
+        elif action == "trending":
+            total = data.get("total")
+            if isinstance(total, int):
+                points.append(("trending_count", str(total)))
+        elif action == "compare":
+            matrix = data.get("comparison_matrix")
+            if isinstance(matrix, dict):
+                vol_winner = matrix.get("volume_winner")
+                if isinstance(vol_winner, str):
+                    points.append(("volume_winner", vol_winner))
+        elif action == "scenario":
+            alloc = data.get("allocation")
+            if isinstance(alloc, dict):
+                amt = alloc.get("resolved_amount")
+                if isinstance(amt, (int, float)):
+                    points.append(("resolved_amount", f"${amt:,.2f}"))
+            metrics = data.get("scenario_metrics")
+            if isinstance(metrics, dict):
+                ev = metrics.get("expected_value")
+                if isinstance(ev, dict):
+                    ev_val = ev.get("ev")
+                    if isinstance(ev_val, (int, float)):
+                        points.append(("scenario_ev", f"${ev_val:,.2f}"))
+            risk = data.get("risk_assessment")
+            if isinstance(risk, dict):
+                r_level = risk.get("risk_level")
+                if isinstance(r_level, str):
+                    points.append(("risk_level", r_level))
 
     return points[:3]
 

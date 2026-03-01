@@ -5,7 +5,9 @@
     "input": "Show me my portfolio performance year to date",
     "expected_route": "portfolio",
     "expected_tool": "analyze_portfolio_performance",
-    "expected_args": { "time_period": "ytd" },
+    "expected_args": {
+      "time_period": "ytd"
+    },
     "expected_category": "analysis",
     "expected_output_contains": ["netPerformancePercentage"],
     "expected_error": null,
@@ -26,7 +28,9 @@
     "input": "How has my portfolio performed over the last 1 year?",
     "expected_route": "portfolio",
     "expected_tool": "analyze_portfolio_performance",
-    "expected_args": { "time_period": "1y" },
+    "expected_args": {
+      "time_period": "1y"
+    },
     "expected_category": "analysis",
     "expected_output_contains": ["netPerformancePercentage"],
     "expected_error": null,
@@ -47,7 +51,9 @@
     "input": "Show my portfolio returns for the past 5 years",
     "expected_route": "portfolio",
     "expected_tool": "analyze_portfolio_performance",
-    "expected_args": { "time_period": "5y" },
+    "expected_args": {
+      "time_period": "5y"
+    },
     "expected_category": "analysis",
     "expected_output_contains": ["netPerformancePercentage"],
     "expected_error": null,
@@ -179,7 +185,9 @@
     "input": "Estimate my tax liability for 2025",
     "expected_route": "tax",
     "expected_tool": "estimate_capital_gains_tax",
-    "expected_args": { "tax_year": 2025 },
+    "expected_args": {
+      "tax_year": 2025
+    },
     "expected_category": "analysis",
     "expected_output_contains": [],
     "expected_error": null,
@@ -200,7 +208,10 @@
     "input": "What is my tax liability for 2024 as a high income earner?",
     "expected_route": "tax",
     "expected_tool": "estimate_capital_gains_tax",
-    "expected_args": { "tax_year": 2024, "income_bracket": "high" },
+    "expected_args": {
+      "tax_year": 2024,
+      "income_bracket": "high"
+    },
     "expected_category": "analysis",
     "expected_output_contains": [],
     "expected_error": null,
@@ -258,7 +269,9 @@
     "input": "Show my allocation for an aggressive profile",
     "expected_route": "allocation",
     "expected_tool": "advise_asset_allocation",
-    "expected_args": { "target_profile": "aggressive" },
+    "expected_args": {
+      "target_profile": "aggressive"
+    },
     "expected_category": "analysis",
     "expected_output_contains": [],
     "expected_error": null,
@@ -295,7 +308,9 @@
     "input": "Run a full compliance check",
     "expected_route": "compliance",
     "expected_tool": "check_compliance",
-    "expected_args": { "check_type": "all" },
+    "expected_args": {
+      "check_type": "all"
+    },
     "expected_category": "analysis",
     "expected_output_contains": [],
     "expected_error": null,
@@ -316,7 +331,9 @@
     "input": "Check for any wash sale violations",
     "expected_route": "compliance",
     "expected_tool": "check_compliance",
-    "expected_args": { "check_type": "wash_sale" },
+    "expected_args": {
+      "check_type": "wash_sale"
+    },
     "expected_category": "analysis",
     "expected_output_contains": [],
     "expected_error": null,
@@ -1149,7 +1166,9 @@
     "input": "Show me the latest prediction markets",
     "expected_route": "predictions",
     "expected_tool": "explore_prediction_markets",
-    "expected_args": { "action": "browse" },
+    "expected_args": {
+      "action": "browse"
+    },
     "expected_category": "analysis",
     "expected_output_contains": ["markets", "total_markets"],
     "expected_error": null,
@@ -1170,7 +1189,10 @@
     "input": "Search prediction markets for Bitcoin",
     "expected_route": "predictions",
     "expected_tool": "explore_prediction_markets",
-    "expected_args": { "action": "search", "query": "Bitcoin" },
+    "expected_args": {
+      "action": "search",
+      "query": "Bitcoin"
+    },
     "expected_category": "analysis",
     "expected_output_contains": ["markets"],
     "expected_error": null,
@@ -1191,7 +1213,9 @@
     "input": "Show my Polymarket positions",
     "expected_route": "predictions",
     "expected_tool": "explore_prediction_markets",
-    "expected_args": { "action": "positions" },
+    "expected_args": {
+      "action": "positions"
+    },
     "expected_category": "analysis",
     "expected_output_contains": ["positions", "total_positions"],
     "expected_error": null,
@@ -1212,7 +1236,9 @@
     "input": "What are the odds on Polymarket?",
     "expected_route": "predictions",
     "expected_tool": "explore_prediction_markets",
-    "expected_args": { "action": "browse" },
+    "expected_args": {
+      "action": "browse"
+    },
     "expected_category": "analysis",
     "expected_output_contains": ["markets"],
     "expected_error": null,
@@ -1233,7 +1259,10 @@
     "input": "Browse crypto prediction markets",
     "expected_route": "predictions",
     "expected_tool": "explore_prediction_markets",
-    "expected_args": { "action": "browse", "category": "Crypto" },
+    "expected_args": {
+      "action": "browse",
+      "category": "Crypto"
+    },
     "expected_category": "analysis",
     "expected_output_contains": ["markets"],
     "expected_error": null,
@@ -1249,11 +1278,258 @@
     "input": "Show me prediction markets for events",
     "expected_route": "predictions",
     "expected_tool": "explore_prediction_markets",
-    "expected_args": { "action": "browse" },
+    "expected_args": {
+      "action": "browse"
+    },
     "expected_category": "analysis",
     "expected_output_contains": ["markets"],
     "expected_error": null,
     "pass_criteria": "Consistency: identical prediction markets result across 3 runs",
+    "eval_types": ["consistency"],
+    "consistency_runs": 3,
+    "latency_threshold_seconds": 5.0,
+    "multi_step_expected_tools": null
+  },
+  {
+    "id": "hp_simulate_01",
+    "category": "happy_path",
+    "input": "What if I bet $500 on Bitcoin 100k on Polymarket?",
+    "expected_route": "predictions",
+    "expected_tool": "explore_prediction_markets",
+    "expected_args": {
+      "action": "simulate"
+    },
+    "expected_category": "analysis",
+    "expected_output_contains": ["potential_profit", "ev_analysis"],
+    "expected_error": null,
+    "pass_criteria": "Routes to simulate action with amount",
+    "eval_types": [
+      "tool_selection",
+      "tool_execution",
+      "correctness",
+      "latency"
+    ],
+    "consistency_runs": 1,
+    "latency_threshold_seconds": 5.0,
+    "multi_step_expected_tools": null
+  },
+  {
+    "id": "hp_trending_02",
+    "category": "happy_path",
+    "input": "What's trending on Polymarket?",
+    "expected_route": "predictions",
+    "expected_tool": "explore_prediction_markets",
+    "expected_args": {
+      "action": "trending"
+    },
+    "expected_category": "analysis",
+    "expected_output_contains": ["trending_markets"],
+    "expected_error": null,
+    "pass_criteria": "Routes to trending action",
+    "eval_types": [
+      "tool_selection",
+      "tool_execution",
+      "correctness",
+      "latency"
+    ],
+    "consistency_runs": 1,
+    "latency_threshold_seconds": 5.0,
+    "multi_step_expected_tools": null
+  },
+  {
+    "id": "hp_compare_03",
+    "category": "happy_path",
+    "input": "Compare prediction markets for Bitcoin and Fed rate cut",
+    "expected_route": "predictions",
+    "expected_tool": "explore_prediction_markets",
+    "expected_args": {
+      "action": "compare"
+    },
+    "expected_category": "analysis",
+    "expected_output_contains": [],
+    "expected_error": null,
+    "pass_criteria": "Routes to compare action with market_slugs",
+    "eval_types": ["tool_selection"],
+    "consistency_runs": 1,
+    "latency_threshold_seconds": 5.0,
+    "multi_step_expected_tools": null
+  },
+  {
+    "id": "hp_scenario_percent_04",
+    "category": "happy_path",
+    "input": "What would happen if I move 20% into Bitcoin 100k on Polymarket?",
+    "expected_route": "predictions",
+    "expected_tool": "explore_prediction_markets",
+    "expected_args": {
+      "action": "scenario"
+    },
+    "expected_category": "analysis",
+    "expected_output_contains": [
+      "scenario_metrics",
+      "risk_assessment",
+      "tax_estimate"
+    ],
+    "expected_error": null,
+    "pass_criteria": "Routes to scenario with percent allocation",
+    "eval_types": [
+      "tool_selection",
+      "tool_execution",
+      "correctness",
+      "latency"
+    ],
+    "consistency_runs": 1,
+    "latency_threshold_seconds": 5.0,
+    "multi_step_expected_tools": null
+  },
+  {
+    "id": "hp_scenario_fixed_05",
+    "category": "happy_path",
+    "input": "What if I put $5000 into the Fed rate cut prediction market?",
+    "expected_route": "predictions",
+    "expected_tool": "explore_prediction_markets",
+    "expected_args": {
+      "action": "scenario"
+    },
+    "expected_category": "analysis",
+    "expected_output_contains": ["allocation", "scenario_metrics"],
+    "expected_error": null,
+    "pass_criteria": "Routes to scenario with fixed allocation",
+    "eval_types": [
+      "tool_selection",
+      "tool_execution",
+      "correctness",
+      "latency"
+    ],
+    "consistency_runs": 1,
+    "latency_threshold_seconds": 5.0,
+    "multi_step_expected_tools": null
+  },
+  {
+    "id": "hp_scenario_allin_06",
+    "category": "happy_path",
+    "input": "Go all in on Bitcoin 100k on Polymarket \u2014 what would happen?",
+    "expected_route": "predictions",
+    "expected_tool": "explore_prediction_markets",
+    "expected_args": {
+      "action": "scenario"
+    },
+    "expected_category": "analysis",
+    "expected_output_contains": ["scenario_metrics", "risk_assessment"],
+    "expected_error": null,
+    "pass_criteria": "Routes to scenario with all-in allocation",
+    "eval_types": [
+      "tool_selection",
+      "tool_execution",
+      "correctness",
+      "latency"
+    ],
+    "consistency_runs": 1,
+    "latency_threshold_seconds": 5.0,
+    "multi_step_expected_tools": null
+  },
+  {
+    "id": "hp_scenario_tax_07",
+    "category": "happy_path",
+    "input": "What would happen if I reallocate into Bitcoin 100k prediction market?",
+    "expected_route": "predictions",
+    "expected_tool": "explore_prediction_markets",
+    "expected_args": {
+      "action": "scenario"
+    },
+    "expected_category": "analysis",
+    "expected_output_contains": ["scenario_metrics"],
+    "expected_error": null,
+    "pass_criteria": "Routes to scenario \u2014 multi-step may trigger scenario+tax",
+    "eval_types": ["tool_selection", "tool_execution", "correctness"],
+    "consistency_runs": 1,
+    "latency_threshold_seconds": 5.0,
+    "multi_step_expected_tools": null
+  },
+  {
+    "id": "hp_scenario_compliance_08",
+    "category": "happy_path",
+    "input": "What would happen if I reallocate into Bitcoin 100k prediction market at 50%?",
+    "expected_route": "predictions",
+    "expected_tool": "explore_prediction_markets",
+    "expected_args": {
+      "action": "scenario"
+    },
+    "expected_category": "analysis",
+    "expected_output_contains": ["compliance_flags", "scenario_metrics"],
+    "expected_error": null,
+    "pass_criteria": "Routes to scenario \u2014 multi-step may trigger scenario+compliance",
+    "eval_types": ["tool_selection", "tool_execution", "correctness"],
+    "consistency_runs": 1,
+    "latency_threshold_seconds": 5.0,
+    "multi_step_expected_tools": null
+  },
+  {
+    "id": "ec_scenario_no_slug_09",
+    "category": "edge_case",
+    "input": "Run a prediction scenario for Bitcoin with 10% of funds",
+    "expected_route": "predictions",
+    "expected_tool": "explore_prediction_markets",
+    "expected_args": {
+      "action": "scenario"
+    },
+    "expected_category": "analysis",
+    "expected_output_contains": ["market"],
+    "expected_error": null,
+    "pass_criteria": "Scenario resolves slug from query when no slug given",
+    "eval_types": ["tool_selection", "tool_execution", "correctness"],
+    "consistency_runs": 1,
+    "latency_threshold_seconds": 5.0,
+    "multi_step_expected_tools": null
+  },
+  {
+    "id": "ec_simulate_no_amount_10",
+    "category": "edge_case",
+    "input": "Simulate a bet on Bitcoin 100k",
+    "expected_route": "predictions",
+    "expected_tool": "explore_prediction_markets",
+    "expected_args": {
+      "action": "simulate"
+    },
+    "expected_category": "analysis",
+    "expected_output_contains": [],
+    "expected_error": null,
+    "pass_criteria": "Simulate without amount \u2014 may default to browse or fail gracefully",
+    "eval_types": ["tool_selection"],
+    "consistency_runs": 1,
+    "latency_threshold_seconds": 5.0,
+    "multi_step_expected_tools": null
+  },
+  {
+    "id": "ec_scenario_allin_tax_11",
+    "category": "edge_case",
+    "input": "Go all in on Bitcoin prediction market \u2014 what would happen?",
+    "expected_route": "predictions",
+    "expected_tool": "explore_prediction_markets",
+    "expected_args": {
+      "action": "scenario"
+    },
+    "expected_category": "analysis",
+    "expected_output_contains": ["scenario_metrics"],
+    "expected_error": null,
+    "pass_criteria": "All-in scenario with tax question \u2014 multi-step may trigger",
+    "eval_types": ["tool_selection", "tool_execution", "correctness"],
+    "consistency_runs": 1,
+    "latency_threshold_seconds": 5.0,
+    "multi_step_expected_tools": null
+  },
+  {
+    "id": "cons_scenario_12",
+    "category": "consistency",
+    "input": "Move 50% into prediction markets \u2014 what would happen?",
+    "expected_route": "predictions",
+    "expected_tool": "explore_prediction_markets",
+    "expected_args": {
+      "action": "scenario"
+    },
+    "expected_category": "analysis",
+    "expected_output_contains": ["scenario_metrics"],
+    "expected_error": null,
+    "pass_criteria": "Consistency: same scenario result across runs",
     "eval_types": ["consistency"],
     "consistency_runs": 3,
     "latency_threshold_seconds": 5.0,

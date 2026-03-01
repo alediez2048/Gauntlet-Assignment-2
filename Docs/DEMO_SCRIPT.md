@@ -1,6 +1,6 @@
 # AgentForge Demo Script
 
-A 5-query scripted walkthrough demonstrating single-tool analysis, multi-step orchestration, edge case handling, and conversation memory.
+An 8-query scripted walkthrough demonstrating single-tool analysis, prediction market intelligence, portfolio reallocation scenarios, multi-step orchestration, edge case handling, and conversation memory.
 
 ## Pre-Demo Checklist
 
@@ -79,7 +79,71 @@ A 5-query scripted walkthrough demonstrating single-tool analysis, multi-step or
 
 ---
 
-### Query 4: Edge Case — Out of Domain
+### Query 4: Prediction Market — Browse & Analyze
+
+**Type this:**
+
+> What's trending on Polymarket right now?
+
+**What happens:**
+
+1. Routes to `explore_prediction_markets` with `action=trending`
+2. Fetches live markets from Polymarket's Gamma API, sorted by 24h volume
+3. Each market displays implied probabilities, liquidity grade, and volume
+4. Response streams in with top trending markets
+
+**Point out to the grader:**
+
+- Live data from Polymarket Gamma API — real-time odds and volume
+- Enriched analytics: implied probabilities, liquidity grades (A-F), spread analysis
+- This is the Polyfolio bounty feature — prediction market integration
+
+---
+
+### Query 5: Prediction Market — Reallocation Scenario
+
+**Type this:**
+
+> How would my portfolio look if I move 20% into the Jesus return to earth prediction market?
+
+**What happens:**
+
+1. Routes to `explore_prediction_markets` with `action=scenario`
+2. Resolves "jesus return" to the actual Polymarket market via progressive word search
+3. Fetches portfolio details ($53K+ in holdings) and computes reallocation
+4. Returns win/lose case analysis, tax estimates, compliance flags, allocation drift
+
+**Point out to the grader:**
+
+- Scenario modeling: win case payout, lose case loss, expected value, Kelly hint
+- Tax estimates: liquidation tax (long-term), win-case tax (short-term), loss offset
+- Risk assessment: concentration impact, allocation drift from balanced portfolio
+- Fuzzy market search: "jesus return to earth" resolves to "Will Jesus Christ return before 2027?"
+
+---
+
+### Query 6: Multi-Step — Prediction Scenario + Compliance
+
+**Type this:**
+
+> What are the tax implications if I reallocate 50% of my portfolio into the Bitcoin prediction market?
+
+**What happens:**
+
+1. Multi-step detector fires: detects both prediction and tax keywords
+2. Step 1: scenario tool models the 50% reallocation with full win/lose analysis
+3. Step 2: tax estimator provides capital gains context
+4. Synthesizer combines both results with cross-cutting insights
+
+**Point out to the grader:**
+
+- Multi-step orchestration chains prediction scenario with tax analysis
+- The agent doesn't ask for clarification — it detects the combined intent automatically
+- Cross-tool synthesis draws connections between reallocation risk and tax implications
+
+---
+
+### Query 7: Edge Case — Out of Domain
 
 **Type this:**
 
@@ -99,7 +163,7 @@ A 5-query scripted walkthrough demonstrating single-tool analysis, multi-step or
 
 ---
 
-### Query 5: Thread Continuity — Follow-Up
+### Query 8: Thread Continuity — Follow-Up
 
 **Type this (in the same chat thread):**
 
@@ -142,7 +206,7 @@ AUTH_TOKEN=$(curl -sS -X POST http://localhost:3333/api/v1/auth/anonymous \
   | python3 -c "import sys,json; print(json.load(sys.stdin)['authToken'])")
 ```
 
-Then run the 5 queries:
+Then run the 8 queries:
 
 ```bash
 # Query 1: Portfolio performance
@@ -163,13 +227,31 @@ curl -N -X POST http://localhost:8000/api/agent/chat \
   -H "Authorization: Bearer $AUTH_TOKEN" \
   -d '{"message":"Give me a full financial health checkup","thread_id":"demo-1"}'
 
-# Query 4: Edge case
+# Query 4: Prediction market trending
+curl -N -X POST http://localhost:8000/api/agent/chat \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $AUTH_TOKEN" \
+  -d '{"message":"What'\''s trending on Polymarket right now?","thread_id":"demo-1"}'
+
+# Query 5: Reallocation scenario
+curl -N -X POST http://localhost:8000/api/agent/chat \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $AUTH_TOKEN" \
+  -d '{"message":"How would my portfolio look if I move 20% into the Jesus return to earth prediction market?","thread_id":"demo-1"}'
+
+# Query 6: Multi-step scenario + tax
+curl -N -X POST http://localhost:8000/api/agent/chat \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $AUTH_TOKEN" \
+  -d '{"message":"What are the tax implications if I reallocate 50% of my portfolio into the Bitcoin prediction market?","thread_id":"demo-1"}'
+
+# Query 7: Edge case
 curl -N -X POST http://localhost:8000/api/agent/chat \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer $AUTH_TOKEN" \
   -d '{"message":"What is the weather in New York?","thread_id":"demo-1"}'
 
-# Query 5: Thread continuity
+# Query 8: Thread continuity
 curl -N -X POST http://localhost:8000/api/agent/chat \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer $AUTH_TOKEN" \

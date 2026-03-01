@@ -34,10 +34,12 @@ The agent accesses Polymarket data through the open-source project's NestJS API 
 
 ### Agent (Python/FastAPI)
 
-- `explore_prediction_markets` tool with 4 actions: browse, search, analyze, positions
+- `explore_prediction_markets` tool with 9 actions: browse, search, analyze, positions, simulate, trending, compare, scenario
+- `prediction_helpers.py` domain logic (Kelly, EV, implied probability, market efficiency, reallocation scenario modeling)
+- Portfolio reallocation analysis with tax, compliance, and allocation drift modeling
 - `PredictionMarketInput` Pydantic schema for validation
 - Full integration across 11 touch points in the routing/orchestration layer
-- 9 unit tests + 6 eval cases (69 total)
+- 377 automated tests passing (272 unit + 18 integration + 87 eval)
 
 ### Frontend (Angular)
 

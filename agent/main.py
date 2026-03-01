@@ -272,6 +272,13 @@ _SAFE_ERROR_MESSAGES: dict[str, str] = {
     "POLYMARKET_API_ERROR": "Received an error from the Polymarket service.",
     "NO_MARKETS_FOUND": "No prediction markets found matching your criteria.",
     "MARKET_NOT_FOUND": "Could not find the specified prediction market.",
+    "INVALID_SIMULATION_AMOUNT": "Please provide a positive dollar amount for the simulation.",
+    "MARKET_INACTIVE": "That prediction market is no longer active.",
+    "INVALID_COMPARISON_COUNT": "Please provide 2 or 3 market slugs to compare.",
+    "INVALID_ALLOCATION_MODE": "Please specify an allocation mode: a dollar amount, a percentage, or all-in.",
+    "INVALID_ALLOCATION_VALUE": "Allocation amount exceeds your current portfolio value.",
+    "UNSUPPORTED_HORIZON": "Supported time horizons are 1 month, 3 months, 6 months, or 1 year.",
+    "MISSING_OUTCOME": "Please specify an outcome side (Yes or No).",
 }
 _THREAD_STATE_CACHE: dict[str, dict[str, Any]] = {}
 

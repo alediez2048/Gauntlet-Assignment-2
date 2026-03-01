@@ -130,19 +130,46 @@ class GhostfolioClient:
         params: dict[str, str] = {}
         if category:
             params["category"] = category
+        if query:
+            params["query"] = query
         result = await self._request_json_any(
             "/api/v1/polymarket/markets", params=params or None
         )
         markets = result if isinstance(result, list) else result.get("markets", [result])
-        if query:
-            q = query.lower()
-            markets = [m for m in markets if q in (m.get("question", "") or "").lower()]
         return markets
 
     async def get_polymarket_market(self, slug: str) -> dict[str, Any]:
-        """Returns a single Polymarket market by slug."""
-        result = await self._request_json_any(f"/api/v1/polymarket/markets/{slug}")
-        return result if isinstance(result, dict) else {}
+        """Returns a single Polymarket market by slug.
+
+        Falls back to text search if exact slug lookup returns nothing
+        (handles LLM-generated approximate slugs like 'bitcoin-100k').
+        """
+        try:
+            result = await self._request_json_any(f"/api/v1/polymarket/markets/{slug}")
+            if isinstance(result, dict) and result.get("question"):
+                return result
+        except GhostfolioClientError:
+            pass  # Slug not found (404) or other error — fall through to search
+
+        # Slug not found — progressively search with fewer words until we find a match.
+        # e.g. "will-bitcoin-reach-100k-2026" → try "bitcoin reach 100k 2026"
+        #   → try "bitcoin 100k" → try "bitcoin"
+        stop_words = {"will", "the", "a", "an", "in", "by", "to", "of", "for", "and", "or", "is", "be", "reach"}
+        words = slug.replace("-", " ").split()
+        key_words = [w for w in words if w.lower() not in stop_words and len(w) >= 2]
+        if not key_words:
+            key_words = [w for w in words if len(w) >= 2]
+
+        # Try progressively fewer key words until we get results
+        for end in range(len(key_words), 0, -1):
+            query = " ".join(key_words[:end])
+            markets = await self.get_polymarket_markets(query=query)
+            if markets:
+                sorted_markets = sorted(
+                    markets, key=lambda m: float(m.get("volume24hr", 0)), reverse=True
+                )
+                return sorted_markets[0]
+        return {}
 
     async def get_polymarket_positions(self) -> list[dict[str, Any]]:
         """Returns user's Polymarket positions."""
