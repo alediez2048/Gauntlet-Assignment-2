@@ -13,18 +13,18 @@ export const ghostfolioFearAndGreedIndexSymbolStocks = `${ghostfolioPrefix}_FEAR
 
 export const locale = 'en-US';
 
-export const primaryColorHex = '#36cfcc';
+export const primaryColorHex = '#1d4ed8';
 export const primaryColorRgb = {
-  r: 54,
-  g: 207,
-  b: 204
+  r: 29,
+  g: 78,
+  b: 216
 };
 
-export const secondaryColorHex = '#3686cf';
+export const secondaryColorHex = '#7c3aed';
 export const secondaryColorRgb = {
-  r: 54,
-  g: 134,
-  b: 207
+  r: 124,
+  g: 58,
+  b: 237
 };
 
 export const warnColorHex = '#dc3545';

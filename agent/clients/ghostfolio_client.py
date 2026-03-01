@@ -130,7 +130,7 @@ class GhostfolioClient:
         params: dict[str, str] = {}
         if category:
             params["category"] = category
-        result = await self._request_json(
+        result = await self._request_json_any(
             "/api/v1/polymarket/markets", params=params or None
         )
         markets = result if isinstance(result, list) else result.get("markets", [result])
@@ -141,11 +141,12 @@ class GhostfolioClient:
 
     async def get_polymarket_market(self, slug: str) -> dict[str, Any]:
         """Returns a single Polymarket market by slug."""
-        return await self._request_json(f"/api/v1/polymarket/markets/{slug}")
+        result = await self._request_json_any(f"/api/v1/polymarket/markets/{slug}")
+        return result if isinstance(result, dict) else {}
 
     async def get_polymarket_positions(self) -> list[dict[str, Any]]:
         """Returns user's Polymarket positions."""
-        result = await self._request_json("/api/v1/polymarket/positions")
+        result = await self._request_json_any("/api/v1/polymarket/positions")
         return result if isinstance(result, list) else result.get("positions", [])
 
     def _validate_date_range(self, value: str) -> None:
@@ -200,6 +201,43 @@ class GhostfolioClient:
             )
 
         return payload
+
+    async def _request_json_any(
+        self,
+        path: str,
+        *,
+        params: dict[str, str] | None = None,
+    ) -> Any:
+        """Like _request_json but accepts both JSON arrays and objects."""
+        token = self._bearer_token or await self._ensure_token()
+        response = await self._send_get(path=path, params=params, bearer_token=token)
+
+        if response.status_code == 401:
+            if self._uses_supplied_bearer():
+                raise GhostfolioClientError("AUTH_FAILED", status=401)
+            clear_bearer_token_cache(self.base_url)
+            refreshed_token = await self._ensure_token(force_refresh=True)
+            response = await self._send_get(
+                path=path,
+                params=params,
+                bearer_token=refreshed_token,
+            )
+            if response.status_code == 401:
+                raise GhostfolioClientError("AUTH_FAILED", status=401)
+
+        try:
+            response.raise_for_status()
+        except httpx.HTTPStatusError as error:
+            status_code = error.response.status_code if error.response else None
+            raise GhostfolioClientError("API_ERROR", status=status_code) from error
+
+        try:
+            return response.json()
+        except ValueError as error:
+            raise GhostfolioClientError(
+                "API_ERROR",
+                detail="Ghostfolio returned a non-JSON response.",
+            ) from error
 
     async def _send_get(
         self,

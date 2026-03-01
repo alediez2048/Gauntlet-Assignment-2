@@ -6,7 +6,7 @@
 @import 'svgmap/dist/svgMap';
 
 :root {
-  --dark-background: rgb(25, 25, 25);
+  --dark-background: rgb(30, 30, 46);
   --font-family-sans-serif: 'Inter', Roboto, 'Helvetica Neue', sans-serif;
   --light-background: rgb(255, 255, 255);
 
@@ -47,19 +47,19 @@
   --palette-background-disabled-list-option: 238, 238, 238;
   --palette-background-tooltip: 97, 97, 97;
   --palette-background-status-bar-dark: 0, 0, 0;
-  --palette-background-app-bar-dark: 33, 33, 33;
-  --palette-background-background-dark: 48, 48, 48;
+  --palette-background-app-bar-dark: 30, 30, 46;
+  --palette-background-background-dark: 30, 30, 46;
   --palette-background-hover-dark: 255, 255, 255;
   --palette-background-hover-dark-alpha: 0.04;
-  --palette-background-card-dark: 66, 66, 66;
-  --palette-background-dialog-dark: 66, 66, 66;
+  --palette-background-card-dark: 42, 42, 61;
+  --palette-background-dialog-dark: 42, 42, 61;
   --palette-background-disabled-button-dark: 255, 255, 255;
   --palette-background-disabled-button-dark-alpha: 0.12;
-  --palette-background-raised-button-dark: 66, 66, 66;
+  --palette-background-raised-button-dark: 42, 42, 61;
   --palette-background-focused-button-dark: 255, 255, 255;
   --palette-background-focused-button-dark-alpha: 0.12;
-  --palette-background-selected-button-dark: 33, 33, 33;
-  --palette-background-selected-disabled-button-dark: 66, 66, 66;
+  --palette-background-selected-button-dark: 50, 50, 74;
+  --palette-background-selected-disabled-button-dark: 42, 42, 61;
   --palette-background-disabled-button-toggle-dark: 0, 0, 0;
   --palette-background-unselected-chip-dark: 97, 97, 97;
   --palette-background-disabled-list-option-dark: 0, 0, 0;
@@ -234,7 +234,7 @@ body {
 
     ngx-skeleton-loader {
       .skeleton-loader {
-        background-color: #323232;
+        background-color: #32324a;
       }
     }
 

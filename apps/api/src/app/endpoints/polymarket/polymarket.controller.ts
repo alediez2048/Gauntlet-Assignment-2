@@ -104,7 +104,18 @@ export class PolymarketController {
   @Get('positions')
   @UseGuards(AuthGuard('jwt'))
   public async getPositions() {
-    return this.polymarketService.getPositions(this.request.user.id);
+    try {
+      return await this.polymarketService.getPositions(this.request.user.id);
+    } catch (error) {
+      this.logger.error(
+        `Failed to fetch positions: ${error instanceof Error ? error.message : 'Unknown'}`
+      );
+
+      throw new HttpException(
+        'Failed to fetch positions',
+        StatusCodes.INTERNAL_SERVER_ERROR
+      );
+    }
   }
 
   @HasPermission(permissions.deleteOrder)

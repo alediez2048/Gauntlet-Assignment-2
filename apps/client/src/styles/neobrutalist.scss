@@ -1,23 +1,162 @@
 // ---------------------------------------------------------------------------
-// Polyfolio Neobrutalist Design System — Global Material Overrides
+// Polyfolio Neobrutalist Design System — Global Overrides
 // ---------------------------------------------------------------------------
-// Design tokens extracted from the agent chat panel's proven neobrutalist system.
-// Single import in styles.scss applies the look to every Material component.
-// Remove the import to revert all styling.
+// Targets both Material components AND the app's custom layout elements
+// (chart container, value display, sidebar, header nav).
+// Remove the @import in styles.scss to revert everything.
 // ---------------------------------------------------------------------------
 
 // ── Design Tokens ──────────────────────────────────────────────────────────
 
-$neo-border-light: 2px solid #000;
-$neo-border-dark: 2px solid #e2e8f0;
-$neo-shadow-light: 4px 4px 0 #000;
-$neo-shadow-hover-light: 6px 6px 0 #000;
-$neo-shadow-active-light: 2px 2px 0 #000;
-$neo-shadow-dark: 4px 4px 0 rgba(255, 255, 255, 0.15);
-$neo-shadow-hover-dark: 6px 6px 0 rgba(255, 255, 255, 0.2);
-$neo-shadow-active-dark: 2px 2px 0 rgba(255, 255, 255, 0.1);
+$neo-blue: #1d4ed8;
+$neo-purple: #7c3aed;
+$neo-border-light: 2.5px solid #1a1a1a;
+$neo-border-dark: 2.5px solid rgba(255, 255, 255, 0.55);
+$neo-shadow-light: 4px 4px 0 #1a1a1a;
+$neo-shadow-hover-light: 6px 6px 0 #1a1a1a;
+$neo-shadow-active-light: 2px 2px 0 #1a1a1a;
+$neo-shadow-dark: 4px 4px 0 rgba(124, 58, 237, 0.5);
+$neo-shadow-hover-dark: 6px 6px 0 rgba(124, 58, 237, 0.6);
+$neo-shadow-active-dark: 2px 2px 0 rgba(124, 58, 237, 0.35);
 $neo-radius: 0.5rem;
 $neo-radius-lg: 0.75rem;
+$neo-surface-dark: #1e1e2e;
+$neo-surface-card-dark: #2a2a3d;
+$neo-surface-elevated-dark: #32324a;
+
+// ═══════════════════════════════════════════════════════════════════════════
+// SECTION 1: App layout elements (chart, value display, sidebar, header)
+// ═══════════════════════════════════════════════════════════════════════════
+
+// ── Chart Container ────────────────────────────────────────────────────────
+// The main chart on the overview page — wrap it in a neobrutalist card
+
+.chart-container {
+  background: rgba(255, 255, 255, 0.03);
+  border: $neo-border-light;
+  border-radius: $neo-radius-lg;
+  box-shadow: $neo-shadow-light;
+  padding: 1rem;
+}
+
+// ── Portfolio Value Display ────────────────────────────────────────────────
+
+.value-container {
+  letter-spacing: -0.02em;
+}
+
+.overview-container {
+  background: rgba(0, 0, 0, 0.02);
+  border: $neo-border-light;
+  border-radius: $neo-radius-lg;
+  box-shadow: 3px 3px 0 #1a1a1a;
+  padding: 1.5rem 1rem !important;
+  margin-top: 1.5rem !important;
+  max-width: 50rem;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+// ── Header Toolbar ─────────────────────────────────────────────────────────
+
+.mat-toolbar {
+  border-bottom: 3px solid #1a1a1a !important;
+  font-weight: 700;
+
+  // Nav buttons in toolbar — give them visible neobrutalist pill style
+  .mat-mdc-unelevated-button:not(.mat-primary):not(.mat-accent) {
+    background-color: transparent !important;
+    border: 2px solid #1a1a1a !important;
+    border-radius: $neo-radius !important;
+    box-shadow: 2px 2px 0 #1a1a1a;
+    font-weight: 800 !important;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    margin: 0 0.15rem;
+    transition:
+      transform 0.12s ease,
+      box-shadow 0.12s ease,
+      background-color 0.12s ease;
+
+    &:hover {
+      transform: translateY(-1px);
+      box-shadow: 3px 3px 0 #1a1a1a;
+      background-color: rgba(29, 78, 216, 0.06) !important;
+    }
+
+    &:active {
+      transform: translateY(1px);
+      box-shadow: 1px 1px 0 #1a1a1a;
+    }
+
+    // Active/current nav button
+    &.font-weight-bold {
+      background-color: $neo-blue !important;
+      color: white !important;
+      border-color: #1a1a1a !important;
+      box-shadow: 3px 3px 0 #1a1a1a;
+      text-decoration: none !important;
+    }
+  }
+
+  // Primary colored buttons (like "Get Started")
+  .mat-mdc-unelevated-button.mat-primary {
+    border: 2px solid #1a1a1a !important;
+    border-radius: $neo-radius !important;
+    box-shadow: 3px 3px 0 #1a1a1a;
+    font-weight: 800 !important;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    font-size: 0.8rem;
+
+    &:hover {
+      transform: translateY(-1px);
+      box-shadow: 4px 4px 0 #1a1a1a;
+    }
+  }
+}
+
+// ── Sidebar (Tab Navigation on Desktop) ───────────────────────────────────
+
+.page.has-tabs {
+  @media (min-width: 576px) {
+    .mat-mdc-tab-header {
+      border-right: 3px solid #1a1a1a !important;
+      background-color: rgba(0, 0, 0, 0.02) !important;
+      padding: 1.5rem 0.5rem !important;
+    }
+  }
+}
+
+.mat-mdc-tab-nav-bar {
+  border-bottom: 3px solid #1a1a1a;
+}
+
+.mat-mdc-tab-link {
+  font-weight: 700 !important;
+  letter-spacing: 0.01em;
+  border-radius: $neo-radius !important;
+  margin: 0.15rem 0.25rem;
+  transition:
+    background-color 0.12s ease,
+    box-shadow 0.12s ease;
+
+  &.mdc-tab--active {
+    background-color: rgba(29, 78, 216, 0.1) !important;
+    font-weight: 800 !important;
+    border: 2px solid rgba(29, 78, 216, 0.3);
+    box-shadow: 2px 2px 0 rgba(29, 78, 216, 0.2);
+  }
+
+  &:hover:not(.mdc-tab--active) {
+    background-color: rgba(29, 78, 216, 0.05) !important;
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// SECTION 2: Material component overrides
+// ═══════════════════════════════════════════════════════════════════════════
 
 // ── Cards ──────────────────────────────────────────────────────────────────
 
@@ -30,26 +169,27 @@ $neo-radius-lg: 0.75rem;
     box-shadow 0.15s ease;
 
   &:hover {
-    transform: translateY(-1px);
+    transform: translateY(-2px);
     box-shadow: $neo-shadow-hover-light !important;
   }
 }
 
-// ── Buttons ────────────────────────────────────────────────────────────────
+// ── Standalone Buttons (outside toolbar) ───────────────────────────────────
 
-.mat-mdc-unelevated-button,
 .mat-mdc-raised-button,
 .mat-mdc-outlined-button {
   border: $neo-border-light !important;
   border-radius: $neo-radius !important;
   box-shadow: $neo-shadow-light;
-  font-weight: 700;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
   transition:
     transform 0.15s ease,
     box-shadow 0.15s ease;
 
   &:hover {
-    transform: translateY(-1px);
+    transform: translateY(-2px);
     box-shadow: $neo-shadow-hover-light;
   }
 
@@ -59,10 +199,9 @@ $neo-radius-lg: 0.75rem;
   }
 }
 
-// ── Toolbar ────────────────────────────────────────────────────────────────
-
-.mat-toolbar {
-  border-bottom: $neo-border-light;
+// Stroked buttons (like "Load Sample Portfolio")
+.mat-mdc-outlined-button {
+  border-width: 2.5px !important;
 }
 
 // ── Tables ─────────────────────────────────────────────────────────────────
@@ -74,10 +213,18 @@ $neo-radius-lg: 0.75rem;
 
   .mat-mdc-header-row {
     font-weight: 800;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
   }
 
   .mat-mdc-row {
-    border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+    border-bottom: 1.5px solid rgba(0, 0, 0, 0.12);
+    transition: background-color 0.1s ease;
+
+    &:hover {
+      background-color: rgba(29, 78, 216, 0.04);
+    }
   }
 }
 
@@ -87,7 +234,7 @@ $neo-radius-lg: 0.75rem;
   .mdc-dialog__surface {
     border: $neo-border-light !important;
     border-radius: $neo-radius-lg !important;
-    box-shadow: $neo-shadow-hover-light !important;
+    box-shadow: 8px 8px 0 #1a1a1a !important;
   }
 }
 
@@ -96,14 +243,8 @@ $neo-radius-lg: 0.75rem;
 .mat-mdc-chip {
   border: $neo-border-light !important;
   border-radius: $neo-radius !important;
-  box-shadow: 2px 2px 0 #000;
+  box-shadow: 2px 2px 0 #1a1a1a;
   font-weight: 700;
-}
-
-// ── Tabs ───────────────────────────────────────────────────────────────────
-
-.mat-mdc-tab-nav-bar {
-  border-bottom: $neo-border-light;
 }
 
 // ── FAB ────────────────────────────────────────────────────────────────────
@@ -117,7 +258,7 @@ $neo-radius-lg: 0.75rem;
     box-shadow 0.15s ease;
 
   &:hover {
-    transform: translateY(-1px);
+    transform: translateY(-2px) scale(1.05);
     box-shadow: $neo-shadow-hover-light !important;
   }
 
@@ -134,27 +275,148 @@ $neo-radius-lg: 0.75rem;
     .mdc-notched-outline__leading,
     .mdc-notched-outline__notch,
     .mdc-notched-outline__trailing {
-      border-width: 2px !important;
+      border-width: 2.5px !important;
+      border-color: #1a1a1a !important;
+    }
+  }
+
+  &:hover .mdc-notched-outline {
+    .mdc-notched-outline__leading,
+    .mdc-notched-outline__notch,
+    .mdc-notched-outline__trailing {
+      border-color: $neo-blue !important;
     }
   }
 }
 
-// ── Dark Mode Overrides ────────────────────────────────────────────────────
+// ── Menu Panels ────────────────────────────────────────────────────────────
+
+.mat-mdc-menu-panel {
+  border: $neo-border-light !important;
+  border-radius: $neo-radius !important;
+  box-shadow: $neo-shadow-light !important;
+}
+
+// ── Select Dropdown ────────────────────────────────────────────────────────
+
+.mat-mdc-select-panel {
+  border: $neo-border-light !important;
+  border-radius: $neo-radius !important;
+  box-shadow: $neo-shadow-light !important;
+}
+
+// ── Paginator ──────────────────────────────────────────────────────────────
+
+.mat-mdc-paginator {
+  border-top: $neo-border-light;
+  font-weight: 700;
+}
+
+// ── Snackbar ───────────────────────────────────────────────────────────────
+
+.mat-mdc-snack-bar-container {
+  border: $neo-border-light;
+  border-radius: $neo-radius !important;
+  box-shadow: $neo-shadow-light;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// SECTION 3: Dark Mode
+// ═══════════════════════════════════════════════════════════════════════════
 
 body.theme-dark {
+  background: $neo-surface-dark !important;
+
+  // ── Chart Container ───────────────
+  .chart-container {
+    background: rgba(124, 58, 237, 0.06);
+    border: $neo-border-dark;
+    box-shadow: $neo-shadow-dark;
+  }
+
+  // ── Portfolio Value & Overview ─────
+  .overview-container {
+    background: $neo-surface-card-dark;
+    border: $neo-border-dark;
+    box-shadow: 3px 3px 0 rgba(124, 58, 237, 0.4);
+  }
+
+  // ── Header Toolbar ────────────────
+  .mat-toolbar {
+    border-bottom: 3px solid rgba(255, 255, 255, 0.35) !important;
+    background-color: $neo-surface-dark !important;
+
+    .mat-mdc-unelevated-button:not(.mat-primary):not(.mat-accent) {
+      border-color: rgba(255, 255, 255, 0.5) !important;
+      box-shadow: 2px 2px 0 rgba(124, 58, 237, 0.4);
+      color: rgba(255, 255, 255, 0.9) !important;
+
+      &:hover {
+        box-shadow: 3px 3px 0 rgba(124, 58, 237, 0.5);
+        background-color: rgba(124, 58, 237, 0.12) !important;
+      }
+
+      &:active {
+        box-shadow: 1px 1px 0 rgba(124, 58, 237, 0.3);
+      }
+
+      &.font-weight-bold {
+        background-color: $neo-purple !important;
+        color: white !important;
+        border-color: rgba(255, 255, 255, 0.6) !important;
+        box-shadow: 3px 3px 0 rgba(124, 58, 237, 0.5);
+      }
+    }
+
+    .mat-mdc-unelevated-button.mat-primary {
+      border-color: rgba(255, 255, 255, 0.5) !important;
+      box-shadow: 3px 3px 0 rgba(124, 58, 237, 0.4);
+    }
+  }
+
+  // ── Sidebar ───────────────────────
+  .page.has-tabs {
+    @media (min-width: 576px) {
+      .mat-mdc-tab-header {
+        background-color: $neo-surface-card-dark !important;
+        border-right: 3px solid rgba(255, 255, 255, 0.25) !important;
+      }
+    }
+  }
+
+  .mat-mdc-tab-nav-bar {
+    border-bottom: 3px solid rgba(255, 255, 255, 0.25);
+  }
+
+  .mat-mdc-tab-link {
+    &.mdc-tab--active {
+      background-color: rgba(124, 58, 237, 0.2) !important;
+      border-color: rgba(124, 58, 237, 0.4);
+      box-shadow: 2px 2px 0 rgba(124, 58, 237, 0.3);
+    }
+
+    &:hover:not(.mdc-tab--active) {
+      background-color: rgba(124, 58, 237, 0.08) !important;
+    }
+  }
+
+  // ── Cards ─────────────────────────
   .mat-mdc-card {
     border: $neo-border-dark;
     box-shadow: $neo-shadow-dark !important;
+    background-color: $neo-surface-card-dark !important;
+    --mat-card-elevated-container-color: #{$neo-surface-card-dark};
+    --mat-card-outlined-container-color: #{$neo-surface-card-dark};
 
     &:hover {
       box-shadow: $neo-shadow-hover-dark !important;
     }
   }
 
-  .mat-mdc-unelevated-button,
+  // ── Buttons ───────────────────────
   .mat-mdc-raised-button,
   .mat-mdc-outlined-button {
-    border-color: #e2e8f0 !important;
+    border-color: rgba(255, 255, 255, 0.5) !important;
     box-shadow: $neo-shadow-dark;
 
     &:hover {
@@ -166,34 +428,41 @@ body.theme-dark {
     }
   }
 
-  .mat-toolbar {
-    border-bottom: $neo-border-dark;
-  }
-
+  // ── Tables ────────────────────────
   .mat-mdc-table {
     border: $neo-border-dark;
+    background-color: $neo-surface-card-dark;
+
+    .mat-mdc-header-row {
+      background-color: $neo-surface-elevated-dark;
+    }
 
     .mat-mdc-row {
-      border-bottom-color: rgba(255, 255, 255, 0.12);
+      border-bottom-color: rgba(255, 255, 255, 0.1);
+
+      &:hover {
+        background-color: rgba(124, 58, 237, 0.08);
+      }
     }
   }
 
+  // ── Dialogs ───────────────────────
   .mat-mdc-dialog-container {
     .mdc-dialog__surface {
       border: $neo-border-dark !important;
-      box-shadow: $neo-shadow-hover-dark !important;
+      box-shadow: 8px 8px 0 rgba(124, 58, 237, 0.4) !important;
+      background-color: $neo-surface-dark !important;
+      --mat-dialog-container-color: #{$neo-surface-dark};
     }
   }
 
+  // ── Chips ─────────────────────────
   .mat-mdc-chip {
     border: $neo-border-dark !important;
-    box-shadow: 2px 2px 0 rgba(255, 255, 255, 0.15);
+    box-shadow: 2px 2px 0 rgba(124, 58, 237, 0.35);
   }
 
-  .mat-mdc-tab-nav-bar {
-    border-bottom: $neo-border-dark;
-  }
-
+  // ── FAB ───────────────────────────
   .mat-mdc-fab,
   .mat-mdc-mini-fab {
     border: $neo-border-dark !important;
@@ -206,5 +475,44 @@ body.theme-dark {
     &:active {
       box-shadow: $neo-shadow-active-dark !important;
     }
+  }
+
+  // ── Form Fields ───────────────────
+  .mdc-text-field--outlined {
+    .mdc-notched-outline {
+      .mdc-notched-outline__leading,
+      .mdc-notched-outline__notch,
+      .mdc-notched-outline__trailing {
+        border-color: rgba(255, 255, 255, 0.4) !important;
+      }
+    }
+
+    &:hover .mdc-notched-outline {
+      .mdc-notched-outline__leading,
+      .mdc-notched-outline__notch,
+      .mdc-notched-outline__trailing {
+        border-color: $neo-purple !important;
+      }
+    }
+  }
+
+  // ── Menu Panels ───────────────────
+  .mat-mdc-menu-panel {
+    border: $neo-border-dark !important;
+    box-shadow: $neo-shadow-dark !important;
+    background-color: $neo-surface-elevated-dark !important;
+  }
+
+  // ── Select Dropdown ───────────────
+  .mat-mdc-select-panel {
+    border: $neo-border-dark !important;
+    box-shadow: $neo-shadow-dark !important;
+    background-color: $neo-surface-elevated-dark !important;
+  }
+
+  // ── Paginator ─────────────────────
+  .mat-mdc-paginator {
+    border-top: $neo-border-dark;
+    background-color: $neo-surface-card-dark;
   }
 }
