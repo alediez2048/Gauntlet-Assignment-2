@@ -77,3 +77,4 @@ class AgentState(TypedDict, total=False):
     tool_plan: list[dict[str, Any]]
     retry_count: int
     verification_count: int
+    prior_history_len: int

@@ -178,9 +178,8 @@ async def test_chat_sse_emits_done_last_on_success(
 
     assert stub_graph.received_state is not None
     assert stub_graph.received_state["messages"][0]["content"] == "How is my portfolio doing ytd?"
-    assert stub_graph.received_config == {
-        "configurable": {"thread_id": done_payload["thread_id"]}
-    }
+    assert stub_graph.received_config["configurable"]["thread_id"] == done_payload["thread_id"]
+    assert stub_graph.received_config.get("run_name") == "AgentForge"
 
 
 @pytest.mark.asyncio
@@ -233,9 +232,8 @@ async def test_chat_sse_reuses_provided_thread_id(
 
     done_payload = events[-1]["data"]
     assert done_payload["thread_id"] == "thread-continuity-1"
-    assert stub_graph.received_config == {
-        "configurable": {"thread_id": "thread-continuity-1"}
-    }
+    assert stub_graph.received_config["configurable"]["thread_id"] == "thread-continuity-1"
+    assert stub_graph.received_config.get("run_name") == "AgentForge"
 
 
 @pytest.mark.asyncio

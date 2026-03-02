@@ -761,6 +761,8 @@ def make_router_node(dependencies: NodeDependencies) -> Callable[[AgentState], A
                 "tool_plan": remaining_plan,
                 "step_count": 0,
                 "retry_count": 0,
+                "verification_count": 0,
+                "prior_history_len": len(state.get("tool_call_history") or []),
                 "reasoning": f"Multi-step plan detected: [{plan_names}]. Starting with {tool_name}.",
             }
 
@@ -788,6 +790,10 @@ def make_router_node(dependencies: NodeDependencies) -> Callable[[AgentState], A
                         "tool_result": None,
                         "error": None,
                         "pending_action": "tool_selected",
+                        "step_count": 0,
+                        "retry_count": 0,
+                        "verification_count": 0,
+                        "prior_history_len": len(state.get("tool_call_history") or []),
                         "reasoning": reasoning or f"Follow-up detected; re-using prior route '{recovered_decision['route']}'.",
                     }
 
@@ -798,6 +804,10 @@ def make_router_node(dependencies: NodeDependencies) -> Callable[[AgentState], A
                 "tool_result": None,
                 "error": None,
                 "pending_action": "ambiguous_or_unsupported",
+                "step_count": 0,
+                "retry_count": 0,
+                "verification_count": 0,
+                "prior_history_len": len(state.get("tool_call_history") or []),
                 "reasoning": reasoning,
             }
 
@@ -808,6 +818,10 @@ def make_router_node(dependencies: NodeDependencies) -> Callable[[AgentState], A
             "tool_result": None,
             "error": None,
             "pending_action": "tool_selected",
+            "step_count": 0,
+            "retry_count": 0,
+            "verification_count": 0,
+            "prior_history_len": len(state.get("tool_call_history") or []),
             "reasoning": reasoning,
         }
 
@@ -1388,7 +1402,10 @@ def make_synthesizer_node(
         tool_name = state.get("tool_name")
         tool_result = state.get("tool_result")
         step_count = state.get("step_count", 0)
-        history = state.get("tool_call_history") or []
+        full_history = state.get("tool_call_history") or []
+        prior_len = state.get("prior_history_len", 0)
+        # Only consider tool records from the current turn
+        history = full_history[prior_len:] if prior_len < len(full_history) else full_history
 
         # --- Multi-step path ---
         if step_count > 1 and history:
