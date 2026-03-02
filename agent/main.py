@@ -20,7 +20,8 @@ from dotenv import dotenv_values
 # (the code default).  On Railway, env vars are set directly on the service.
 _REPO_ROOT = Path(__file__).resolve().parent.parent
 _DOTENV_KEYS_TO_LOAD = {"OPENAI_API_KEY", "LANGSMITH_TRACING", "LANGSMITH_ENDPOINT",
-                        "LANGSMITH_API_KEY", "LANGSMITH_PROJECT"}
+                        "LANGSMITH_API_KEY", "LANGSMITH_PROJECT",
+                        "LANGCHAIN_TRACING_V2"}
 _dotenv_vals = dotenv_values(_REPO_ROOT / ".env")
 for _key in _DOTENV_KEYS_TO_LOAD:
     _val = _dotenv_vals.get(_key)
@@ -501,7 +502,11 @@ async def chat(request: ChatRequest, raw_request: Request) -> StreamingResponse:
                 graph = await build_graph(api_client=api_client, router=router, synthesizer=synthesizer)
                 graph_state = await graph.ainvoke(
                     graph_input,
-                    config={"configurable": {"thread_id": thread_id}},
+                    config={
+                        "configurable": {"thread_id": thread_id},
+                        "run_name": "AgentForge",
+                        "metadata": {"user_query": user_message[:200]},
+                    },
                 )
 
             if not isinstance(graph_state, dict):
@@ -602,7 +607,11 @@ async def _run_eval_graph(
     start = time.perf_counter()
     result = await graph.ainvoke(
         {"messages": [{"role": "user", "content": query}], "tool_call_history": []},
-        config={"configurable": {"thread_id": f"eval-{uuid4()}"}},
+        config={
+            "configurable": {"thread_id": f"eval-{uuid4()}"},
+            "run_name": "AgentForge-Eval",
+            "metadata": {"eval_query": query[:200]},
+        },
     )
     elapsed = time.perf_counter() - start
     return result, elapsed
