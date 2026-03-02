@@ -70,11 +70,39 @@ export class GfAgentChatPanelComponent implements OnDestroy {
   public draftMessage = '';
   public expandedCategory: string | null = null;
   public isTestingMode = false;
-  public readonly sampleQuestions: string[] = [
-    'How is my portfolio doing?',
-    'Show my transactions',
-    'What are my holdings worth?',
-    'Am I well diversified?'
+  public readonly userCategories: QuestionCategory[] = [
+    {
+      label: 'Portfolio',
+      questions: [
+        'How is my portfolio performing?',
+        'What are my holdings worth?',
+        'Am I well diversified?'
+      ]
+    },
+    {
+      label: 'Taxes',
+      questions: [
+        'Estimate my capital gains tax this year.',
+        'What are my tax-loss harvesting opportunities?',
+        'How tax-efficient is my portfolio?'
+      ]
+    },
+    {
+      label: 'Compliance',
+      questions: [
+        'Check my portfolio for compliance issues.',
+        'Do I have any concentration risk?',
+        'Are there any regulatory flags in my holdings?'
+      ]
+    },
+    {
+      label: 'Prediction Markets',
+      questions: [
+        'What prediction markets are trending?',
+        'Show my Polymarket positions.',
+        'Analyze the top prediction markets by volume.'
+      ]
+    }
   ];
   public readonly chatState = signal<AgentChatState>(INITIAL_AGENT_CHAT_STATE);
   public readonly evalState = signal<EvalRunState>(INITIAL_EVAL_RUN_STATE);
