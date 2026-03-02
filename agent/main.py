@@ -505,7 +505,7 @@ async def chat(request: ChatRequest, raw_request: Request) -> StreamingResponse:
                     config={
                         "configurable": {"thread_id": thread_id},
                         "run_name": "AgentForge",
-                        "metadata": {"user_query": user_message[:200]},
+                        "metadata": {"user_query": request.message[:200]},
                     },
                 )
 
