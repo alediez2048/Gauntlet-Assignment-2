@@ -451,15 +451,12 @@ async def _handle_scenario(
     if not market.get("active", False):
         return ToolResult.fail("MARKET_INACTIVE")
 
-    # Get outcome price
+    # Get outcome prices for both sides
     summary = format_market_summary(market)
-    side = (outcome or "Yes").capitalize()
-    if side not in ("Yes", "No"):
-        side = "Yes"
-    outcome_idx = 0 if side == "Yes" else 1
-    outcome_price = summary["outcomes"][outcome_idx]["price"] if outcome_idx < len(summary["outcomes"]) else 0
+    yes_price = summary["outcomes"][0]["price"] if len(summary["outcomes"]) > 0 else 0
+    no_price = summary["outcomes"][1]["price"] if len(summary["outcomes"]) > 1 else 0
 
-    if outcome_price <= 0:
+    if yes_price <= 0 and no_price <= 0:
         return ToolResult.fail("MARKET_NOT_FOUND")
 
     # Get portfolio data
@@ -497,19 +494,72 @@ async def _handle_scenario(
         if alloc_val > net_worth:
             return ToolResult.fail("INVALID_ALLOCATION_VALUE")
 
-    # Compute scenario
-    result = compute_scenario(
+    # Compute scenario for BOTH sides
+    yes_result = compute_scenario(
         net_worth=net_worth,
         holdings=holdings,
         market=market,
         allocation_mode=allocation_mode,
         allocation_value=alloc_val,
-        outcome_price=outcome_price,
+        outcome_price=yes_price,
         income_bracket=resolved_bracket,
-    )
+    ) if yes_price > 0 else None
 
-    # Override outcome side if user specified
-    result["market"]["outcome_side"] = side
+    no_result = compute_scenario(
+        net_worth=net_worth,
+        holdings=holdings,
+        market=market,
+        allocation_mode=allocation_mode,
+        allocation_value=alloc_val,
+        outcome_price=no_price,
+        income_bracket=resolved_bracket,
+    ) if no_price > 0 else None
+
+    # Build combined response with both outcomes
+    primary = yes_result or no_result
+    if not primary:
+        return ToolResult.fail("MARKET_NOT_FOUND")
+
+    # Use the primary result as the base, add both outcomes
+    result = dict(primary)
+    result["market"]["outcome_side"] = "Both"
+
+    # Replace single-side scenario_metrics with dual-outcome analysis
+    outcomes_analysis: dict[str, Any] = {}
+    if yes_result:
+        yes_metrics = yes_result["scenario_metrics"]
+        yes_metrics_labeled = {
+            "outcome_side": "Yes",
+            "outcome_price": yes_price,
+            "implied_probability": yes_result["market"]["implied_probability"],
+            **yes_metrics,
+        }
+        outcomes_analysis["yes"] = yes_metrics_labeled
+    if no_result:
+        no_metrics = no_result["scenario_metrics"]
+        no_metrics_labeled = {
+            "outcome_side": "No",
+            "outcome_price": no_price,
+            "implied_probability": no_result["market"]["implied_probability"],
+            **no_metrics,
+        }
+        outcomes_analysis["no"] = no_metrics_labeled
+
+    result["outcomes_analysis"] = outcomes_analysis
+    # Keep scenario_metrics as the Yes side for backward compat
+    if yes_result:
+        result["scenario_metrics"] = yes_result["scenario_metrics"]
+
+    # Tax estimates: include both sides
+    if yes_result and no_result:
+        result["tax_estimate"] = {
+            "income_bracket": resolved_bracket,
+            "liquidation_tax": yes_result["tax_estimate"]["liquidation_tax"],
+            "yes_win_tax": yes_result["tax_estimate"]["win_case_tax"],
+            "yes_lose_tax": yes_result["tax_estimate"]["lose_case_tax"],
+            "no_win_tax": no_result["tax_estimate"]["win_case_tax"],
+            "no_lose_tax": no_result["tax_estimate"]["lose_case_tax"],
+        }
 
     return ToolResult.ok(result, source="prediction_markets")
 

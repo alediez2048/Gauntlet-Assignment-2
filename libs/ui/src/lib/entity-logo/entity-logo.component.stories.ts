@@ -38,7 +38,7 @@ export const LogoByAssetProfileIdentifier: Story = {
 export const LogoByUrl: Story = {
   args: {
     size: 'large',
-    tooltip: 'Ghostfolio',
+    tooltip: 'Polyfolio',
     url: 'https://ghostfol.io'
   }
 };

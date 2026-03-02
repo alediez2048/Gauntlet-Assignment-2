@@ -18,7 +18,7 @@ export class IcsService {
     const header = [
       'BEGIN:VCALENDAR',
       'VERSION:2.0',
-      'PRODID:-//Ghostfolio//NONSGML v1.0//EN'
+      'PRODID:-//Polyfolio//NONSGML v1.0//EN'
     ];
     const events = aActivities.map((activity) => {
       return this.getEvent({

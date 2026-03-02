@@ -60,7 +60,7 @@ export class GfLandingPageComponent implements OnDestroy, OnInit {
       author: 'Damjan',
       country: 'Slovenia 🇸🇮',
       quote:
-        'Ghostfolio helps me track all my investments in one place, it has a built-in portfolio analyzer and a very neat, seamless user interface.'
+        'Polyfolio helps me track all my investments in one place, it has a built-in portfolio analyzer and a very neat, seamless user interface.'
     },
     {
       author: 'Ivo',
@@ -77,14 +77,14 @@ export class GfLandingPageComponent implements OnDestroy, OnInit {
       author: 'Marius',
       country: 'Romania 🇷🇴',
       quote:
-        'Ghostfolio is an awesome project. It helps me keep track of cryptocurrencies in an easy way. I really like it!',
+        'Polyfolio is an awesome project. It helps me keep track of cryptocurrencies in an easy way. I really like it!',
       url: 'https://mariushosting.com'
     },
     {
       author: 'Onur',
       country: 'Switzerland 🇨🇭',
       quote:
-        'Ghostfolio looks like the perfect portfolio tracker I’ve been searching for all these years.'
+        'Polyfolio looks like the perfect portfolio tracker I’ve been searching for all these years.'
     },
     {
       author: 'Philipp',
@@ -96,13 +96,13 @@ export class GfLandingPageComponent implements OnDestroy, OnInit {
       author: 'Sal',
       country: 'Canada 🇨🇦',
       quote:
-        'Ghostfolio is one of the best tools I have used for tracking my investments. I intend to spread the word to all my friends.'
+        'Polyfolio is one of the best tools I have used for tracking my investments. I intend to spread the word to all my friends.'
     },
     {
       author: 'Thomas',
-      country: 'Creator of Ghostfolio, Switzerland 🇨🇭',
+      country: 'Creator of Polyfolio, Switzerland 🇨🇭',
       quote:
-        'My investment strategy has become more structured through the daily use of Ghostfolio.',
+        'My investment strategy has become more structured through the daily use of Polyfolio.',
       url: 'https://dotsilver.ch'
     }
   ];

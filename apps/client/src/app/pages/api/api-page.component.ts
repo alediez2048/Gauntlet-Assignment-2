@@ -40,7 +40,7 @@ export class GfApiPageComponent implements OnInit {
   public constructor(private http: HttpClient) {}
 
   public ngOnInit() {
-    this.apiKey = prompt($localize`Please enter your Ghostfolio API key:`);
+    this.apiKey = prompt($localize`Please enter your Polyfolio API key:`);
 
     this.assetProfile$ = this.fetchAssetProfile({ symbol: 'AAPL' });
     this.dividends$ = this.fetchDividends({ symbol: 'KO' });

@@ -51,7 +51,7 @@ export class GfUserAccountMembershipComponent implements OnDestroy {
   public priceId: string;
   public routerLinkPricing = publicRoutes.pricing.routerLink;
   public trySubscriptionMail =
-    'mailto:hi@ghostfol.io?Subject=Ghostfolio Premium Trial&body=Hello%0D%0DI am interested in Ghostfolio Premium. Can you please send me a coupon code to try it for some time?%0D%0DKind regards';
+    'mailto:hi@ghostfol.io?Subject=Polyfolio Premium Trial&body=Hello%0D%0DI am interested in Polyfolio Premium. Can you please send me a coupon code to try it for some time?%0D%0DKind regards';
   public user: User;
 
   private unsubscribeSubject = new Subject<void>();
@@ -151,7 +151,7 @@ export class GfUserAccountMembershipComponent implements OnDestroy {
                 $localize`Set this API key in your self-hosted environment:` +
                 '<br />' +
                 apiKey,
-              title: $localize`Ghostfolio Premium Data Provider API Key`
+              title: $localize`Polyfolio Premium Data Provider API Key`
             });
           });
       },

@@ -13,7 +13,7 @@ export class ResourcesOverviewComponent {
   public overviewItems = [
     {
       description:
-        'Find quick answers to commonly asked questions about Ghostfolio in our Frequently Asked Questions (FAQ) section.',
+        'Find quick answers to commonly asked questions about Polyfolio in our Frequently Asked Questions (FAQ) section.',
       routerLink: publicRoutes.faq.routerLink,
       title: publicRoutes.faq.title
     },

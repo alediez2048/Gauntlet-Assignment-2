@@ -143,7 +143,7 @@ export class GfAdminSettingsComponent implements OnDestroy, OnInit {
             });
         }
       },
-      title: $localize`Please enter your Ghostfolio API key.`
+      title: $localize`Please enter your Polyfolio API key.`
     });
   }
 

@@ -427,9 +427,12 @@ async def test_scenario_tax_estimates_present(mock_client: MockGhostfolioClient)
     assert result.success
     tax = result.data["tax_estimate"]
     assert "liquidation_tax" in tax
-    assert "win_case_tax" in tax
     assert "rate_applied" in tax["liquidation_tax"]
-    assert "rate_applied" in tax["win_case_tax"]
+    # Dual-outcome tax: both yes and no win/lose tax present
+    assert "yes_win_tax" in tax
+    assert "no_win_tax" in tax
+    assert "rate_applied" in tax["yes_win_tax"]
+    assert "rate_applied" in tax["no_win_tax"]
 
 
 @pytest.mark.asyncio

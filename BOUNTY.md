@@ -8,11 +8,14 @@ Crypto-native retail investors who want a unified view of their traditional port
 
 **Polymarket Prediction Market Integration** — browse, search, and analyze live prediction markets from Polymarket directly within Polyfolio. Users can:
 
-- **Browse** active prediction markets with real-time odds, volume, and outcomes
+- **Browse** active prediction markets with real-time odds, volume, and liquidity grades
 - **Search** markets by keyword or category (Crypto, Politics, Economics)
-- **Analyze** individual markets with detailed bid/ask spreads and volume data
-- **Track positions** — full CRUD for Polymarket positions stored as orders with `DataSource.POLYMARKET`
-- **AI-powered insights** — the agent chat routes prediction market queries automatically using keyword and LLM-based routing with 6 eval cases
+- **Analyze** individual markets with EV, Kelly hints, bid/ask spreads, and efficiency scores
+- **Simulate** single-bet what-if scenarios with risk assessment
+- **Compare** markets side-by-side with spread, volume, and efficiency metrics
+- **Scenario model** portfolio reallocations into prediction markets with win/lose cases, tax estimates, and compliance flags
+- **Track positions** — CRUD for Polymarket positions stored as orders with `DataSource.POLYMARKET` (backend REST endpoints; agent reads positions with P&L enrichment)
+- **AI-powered insights** — the agent chat routes prediction market queries automatically using keyword and LLM-based routing with 18 eval cases
 
 ## Data Source
 
@@ -34,12 +37,12 @@ The agent accesses Polymarket data through the open-source project's NestJS API 
 
 ### Agent (Python/FastAPI)
 
-- `explore_prediction_markets` tool with 9 actions: browse, search, analyze, positions, simulate, trending, compare, scenario
+- `explore_prediction_markets` tool with 8 actions: browse, search, analyze, positions, simulate, trending, compare, scenario
 - `prediction_helpers.py` domain logic (Kelly, EV, implied probability, market efficiency, reallocation scenario modeling)
 - Portfolio reallocation analysis with tax, compliance, and allocation drift modeling
 - `PredictionMarketInput` Pydantic schema for validation
-- Full integration across 11 touch points in the routing/orchestration layer
-- 377 automated tests passing (272 unit + 18 integration + 87 eval)
+- Integration across routing, multi-step detection, arg extraction, validation, and synthesis layers
+- 228 automated tests passing (120 unit + 27 integration + 81 eval)
 
 ### Frontend (Angular)
 
@@ -53,8 +56,10 @@ Polyfolio is the first unified portfolio tracker that combines traditional asset
 
 ## Stateful CRUD
 
-Prediction market positions are persisted in the database via Prisma:
+Prediction market positions are persisted in the database via Prisma through the NestJS backend:
 
 - **Create**: `POST /api/v1/polymarket/positions` — upserts SymbolProfile + creates Order
 - **Read**: `GET /api/v1/polymarket/positions` — lists user's POLYMARKET orders with SymbolProfile
 - **Delete**: `DELETE /api/v1/polymarket/positions/:id` — removes order (ownership-checked)
+
+The AI agent reads positions via the `positions` action (enriched with unrealized P&L and portfolio exposure %). Create and delete are available through the REST API.

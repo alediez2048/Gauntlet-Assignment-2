@@ -205,7 +205,7 @@ export class GfUserAccountSettingsComponent implements OnDestroy, OnInit {
           });
       },
       confirmType: ConfirmationDialogType.Warn,
-      title: $localize`Do you really want to close your Ghostfolio account?`
+      title: $localize`Do you really want to close your Polyfolio account?`
     });
   }
 
@@ -236,7 +236,7 @@ export class GfUserAccountSettingsComponent implements OnDestroy, OnInit {
 
         downloadAsFile({
           content: data,
-          fileName: `ghostfolio-export-${format(
+          fileName: `polyfolio-export-${format(
             parseISO(data.meta.date),
             'yyyyMMddHHmm'
           )}.json`,

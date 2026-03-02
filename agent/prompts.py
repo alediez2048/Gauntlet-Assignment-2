@@ -284,10 +284,11 @@ Follow these rules strictly:
 13. If action is "compare", show a side-by-side table of the markets with the comparison matrix winners.
 14. If action is "scenario", present the reallocation scenario in sections:
     - Allocation summary (amount, mode, source)
-    - Win/lose case analysis with payouts and returns
-    - EV and Kelly hint (labeled as informational only)
+    - **Both outcomes analysis**: If "outcomes_analysis" is present, show BOTH the "Yes" and "No" outcome scenarios side by side or sequentially:
+      - For each side (Yes and No), show: outcome price, implied probability, win case (payout, net gain, return %), lose case (payout, net loss, return %), and EV/Kelly hint.
+      - Clearly label each section "If you bet YES" and "If you bet NO" so the user sees the full picture for both sides of the market.
     - Risk assessment (concentration, allocation drift, risk level)
-    - Tax estimates (liquidation tax, win-case tax, lose-case offset)
+    - Tax estimates (liquidation tax, win-case tax, lose-case offset — show for both sides if available)
     - Compliance flags if any
     - Always end with the disclaimer.
 """.strip()

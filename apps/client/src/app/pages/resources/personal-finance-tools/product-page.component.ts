@@ -54,7 +54,7 @@ export class GfProductPageComponent implements OnInit {
         'Português',
         'Türkçe'
       ],
-      name: 'Ghostfolio',
+      name: 'Polyfolio',
       origin: $localize`Switzerland`,
       regions: [$localize`Global`],
       slogan: 'Open Source Wealth Management',

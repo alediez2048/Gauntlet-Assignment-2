@@ -2146,7 +2146,7 @@ Closed the regression gap found in the TICKET-10.2 validation pass by fixing fai
 - Scenario action models "what if I move X% from my portfolio into a prediction market?" with win/lose cases, tax estimates, compliance flags, and allocation drift analysis
 - Multi-step routing detects combined queries (e.g. "tax implications if I reallocate to a prediction market") and chains scenario + tax or scenario + compliance tools automatically
 - Fixed critical production bugs: Gamma API slug resolution (path vs query param), `currentValueInBaseCurrency` field name mismatch, variable shadowing in simulate/scenario handlers, progressive word-level search for fuzzy market matching
-- 377 automated tests passing (272 unit + 18 integration + 87 eval)
+- 228 automated tests passing (120 unit + 27 integration + 81 eval)
 
 ### What Changed
 
@@ -2182,13 +2182,13 @@ Closed the regression gap found in the TICKET-10.2 validation pass by fixing fai
 
 **5. Routing & Multi-Step — `nodes.py` + `prompts.py` + `schemas.py` + `main.py`**
 
-- Extended `PredictionMarketInput` schema: 9 actions + simulate/scenario/compare fields
+- Extended `PredictionMarketInput` schema: 8 actions + simulate/scenario/compare fields
 - `_default_args_for_tool`: extracts allocation mode (all_in/percent/fixed), dollar amounts, percentages, market topics from user queries
 - `_extract_market_query`: fallback content-word extraction for unknown topics (e.g. "jesus return")
 - `_sanitize_tool_args`: enriches scenario args when multi-step forces action=scenario but default_args didn't extract allocation
 - `_detect_multi_step`: added heuristic keyword detection for combined tax+prediction and compliance+prediction queries
 - 7 new error codes in `_SAFE_ERROR_MESSAGES`
-- Updated synthesis prompts with formatting rules for all 9 actions
+- Updated synthesis prompts with formatting rules for all 8 actions
 
 **6. Fixtures & Tests**
 
@@ -2211,9 +2211,9 @@ Closed the regression gap found in the TICKET-10.2 validation pass by fixing fai
 
 ### Commits
 
-| Hash          | Message                                                                     |
-| ------------- | --------------------------------------------------------------------------- |
-| (this commit) | feat(agent): deep prediction markets enhancement with reallocation analysis |
+| Hash        | Message                                                                     |
+| ----------- | --------------------------------------------------------------------------- |
+| `2c9a4a8e5` | feat(agent): deep prediction markets enhancement with reallocation analysis |
 
 ### Files Changed
 
@@ -2221,7 +2221,7 @@ Closed the regression gap found in the TICKET-10.2 validation pass by fixing fai
 | ----------------------------------------------- | ------------------------------------------------------------------- |
 | `agent/tools/prediction_helpers.py`             | **New** — pure domain logic (~180 LOC)                              |
 | `agent/tools/prediction_markets.py`             | 5 new action handlers, enriched existing actions, bug fixes         |
-| `agent/tools/schemas.py`                        | Extended PredictionMarketInput for 9 actions                        |
+| `agent/tools/schemas.py`                        | Extended PredictionMarketInput for 8 actions                        |
 | `agent/graph/nodes.py`                          | Routing, multi-step patterns, arg extraction, content-word fallback |
 | `agent/prompts.py`                              | Synthesis prompt updates, few-shot examples                         |
 | `agent/main.py`                                 | 7 new error codes                                                   |
@@ -2230,18 +2230,29 @@ Closed the regression gap found in the TICKET-10.2 validation pass by fixing fai
 | `apps/api/.../polymarket.controller.ts`         | Query param, null handling                                          |
 | `agent/tests/unit/test_prediction_markets.py`   | 29 new unit tests                                                   |
 | `agent/tests/integration/test_graph_routing.py` | 5 new integration tests                                             |
-| `agent/tests/eval/eval_dataset.json`            | 18 new eval cases (87 total)                                        |
+| `agent/tests/eval/eval_dataset.json`            | 18 new eval cases (81 total)                                        |
 | `agent/tests/fixtures/polymarket_markets.json`  | Extended fixtures                                                   |
 
 ### Tests
 
-- 377 automated tests passing (272 unit + 18 integration + 87 eval)
-- All 9 prediction market actions manually verified against live Gamma API
+- 228 automated tests passing (120 unit + 27 integration + 81 eval)
+- All 8 prediction market actions manually verified against live Gamma API
 - Multi-step scenario+tax and scenario+compliance flows verified
+
+### Deployment
+
+Both services deployed to Railway production after all fixes:
+
+| Service    | Command                                                | Build Time | Status  |
+| ---------- | ------------------------------------------------------ | ---------- | ------- |
+| Ghostfolio | `railway up --service ghostfolio --ci`                 | 337s       | Healthy |
+| Agent      | `railway up --service agent --ci --path-as-root agent` | 98s        | Healthy |
+
+**Note:** Initial agent deployment crashed because `railway up` from repo root included the Prisma schema (expects `DATABASE_URL`). Fixed by using `--path-as-root agent` to scope the build context to the `agent/` subdirectory only.
 
 ### Time Spent
 
-~6 hrs
+~6 hrs (implementation + bug fixes + deployment)
 
 ---
 
@@ -2263,7 +2274,7 @@ Closed the regression gap found in the TICKET-10.2 validation pass by fixing fai
 | ---------------- | -------------------------------------------------------------------------------------- |
 | Tickets Complete | 17 / 17                                                                                |
 | Total Dev Time   | ~47.50 hrs                                                                             |
-| Tests Passing    | 377 automated (272 unit + 18 integration + 87 eval) + golden-path + manual smoke tests |
+| Tests Passing    | 228 automated (120 unit + 27 integration + 81 eval) + golden-path + manual smoke tests |
 | Files Created    | 83                                                                                     |
 | Files Modified   | 89                                                                                     |
 | Cursor Rules     | 10                                                                                     |

@@ -418,8 +418,8 @@
         </context-group>
       </trans-unit>
       <trans-unit id="5611965261696422586" datatype="html">
-        <source>and is driven by the efforts of its <x id="START_LINK" ctype="x-a" equiv-text="&lt;a href=&quot;https://github.com/ghostfolio/ghostfolio/graphs/contributors&quot; title=&quot;Contributors to Ghostfolio&quot; &gt;"/>contributors<x id="CLOSE_LINK" ctype="x-a" equiv-text="&lt;/a &gt;"/></source>
-        <target state="new">and is driven by the efforts of its <x id="START_LINK" ctype="x-a" equiv-text="&lt;a href=&quot;https://github.com/ghostfolio/ghostfolio/graphs/contributors&quot; title=&quot;Contributors to Ghostfolio&quot; &gt;"/>contributors<x id="CLOSE_LINK" ctype="x-a" equiv-text="&lt;/a &gt;"/></target>
+        <source>and is driven by the efforts of its <x id="START_LINK" ctype="x-a" equiv-text="&lt;a href=&quot;https://github.com/ghostfolio/ghostfolio/graphs/contributors&quot; title=&quot;Contributors to Polyfolio&quot; &gt;"/>contributors<x id="CLOSE_LINK" ctype="x-a" equiv-text="&lt;/a &gt;"/></source>
+        <target state="new">and is driven by the efforts of its <x id="START_LINK" ctype="x-a" equiv-text="&lt;a href=&quot;https://github.com/ghostfolio/ghostfolio/graphs/contributors&quot; title=&quot;Contributors to Polyfolio&quot; &gt;"/>contributors<x id="CLOSE_LINK" ctype="x-a" equiv-text="&lt;/a &gt;"/></target>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/client/src/app/pages/about/overview/about-overview-page.html</context>
           <context context-type="linenumber">49</context>
@@ -958,8 +958,8 @@
         </context-group>
       </trans-unit>
       <trans-unit id="5924141452953678982" datatype="html">
-        <source>About Ghostfolio</source>
-        <target state="translated">À propos de Ghostfolio</target>
+        <source>About Polyfolio</source>
+        <target state="translated">À propos de Polyfolio</target>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/client/src/app/components/header/header.component.html</context>
           <context context-type="linenumber">326</context>
@@ -1458,8 +1458,8 @@
         </context-group>
       </trans-unit>
       <trans-unit id="3453373677180899990" datatype="html">
-        <source>My Ghostfolio</source>
-        <target state="translated">Mon Ghostfolio</target>
+        <source>My Polyfolio</source>
+        <target state="translated">Mon Polyfolio</target>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/client/src/app/components/header/header.component.html</context>
           <context context-type="linenumber">277</context>
@@ -2562,8 +2562,8 @@
         </context-group>
       </trans-unit>
       <trans-unit id="201073452973037511" datatype="html">
-        <source>Ghostfolio empowers you to keep track of your wealth.</source>
-        <target state="translated">Ghostfolio vous aide à garder un aperçu de votre patrimoine.</target>
+        <source>Polyfolio empowers you to keep track of your wealth.</source>
+        <target state="translated">Polyfolio vous aide à garder un aperçu de votre patrimoine.</target>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/client/src/app/pages/public/public-page.html</context>
           <context context-type="linenumber">237</context>
@@ -3518,8 +3518,8 @@
         </context-group>
       </trans-unit>
       <trans-unit id="195913158506780337" datatype="html">
-        <source>For tech-savvy investors who prefer to run Ghostfolio on their own infrastructure.</source>
-        <target state="translated">Pour les investisseurs à l’aise avec la technologie qui préfèrent héberger Ghostfolio sur leur propre infrastructure.</target>
+        <source>For tech-savvy investors who prefer to run Polyfolio on their own infrastructure.</source>
+        <target state="translated">Pour les investisseurs à l’aise avec la technologie qui préfèrent héberger Polyfolio sur leur propre infrastructure.</target>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/client/src/app/pages/pricing/pricing-page.html</context>
           <context context-type="linenumber">26</context>
@@ -3590,8 +3590,8 @@
         </context-group>
       </trans-unit>
       <trans-unit id="4362270378699380187" datatype="html">
-        <source>Fully managed Ghostfolio cloud offering.</source>
-        <target state="translated">Offre Ghostfolio cloud complètement administrée.</target>
+        <source>Fully managed Polyfolio cloud offering.</source>
+        <target state="translated">Offre Polyfolio cloud complètement administrée.</target>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/client/src/app/pages/pricing/pricing-page.html</context>
           <context context-type="linenumber">150</context>
@@ -3690,8 +3690,8 @@
         </context-group>
       </trans-unit>
       <trans-unit id="1631940846690193897" datatype="html">
-        <source>Switch to Ghostfolio Premium easily</source>
-        <target state="translated">Passez à Ghostfolio Premium facilement</target>
+        <source>Switch to Polyfolio Premium easily</source>
+        <target state="translated">Passez à Polyfolio Premium facilement</target>
         <context-group purpose="location">
           <context context-type="sourcefile">libs/ui/src/lib/i18n.ts</context>
           <context context-type="linenumber">13</context>
@@ -3714,16 +3714,16 @@
         </context-group>
       </trans-unit>
       <trans-unit id="3298117765569632011" datatype="html">
-        <source>Switch to Ghostfolio Premium or Ghostfolio Open Source easily</source>
-        <target state="translated">Passez à Ghostfolio Premium ou Ghostfolio Open Source facilement</target>
+        <source>Switch to Polyfolio Premium or Polyfolio Open Source easily</source>
+        <target state="translated">Passez à Polyfolio Premium ou Polyfolio Open Source facilement</target>
         <context-group purpose="location">
           <context context-type="sourcefile">libs/ui/src/lib/i18n.ts</context>
           <context context-type="linenumber">12</context>
         </context-group>
       </trans-unit>
       <trans-unit id="1921273115613254799" datatype="html">
-        <source>Switch to Ghostfolio Open Source or Ghostfolio Basic easily</source>
-        <target state="translated">Passez à Ghostfolio Open Source ou Ghostfolio Basic facilement</target>
+        <source>Switch to Polyfolio Open Source or Polyfolio Basic easily</source>
+        <target state="translated">Passez à Polyfolio Open Source ou Polyfolio Basic facilement</target>
         <context-group purpose="location">
           <context context-type="sourcefile">libs/ui/src/lib/i18n.ts</context>
           <context context-type="linenumber">14</context>
@@ -3782,8 +3782,8 @@
         </context-group>
       </trans-unit>
       <trans-unit id="6962217007874959362" datatype="html">
-        <source>Our official Ghostfolio Premium cloud offering is the easiest way to get started. Due to the time it saves, this will be the best option for most people. Revenue is used to cover operational costs for the hosting infrastructure and professional data providers, and to fund ongoing development.</source>
-        <target state="new">Notre offre Ghostfolio Premium cloud est la manière la plus simple de débuter. Grâce au temps qu’elle économise, ce sera la meilleure option pour la plupart des gens. Les revenus sont utilisés pour couvrir les frais d’infrastructures et financer le développement continu de Ghostfolio.</target>
+        <source>Our official Polyfolio Premium cloud offering is the easiest way to get started. Due to the time it saves, this will be the best option for most people. Revenue is used to cover operational costs for the hosting infrastructure and professional data providers, and to fund ongoing development.</source>
+        <target state="new">Notre offre Polyfolio Premium cloud est la manière la plus simple de débuter. Grâce au temps qu’elle économise, ce sera la meilleure option pour la plupart des gens. Les revenus sont utilisés pour couvrir les frais d’infrastructures et financer le développement continu de Polyfolio.</target>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/client/src/app/pages/pricing/pricing-page.html</context>
           <context context-type="linenumber">7</context>
@@ -3914,8 +3914,8 @@
         </context-group>
       </trans-unit>
       <trans-unit id="7827737332834169968" datatype="html">
-        <source>Upgrade to Ghostfolio Premium today and gain access to exclusive features to enhance your investment experience:</source>
-        <target state="translated">Mettez à niveau vers Ghostfolio Premium aujourd’hui et gagnez accès à des fonctionnalités exclusives pour améliorer votre expérience d’investissement:</target>
+        <source>Upgrade to Polyfolio Premium today and gain access to exclusive features to enhance your investment experience:</source>
+        <target state="translated">Mettez à niveau vers Polyfolio Premium aujourd’hui et gagnez accès à des fonctionnalités exclusives pour améliorer votre expérience d’investissement:</target>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/client/src/app/components/subscription-interstitial-dialog/subscription-interstitial-dialog.html</context>
           <context context-type="linenumber">18</context>
@@ -4414,8 +4414,8 @@
         </context-group>
       </trans-unit>
       <trans-unit id="9169772418374159113" datatype="html">
-        <source>Effortlessly track, analyze, and visualize your wealth with Ghostfolio.</source>
-        <target state="translated">Suivez, analysez et visualisez sans effort votre patrimoine avec Ghostfolio.</target>
+        <source>Effortlessly track, analyze, and visualize your wealth with Polyfolio.</source>
+        <target state="translated">Suivez, analysez et visualisez sans effort votre patrimoine avec Polyfolio.</target>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/client/src/app/pages/resources/personal-finance-tools/product-page.html</context>
           <context context-type="linenumber">329</context>
@@ -4534,16 +4534,16 @@
         </context-group>
       </trans-unit>
       <trans-unit id="2112958051825467900" datatype="html">
-        <source>Welcome to Ghostfolio</source>
-        <target state="translated">Bienvenue sur Ghostfolio</target>
+        <source>Welcome to Polyfolio</source>
+        <target state="translated">Bienvenue sur Polyfolio</target>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/client/src/app/components/home-overview/home-overview.html</context>
           <context context-type="linenumber">11</context>
         </context-group>
       </trans-unit>
       <trans-unit id="5289957034780335504" datatype="html">
-        <source>The source code is fully available as <x id="START_LINK" ctype="x-a" equiv-text="&lt;a href=&quot;https://github.com/ghostfolio/ghostfolio&quot; title=&quot;Find Ghostfolio on GitHub&quot; &gt;"/>open source software<x id="CLOSE_LINK" ctype="x-a" equiv-text="&lt;/a &gt;"/> (OSS) under the <x id="START_LINK_1" equiv-text="&lt;a href=&quot;https://www.gnu.org/licenses/agpl-3.0.html&quot; title=&quot;GNU Affero General Public License&quot; &gt;"/>AGPL-3.0 license<x id="CLOSE_LINK" ctype="x-a" equiv-text="&lt;/a &gt;"/></source>
-        <target state="new">The source code is fully available as <x id="START_LINK" ctype="x-a" equiv-text="&lt;a href=&quot;https://github.com/ghostfolio/ghostfolio&quot; title=&quot;Find Ghostfolio on GitHub&quot; &gt;"/>open source software<x id="CLOSE_LINK" ctype="x-a" equiv-text="&lt;/a &gt;"/> (OSS) under the <x id="START_LINK_1" equiv-text="&lt;a href=&quot;https://www.gnu.org/licenses/agpl-3.0.html&quot; title=&quot;GNU Affero General Public License&quot; &gt;"/>AGPL-3.0 license<x id="CLOSE_LINK" ctype="x-a" equiv-text="&lt;/a &gt;"/></target>
+        <source>The source code is fully available as <x id="START_LINK" ctype="x-a" equiv-text="&lt;a href=&quot;https://github.com/ghostfolio/ghostfolio&quot; title=&quot;Find Polyfolio on GitHub&quot; &gt;"/>open source software<x id="CLOSE_LINK" ctype="x-a" equiv-text="&lt;/a &gt;"/> (OSS) under the <x id="START_LINK_1" equiv-text="&lt;a href=&quot;https://www.gnu.org/licenses/agpl-3.0.html&quot; title=&quot;GNU Affero General Public License&quot; &gt;"/>AGPL-3.0 license<x id="CLOSE_LINK" ctype="x-a" equiv-text="&lt;/a &gt;"/></source>
+        <target state="new">The source code is fully available as <x id="START_LINK" ctype="x-a" equiv-text="&lt;a href=&quot;https://github.com/ghostfolio/ghostfolio&quot; title=&quot;Find Polyfolio on GitHub&quot; &gt;"/>open source software<x id="CLOSE_LINK" ctype="x-a" equiv-text="&lt;/a &gt;"/> (OSS) under the <x id="START_LINK_1" equiv-text="&lt;a href=&quot;https://www.gnu.org/licenses/agpl-3.0.html&quot; title=&quot;GNU Affero General Public License&quot; &gt;"/>AGPL-3.0 license<x id="CLOSE_LINK" ctype="x-a" equiv-text="&lt;/a &gt;"/></target>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/client/src/app/pages/about/overview/about-overview-page.html</context>
           <context context-type="linenumber">16</context>
@@ -4630,8 +4630,8 @@
         </context-group>
       </trans-unit>
       <trans-unit id="3824165347269033834" datatype="html">
-        <source>At Ghostfolio, transparency is at the core of our values. We publish the source code as <x id="START_LINK" ctype="x-a" equiv-text="&lt;a href=&quot;https://github.com/ghostfolio/ghostfolio&quot; title=&quot;Find Ghostfolio on GitHub&quot; &gt;"/>open source software<x id="CLOSE_LINK" ctype="x-a" equiv-text="&lt;/a &gt;"/> (OSS) under the <x id="START_LINK_1" equiv-text="&lt;a href=&quot;https://www.gnu.org/licenses/agpl-3.0.html&quot; title=&quot;GNU Affero General Public License&quot; &gt;"/>AGPL-3.0 license<x id="CLOSE_LINK" ctype="x-a" equiv-text="&lt;/a &gt;"/> and we openly share aggregated key metrics of the platform’s operational status.</source>
-        <target state="translated">Chez Ghostfolio, la transparence est le centre de notre attention. Nous publions le code source sous <x id="START_LINK" ctype="x-a" equiv-text="&lt;a href=&quot;https://github.com/ghostfolio/ghostfolio&quot; title=&quot;Find Ghostfolio on GitHub&quot; &gt;"/>open source software<x id="CLOSE_LINK" ctype="x-a" equiv-text="&lt;/a &gt;"/> (OSS) sous la <x id="START_LINK_1" equiv-text="&lt;a href=&quot;https://www.gnu.org/licenses/agpl-3.0.html&quot; title=&quot;GNU Affero General Public License&quot; &gt;"/>licence AGPL-3.0<x id="CLOSE_LINK" ctype="x-a" equiv-text="&lt;/a &gt;"/> et nous partageons ouvertement les indicateurs clés agrégés sur l’état opérationnel de la plateforme.</target>
+        <source>At Polyfolio, transparency is at the core of our values. We publish the source code as <x id="START_LINK" ctype="x-a" equiv-text="&lt;a href=&quot;https://github.com/ghostfolio/ghostfolio&quot; title=&quot;Find Polyfolio on GitHub&quot; &gt;"/>open source software<x id="CLOSE_LINK" ctype="x-a" equiv-text="&lt;/a &gt;"/> (OSS) under the <x id="START_LINK_1" equiv-text="&lt;a href=&quot;https://www.gnu.org/licenses/agpl-3.0.html&quot; title=&quot;GNU Affero General Public License&quot; &gt;"/>AGPL-3.0 license<x id="CLOSE_LINK" ctype="x-a" equiv-text="&lt;/a &gt;"/> and we openly share aggregated key metrics of the platform’s operational status.</source>
+        <target state="translated">Chez Polyfolio, la transparence est le centre de notre attention. Nous publions le code source sous <x id="START_LINK" ctype="x-a" equiv-text="&lt;a href=&quot;https://github.com/ghostfolio/ghostfolio&quot; title=&quot;Find Polyfolio on GitHub&quot; &gt;"/>open source software<x id="CLOSE_LINK" ctype="x-a" equiv-text="&lt;/a &gt;"/> (OSS) sous la <x id="START_LINK_1" equiv-text="&lt;a href=&quot;https://www.gnu.org/licenses/agpl-3.0.html&quot; title=&quot;GNU Affero General Public License&quot; &gt;"/>licence AGPL-3.0<x id="CLOSE_LINK" ctype="x-a" equiv-text="&lt;/a &gt;"/> et nous partageons ouvertement les indicateurs clés agrégés sur l’état opérationnel de la plateforme.</target>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/client/src/app/pages/open/open-page.html</context>
           <context context-type="linenumber">7</context>
@@ -4766,8 +4766,8 @@
         </context-group>
       </trans-unit>
       <trans-unit id="6823552682337895854" datatype="html">
-        <source>Check out the numerous features of Ghostfolio to manage your wealth</source>
-        <target state="translated">Découvrez les nombreuses fonctionnalités de Ghostfolio pour gérer votre patrimoine</target>
+        <source>Check out the numerous features of Polyfolio to manage your wealth</source>
+        <target state="translated">Découvrez les nombreuses fonctionnalités de Polyfolio pour gérer votre patrimoine</target>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/client/src/app/pages/features/features-page.html</context>
           <context context-type="linenumber">7</context>
@@ -4786,16 +4786,16 @@
         </context-group>
       </trans-unit>
       <trans-unit id="5152858168588361831" datatype="html">
-        <source>Discover the latest Ghostfolio updates and insights on personal finance</source>
-        <target state="translated">Découvrez les dernières mises à jour et informations de Ghostfolio sur la gestion de patrimoine</target>
+        <source>Discover the latest Polyfolio updates and insights on personal finance</source>
+        <target state="translated">Découvrez les dernières mises à jour et informations de Polyfolio sur la gestion de patrimoine</target>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/client/src/app/pages/blog/blog-page.html</context>
           <context context-type="linenumber">7</context>
         </context-group>
       </trans-unit>
       <trans-unit id="8362400188600186131" datatype="html">
-        <source>If you prefer to run Ghostfolio on your own infrastructure, please find the source code and further instructions on <x id="START_LINK" ctype="x-a" equiv-text="&lt;a href=&quot;https://github.com/ghostfolio/ghostfolio&quot;&gt;"/>GitHub<x id="CLOSE_LINK" ctype="x-a" equiv-text="&lt;/a&gt;"/>.</source>
-        <target state="translated">Si vous préférez exécuter Ghostfolio sur votre propre infrastructure, veuilez trouver le code source ainsi que des instructions supplémentaires sur <x id="START_LINK" ctype="x-a" equiv-text="&lt;a href=&quot;https://github.com/ghostfolio/ghostfolio&quot;&gt;"/>GitHub<x id="CLOSE_LINK" ctype="x-a" equiv-text="&lt;/a&gt;"/>.</target>
+        <source>If you prefer to run Polyfolio on your own infrastructure, please find the source code and further instructions on <x id="START_LINK" ctype="x-a" equiv-text="&lt;a href=&quot;https://github.com/ghostfolio/ghostfolio&quot;&gt;"/>GitHub<x id="CLOSE_LINK" ctype="x-a" equiv-text="&lt;/a&gt;"/>.</source>
+        <target state="translated">Si vous préférez exécuter Polyfolio sur votre propre infrastructure, veuilez trouver le code source ainsi que des instructions supplémentaires sur <x id="START_LINK" ctype="x-a" equiv-text="&lt;a href=&quot;https://github.com/ghostfolio/ghostfolio&quot;&gt;"/>GitHub<x id="CLOSE_LINK" ctype="x-a" equiv-text="&lt;/a&gt;"/>.</target>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/client/src/app/pages/pricing/pricing-page.html</context>
           <context context-type="linenumber">14</context>
@@ -4810,8 +4810,8 @@
         </context-group>
       </trans-unit>
       <trans-unit id="9187466252216812080" datatype="html">
-        <source>Ghostfolio is a privacy-first, open source dashboard for your personal finances. Break down your asset allocation, know your net worth and make solid, data-driven investment decisions.</source>
-        <target state="translated">Ghostfolio est un tableau de bord open-source axé sur la confidentialité pour votre Gestion de Patrimoine. Décomposez votre répartition d’actifs, connaissez votre valeur nette et prenez des décisions d’investissement solides et basées sur des données.</target>
+        <source>Polyfolio is a privacy-first, open source dashboard for your personal finances. Break down your asset allocation, know your net worth and make solid, data-driven investment decisions.</source>
+        <target state="translated">Polyfolio est un tableau de bord open-source axé sur la confidentialité pour votre Gestion de Patrimoine. Décomposez votre répartition d’actifs, connaissez votre valeur nette et prenez des décisions d’investissement solides et basées sur des données.</target>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/client/src/app/pages/landing/landing-page.html</context>
           <context context-type="linenumber">10</context>
@@ -4850,8 +4850,8 @@
         </context-group>
       </trans-unit>
       <trans-unit id="541335210822318978" datatype="html">
-        <source>Ghostfolio empowers busy people to keep track of stocks, ETFs or cryptocurrencies without being tracked.</source>
-        <target state="translated">Ghostfolio permet aux personnes occupées de suivre ses actions, ETF ou cryptomonnaies sans être pistées.</target>
+        <source>Polyfolio empowers busy people to keep track of stocks, ETFs or cryptocurrencies without being tracked.</source>
+        <target state="translated">Polyfolio permet aux personnes occupées de suivre ses actions, ETF ou cryptomonnaies sans être pistées.</target>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/client/src/app/pages/landing/landing-page.html</context>
           <context context-type="linenumber">128</context>
@@ -4874,8 +4874,8 @@
         </context-group>
       </trans-unit>
       <trans-unit id="6957860293614395750" datatype="html">
-        <source>Use Ghostfolio anonymously and own your financial data.</source>
-        <target state="translated">Utilisez Ghostfolio de manière anonyme et soyez propriétaire de vos données financières.</target>
+        <source>Use Polyfolio anonymously and own your financial data.</source>
+        <target state="translated">Utilisez Polyfolio de manière anonyme et soyez propriétaire de vos données financières.</target>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/client/src/app/pages/landing/landing-page.html</context>
           <context context-type="linenumber">152</context>
@@ -4898,16 +4898,16 @@
         </context-group>
       </trans-unit>
       <trans-unit id="174909485329693389" datatype="html">
-        <source>Why <x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong&gt;"/>Ghostfolio<x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/strong&gt;"/>?</source>
-        <target state="translated">Pourquoi <x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong&gt;"/>Ghostfolio<x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/strong&gt;"/>?</target>
+        <source>Why <x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong&gt;"/>Polyfolio<x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/strong&gt;"/>?</source>
+        <target state="translated">Pourquoi <x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong&gt;"/>Polyfolio<x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/strong&gt;"/>?</target>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/client/src/app/pages/landing/landing-page.html</context>
           <context context-type="linenumber">170</context>
         </context-group>
       </trans-unit>
       <trans-unit id="8071481725417955188" datatype="html">
-        <source>Ghostfolio is for you if you are...</source>
-        <target state="translated">Ghostfolio est pour vous si vous ...</target>
+        <source>Polyfolio is for you if you are...</source>
+        <target state="translated">Polyfolio est pour vous si vous ...</target>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/client/src/app/pages/landing/landing-page.html</context>
           <context context-type="linenumber">172</context>
@@ -4986,8 +4986,8 @@
         </context-group>
       </trans-unit>
       <trans-unit id="4462291849266824923" datatype="html">
-        <source>Learn more about Ghostfolio</source>
-        <target state="translated">En appendre plus sur Ghostfolio</target>
+        <source>Learn more about Polyfolio</source>
+        <target state="translated">En appendre plus sur Polyfolio</target>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/client/src/app/pages/landing/landing-page.html</context>
           <context context-type="linenumber">217</context>
@@ -5002,16 +5002,16 @@
         </context-group>
       </trans-unit>
       <trans-unit id="1398112848362226140" datatype="html">
-        <source>Members from around the globe are using <x id="START_LINK" ctype="x-a" equiv-text="&lt;a href=&quot;pricing&quot;&gt;"/><x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong&gt;"/>Ghostfolio Premium<x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/strong&gt;"/><x id="CLOSE_LINK" ctype="x-a" equiv-text="&lt;/a&gt;"/></source>
-        <target state="translated">Les utilisateurs du monde entier utilisent <x id="START_LINK" ctype="x-a" equiv-text="&lt;a href=&quot;pricing&quot;&gt;"/><x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong&gt;"/>Ghostfolio Premium<x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/strong&gt;"/><x id="CLOSE_LINK" ctype="x-a" equiv-text="&lt;/a&gt;"/></target>
+        <source>Members from around the globe are using <x id="START_LINK" ctype="x-a" equiv-text="&lt;a href=&quot;pricing&quot;&gt;"/><x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong&gt;"/>Polyfolio Premium<x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/strong&gt;"/><x id="CLOSE_LINK" ctype="x-a" equiv-text="&lt;/a&gt;"/></source>
+        <target state="translated">Les utilisateurs du monde entier utilisent <x id="START_LINK" ctype="x-a" equiv-text="&lt;a href=&quot;pricing&quot;&gt;"/><x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong&gt;"/>Polyfolio Premium<x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/strong&gt;"/><x id="CLOSE_LINK" ctype="x-a" equiv-text="&lt;/a&gt;"/></target>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/client/src/app/pages/landing/landing-page.html</context>
           <context context-type="linenumber">265</context>
         </context-group>
       </trans-unit>
       <trans-unit id="8065260392868074625" datatype="html">
-        <source>How does <x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong&gt;"/>Ghostfolio<x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/strong&gt;"/> work?</source>
-        <target state="translated">Comment fonctionne <x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong&gt;"/>Ghostfolio<x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/strong&gt;"/> ?</target>
+        <source>How does <x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong&gt;"/>Polyfolio<x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/strong&gt;"/> work?</source>
+        <target state="translated">Comment fonctionne <x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong&gt;"/>Polyfolio<x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/strong&gt;"/> ?</target>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/client/src/app/pages/landing/landing-page.html</context>
           <context context-type="linenumber">282</context>
@@ -5247,16 +5247,16 @@
         </context-group>
       </trans-unit>
       <trans-unit id="9040028765832531851" datatype="html">
-        <source>This overview page features a curated collection of personal finance tools compared to the open source alternative <x id="START_LINK" ctype="x-a" equiv-text="&lt;a [routerLink]=&quot;routerLinkAbout&quot;&gt;"/>Ghostfolio<x id="CLOSE_LINK" ctype="x-a" equiv-text="&lt;/a&gt;"/>. If you value transparency, data privacy, and community collaboration, Ghostfolio provides an excellent opportunity to take control of your financial management.</source>
-        <target state="translated">Cette page d’aperçu présente une collection d’outils de finances personnelles comparés à la solution open source alternative <x id="START_LINK" ctype="x-a" equiv-text="&lt;a [routerLink]=&quot;routerLinkAbout&quot;&gt;"/>Ghostfolio<x id="CLOSE_LINK" ctype="x-a" equiv-text="&lt;/a&gt;"/>. Si vous accordez de l’importance à la transparence, à la confidentialité des données et à la collaboration communautaire, Ghostfolio vous offre une excellente occasion de prendre le contrôle de votre gestion financière.</target>
+        <source>This overview page features a curated collection of personal finance tools compared to the open source alternative <x id="START_LINK" ctype="x-a" equiv-text="&lt;a [routerLink]=&quot;routerLinkAbout&quot;&gt;"/>Polyfolio<x id="CLOSE_LINK" ctype="x-a" equiv-text="&lt;/a&gt;"/>. If you value transparency, data privacy, and community collaboration, Polyfolio provides an excellent opportunity to take control of your financial management.</source>
+        <target state="translated">Cette page d’aperçu présente une collection d’outils de finances personnelles comparés à la solution open source alternative <x id="START_LINK" ctype="x-a" equiv-text="&lt;a [routerLink]=&quot;routerLinkAbout&quot;&gt;"/>Polyfolio<x id="CLOSE_LINK" ctype="x-a" equiv-text="&lt;/a&gt;"/>. Si vous accordez de l’importance à la transparence, à la confidentialité des données et à la collaboration communautaire, Polyfolio vous offre une excellente occasion de prendre le contrôle de votre gestion financière.</target>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/client/src/app/pages/resources/personal-finance-tools/personal-finance-tools-page.html</context>
           <context context-type="linenumber">9</context>
         </context-group>
       </trans-unit>
       <trans-unit id="1509032395181307486" datatype="html">
-        <source>Explore the links below to compare a variety of personal finance tools with Ghostfolio.</source>
-        <target state="translated">Explorez les liens ci-dessous pour comparer une variété d’outils de finances personnelles avec Ghostfolio.</target>
+        <source>Explore the links below to compare a variety of personal finance tools with Polyfolio.</source>
+        <target state="translated">Explorez les liens ci-dessous pour comparer une variété d’outils de finances personnelles avec Polyfolio.</target>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/client/src/app/pages/resources/personal-finance-tools/personal-finance-tools-page.html</context>
           <context context-type="linenumber">17</context>
@@ -5279,24 +5279,24 @@
         </context-group>
       </trans-unit>
       <trans-unit id="5100352603258735382" datatype="html">
-        <source>Are you looking for an open source alternative to <x id="INTERPOLATION" equiv-text="{{ product2.name }}"/>? <x id="START_LINK" ctype="x-a" equiv-text="&lt;a [routerLink]=&quot;routerLinkAbout&quot;&gt;"/>Ghostfolio<x id="CLOSE_LINK" ctype="x-a" equiv-text="&lt;/a &gt;"/> is a powerful portfolio management tool that provides individuals with a comprehensive platform to track, analyze, and optimize their investments. Whether you are an experienced investor or just starting out, Ghostfolio offers an intuitive user interface and a <x id="START_LINK_1" equiv-text="&lt;a [routerLink]=&quot;routerLinkFeatures&quot; &gt;"/>wide range of functionalities<x id="CLOSE_LINK" ctype="x-a" equiv-text="&lt;/a &gt;"/> to help you make informed decisions and take control of your financial future.</source>
-        <target state="translated">Cherchez-vous des alternatives open source à <x id="INTERPOLATION" equiv-text="{{ product2.name }}"/>? <x id="START_LINK" ctype="x-a" equiv-text="&lt;a [routerLink]=&quot;routerLinkAbout&quot;&gt;"/>Ghostfolio<x id="CLOSE_LINK" ctype="x-a" equiv-text="&lt;/a &gt;"/> est un outil de gestion de portefeuille puissant offrant aux particuliers une plateforme complète pour suivre, analyser et optimiser ses investissements. Que vous soyez un investisseur expérimenté ou que vous débutiez, Ghostfolio offre une interface utilisateur intuitive et une <x id="START_LINK_1" equiv-text="&lt;a [routerLink]=&quot;routerLinkFeatures&quot; &gt;"/>large gamme de fonctionnalités<x id="CLOSE_LINK" ctype="x-a" equiv-text="&lt;/a &gt;"/> pour vous aider à prendre des décisions éclairées et à prendre le contrôle de votre avenir financier.</target>
+        <source>Are you looking for an open source alternative to <x id="INTERPOLATION" equiv-text="{{ product2.name }}"/>? <x id="START_LINK" ctype="x-a" equiv-text="&lt;a [routerLink]=&quot;routerLinkAbout&quot;&gt;"/>Polyfolio<x id="CLOSE_LINK" ctype="x-a" equiv-text="&lt;/a &gt;"/> is a powerful portfolio management tool that provides individuals with a comprehensive platform to track, analyze, and optimize their investments. Whether you are an experienced investor or just starting out, Polyfolio offers an intuitive user interface and a <x id="START_LINK_1" equiv-text="&lt;a [routerLink]=&quot;routerLinkFeatures&quot; &gt;"/>wide range of functionalities<x id="CLOSE_LINK" ctype="x-a" equiv-text="&lt;/a &gt;"/> to help you make informed decisions and take control of your financial future.</source>
+        <target state="translated">Cherchez-vous des alternatives open source à <x id="INTERPOLATION" equiv-text="{{ product2.name }}"/>? <x id="START_LINK" ctype="x-a" equiv-text="&lt;a [routerLink]=&quot;routerLinkAbout&quot;&gt;"/>Polyfolio<x id="CLOSE_LINK" ctype="x-a" equiv-text="&lt;/a &gt;"/> est un outil de gestion de portefeuille puissant offrant aux particuliers une plateforme complète pour suivre, analyser et optimiser ses investissements. Que vous soyez un investisseur expérimenté ou que vous débutiez, Polyfolio offre une interface utilisateur intuitive et une <x id="START_LINK_1" equiv-text="&lt;a [routerLink]=&quot;routerLinkFeatures&quot; &gt;"/>large gamme de fonctionnalités<x id="CLOSE_LINK" ctype="x-a" equiv-text="&lt;/a &gt;"/> pour vous aider à prendre des décisions éclairées et à prendre le contrôle de votre avenir financier.</target>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/client/src/app/pages/resources/personal-finance-tools/product-page.html</context>
           <context context-type="linenumber">19</context>
         </context-group>
       </trans-unit>
       <trans-unit id="7314014538091101522" datatype="html">
-        <source>Ghostfolio is an open source software (OSS), providing a cost-effective alternative to <x id="INTERPOLATION" equiv-text="{{ product2.name }}"/> making it particularly suitable for individuals on a tight budget, such as those <x id="START_LINK" ctype="x-a" equiv-text="&lt;a href=&quot;../en/blog/2023/07/exploring-the-path-to-fire&quot; &gt;"/>pursuing Financial Independence, Retire Early (FIRE)<x id="CLOSE_LINK" ctype="x-a" equiv-text="&lt;/a &gt;"/>. By leveraging the collective efforts of a community of developers and personal finance enthusiasts, Ghostfolio continuously enhances its capabilities, security, and user experience.</source>
-        <target state="translated">Ghostfolio est un logiciel open source (OSS), offrant une alternative économique, <x id="INTERPOLATION" equiv-text="{{ product2.name }}"/> le rendant particulièrement adaptée aux personnes disposant d’un budget serré, telles que celles qui <x id="START_LINK" ctype="x-a" equiv-text="&lt;a href=&quot;../en/blog/2023/07/exploring-the-path-to-fire&quot; &gt;"/>cherchent à atteindre le mouvement Financial Independence, Retire Early (FIRE)<x id="CLOSE_LINK" ctype="x-a" equiv-text="&lt;/a &gt;"/>. En s’appuyant sur les efforts collectifs d’une communauté de développeurs et de passionnés de finances personnelles, Ghostfolio améliore continuellement ses fonctionnalités, sa sécurité et son expérience utilisateur.</target>
+        <source>Polyfolio is an open source software (OSS), providing a cost-effective alternative to <x id="INTERPOLATION" equiv-text="{{ product2.name }}"/> making it particularly suitable for individuals on a tight budget, such as those <x id="START_LINK" ctype="x-a" equiv-text="&lt;a href=&quot;../en/blog/2023/07/exploring-the-path-to-fire&quot; &gt;"/>pursuing Financial Independence, Retire Early (FIRE)<x id="CLOSE_LINK" ctype="x-a" equiv-text="&lt;/a &gt;"/>. By leveraging the collective efforts of a community of developers and personal finance enthusiasts, Polyfolio continuously enhances its capabilities, security, and user experience.</source>
+        <target state="translated">Polyfolio est un logiciel open source (OSS), offrant une alternative économique, <x id="INTERPOLATION" equiv-text="{{ product2.name }}"/> le rendant particulièrement adaptée aux personnes disposant d’un budget serré, telles que celles qui <x id="START_LINK" ctype="x-a" equiv-text="&lt;a href=&quot;../en/blog/2023/07/exploring-the-path-to-fire&quot; &gt;"/>cherchent à atteindre le mouvement Financial Independence, Retire Early (FIRE)<x id="CLOSE_LINK" ctype="x-a" equiv-text="&lt;/a &gt;"/>. En s’appuyant sur les efforts collectifs d’une communauté de développeurs et de passionnés de finances personnelles, Polyfolio améliore continuellement ses fonctionnalités, sa sécurité et son expérience utilisateur.</target>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/client/src/app/pages/resources/personal-finance-tools/product-page.html</context>
           <context context-type="linenumber">33</context>
         </context-group>
       </trans-unit>
       <trans-unit id="2315631726271602419" datatype="html">
-        <source>Let’s dive deeper into the detailed Ghostfolio vs <x id="INTERPOLATION" equiv-text="{{ product2.name }}"/> comparison table below to gain a thorough understanding of how Ghostfolio positions itself relative to <x id="INTERPOLATION" equiv-text="{{ product2.name }}"/>. We will explore various aspects such as features, data privacy, pricing, and more, allowing you to make a well-informed choice for your personal requirements.</source>
-        <target state="translated">Regardons plus en détails ce que proposent Ghostfolio vs <x id="INTERPOLATION" equiv-text="{{ product2.name }}"/> via la table de comparaison ci-dessous pour comprendre comment Ghostfolio se positionne par rapport à <x id="INTERPOLATION" equiv-text="{{ product2.name }}"/>. Nous examinerons divers aspects tels que les fonctionnalités, la confidentialité des données, le prix, etc., afin de vous permettre de faire un choix éclairé en fonction de vos besoins personnels.</target>
+        <source>Let’s dive deeper into the detailed Polyfolio vs <x id="INTERPOLATION" equiv-text="{{ product2.name }}"/> comparison table below to gain a thorough understanding of how Polyfolio positions itself relative to <x id="INTERPOLATION" equiv-text="{{ product2.name }}"/>. We will explore various aspects such as features, data privacy, pricing, and more, allowing you to make a well-informed choice for your personal requirements.</source>
+        <target state="translated">Regardons plus en détails ce que proposent Polyfolio vs <x id="INTERPOLATION" equiv-text="{{ product2.name }}"/> via la table de comparaison ci-dessous pour comprendre comment Polyfolio se positionne par rapport à <x id="INTERPOLATION" equiv-text="{{ product2.name }}"/>. Nous examinerons divers aspects tels que les fonctionnalités, la confidentialité des données, le prix, etc., afin de vous permettre de faire un choix éclairé en fonction de vos besoins personnels.</target>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/client/src/app/pages/resources/personal-finance-tools/product-page.html</context>
           <context context-type="linenumber">44</context>
@@ -5316,8 +5316,8 @@
         </context-group>
       </trans-unit>
       <trans-unit id="2192861316878557060" datatype="html">
-        <source>Please note that the information provided in the Ghostfolio vs <x id="INTERPOLATION" equiv-text="{{ product2.name }}"/> comparison table is based on our independent research and analysis. This website is not affiliated with <x id="INTERPOLATION" equiv-text="{{ product2.name }}"/> or any other product mentioned in the comparison. As the landscape of personal finance tools evolves, it is essential to verify any specific details or changes directly from the respective product page. Data needs a refresh? Help us maintain accurate data on <x id="START_LINK" ctype="x-a" equiv-text="&lt;a href=&quot;https://github.com/ghostfolio/ghostfolio&quot;&gt;"/>GitHub<x id="CLOSE_LINK" ctype="x-a" equiv-text="&lt;/a&gt;"/>.</source>
-        <target state="translated">Veuillez noter que les informations fournies dans le Ghostfolio vs <x id="INTERPOLATION" equiv-text="{{ product2.name }}"/> via la table de comparaison se basent de nos recherches et analyses indépendantes. Ce site n’est pas affilié à <x id="INTERPOLATION" equiv-text="{{ product2.name }}"/> ou tout autre produit mentionné dans la comparaison. Le paysage des outils de finances personnelles évoluant, il est essentiel de vérifier tout détail ou changement spécifique directement sur la page du produit concerné. Certaines données doivent être mises à jour ? Aidez-nous à maintenir les données exactes sur <x id="START_LINK" ctype="x-a" equiv-text="&lt;a href=&quot;https://github.com/ghostfolio/ghostfolio&quot;&gt;"/>GitHub<x id="CLOSE_LINK" ctype="x-a" equiv-text="&lt;/a&gt;"/>.</target>
+        <source>Please note that the information provided in the Polyfolio vs <x id="INTERPOLATION" equiv-text="{{ product2.name }}"/> comparison table is based on our independent research and analysis. This website is not affiliated with <x id="INTERPOLATION" equiv-text="{{ product2.name }}"/> or any other product mentioned in the comparison. As the landscape of personal finance tools evolves, it is essential to verify any specific details or changes directly from the respective product page. Data needs a refresh? Help us maintain accurate data on <x id="START_LINK" ctype="x-a" equiv-text="&lt;a href=&quot;https://github.com/ghostfolio/ghostfolio&quot;&gt;"/>GitHub<x id="CLOSE_LINK" ctype="x-a" equiv-text="&lt;/a&gt;"/>.</source>
+        <target state="translated">Veuillez noter que les informations fournies dans le Polyfolio vs <x id="INTERPOLATION" equiv-text="{{ product2.name }}"/> via la table de comparaison se basent de nos recherches et analyses indépendantes. Ce site n’est pas affilié à <x id="INTERPOLATION" equiv-text="{{ product2.name }}"/> ou tout autre produit mentionné dans la comparaison. Le paysage des outils de finances personnelles évoluant, il est essentiel de vérifier tout détail ou changement spécifique directement sur la page du produit concerné. Certaines données doivent être mises à jour ? Aidez-nous à maintenir les données exactes sur <x id="START_LINK" ctype="x-a" equiv-text="&lt;a href=&quot;https://github.com/ghostfolio/ghostfolio&quot;&gt;"/>GitHub<x id="CLOSE_LINK" ctype="x-a" equiv-text="&lt;/a&gt;"/>.</target>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/client/src/app/pages/resources/personal-finance-tools/product-page.html</context>
           <context context-type="linenumber">312</context>
@@ -5364,8 +5364,8 @@
         </context-group>
       </trans-unit>
       <trans-unit id="4257439615478050183" datatype="html">
-        <source>Ghostfolio Status</source>
-        <target state="new">Ghostfolio Status</target>
+        <source>Polyfolio Status</source>
+        <target state="new">Polyfolio Status</target>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/client/src/app/pages/about/overview/about-overview-page.html</context>
           <context context-type="linenumber">62</context>
@@ -5604,8 +5604,8 @@
         </context-group>
       </trans-unit>
       <trans-unit id="metaDescription" datatype="html">
-        <source>Ghostfolio is a personal finance dashboard to keep track of your net worth including cash, stocks, ETFs and cryptocurrencies across multiple platforms.</source>
-        <target state="translated">Ghostfolio est un dashboard de finances personnelles qui permet de suivre vos actifs comme les actions, les ETF ou les crypto-monnaies sur plusieurs plateformes.</target>
+        <source>Polyfolio is a personal finance dashboard to keep track of your net worth including cash, stocks, ETFs and cryptocurrencies across multiple platforms.</source>
+        <target state="translated">Polyfolio est un dashboard de finances personnelles qui permet de suivre vos actifs comme les actions, les ETF ou les crypto-monnaies sur plusieurs plateformes.</target>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/client/src/app/pages/i18n/i18n-page.html</context>
           <context context-type="linenumber">5</context>
@@ -5640,8 +5640,8 @@
         </context-group>
       </trans-unit>
       <trans-unit id="4909535316439940790" datatype="html">
-        <source>Ghostfolio vs <x id="INTERPOLATION" equiv-text="{{ product2.name }}"/> comparison table</source>
-        <target state="translated">Ghostfolio vs <x id="INTERPOLATION" equiv-text="{{ product2.name }}"/> tableau comparatif</target>
+        <source>Polyfolio vs <x id="INTERPOLATION" equiv-text="{{ product2.name }}"/> comparison table</source>
+        <target state="translated">Polyfolio vs <x id="INTERPOLATION" equiv-text="{{ product2.name }}"/> tableau comparatif</target>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/client/src/app/pages/resources/personal-finance-tools/product-page.html</context>
           <context context-type="linenumber">55</context>
@@ -6217,8 +6217,8 @@
         </context-group>
       </trans-unit>
       <trans-unit id="4941836956820527118" datatype="html">
-        <source>Do you really want to close your Ghostfolio account?</source>
-        <target state="translated">Confirmer la suppresion de votre compte Ghostfolio ?</target>
+        <source>Do you really want to close your Polyfolio account?</source>
+        <target state="translated">Confirmer la suppresion de votre compte Polyfolio ?</target>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/client/src/app/components/user-account-settings/user-account-settings.component.ts</context>
           <context context-type="linenumber">208</context>
@@ -6973,8 +6973,8 @@
         </context-group>
       </trans-unit>
       <trans-unit id="7522916136412124285" datatype="html">
-        <source>to use our referral link and get a Ghostfolio Premium membership for one year</source>
-        <target state="new">to use our referral link and get a Ghostfolio Premium membership for one year</target>
+        <source>to use our referral link and get a Polyfolio Premium membership for one year</source>
+        <target state="new">to use our referral link and get a Polyfolio Premium membership for one year</target>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/client/src/app/pages/pricing/pricing-page.html</context>
           <context context-type="linenumber">340</context>
@@ -7053,8 +7053,8 @@
         </context-group>
       </trans-unit>
       <trans-unit id="3528767106831563012" datatype="html">
-        <source>Ghostfolio is a lightweight wealth management application for individuals to keep track of stocks, ETFs or cryptocurrencies and make solid, data-driven investment decisions.</source>
-        <target state="new">Ghostfolio is a lightweight wealth management application for individuals to keep track of stocks, ETFs or cryptocurrencies and make solid, data-driven investment decisions.</target>
+        <source>Polyfolio is a lightweight wealth management application for individuals to keep track of stocks, ETFs or cryptocurrencies and make solid, data-driven investment decisions.</source>
+        <target state="new">Polyfolio is a lightweight wealth management application for individuals to keep track of stocks, ETFs or cryptocurrencies and make solid, data-driven investment decisions.</target>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/client/src/app/pages/about/overview/about-overview-page.html</context>
           <context context-type="linenumber">10</context>
@@ -7175,8 +7175,8 @@
         </context-group>
       </trans-unit>
       <trans-unit id="5806117524908922510" datatype="html">
-        <source>Ghostfolio X-ray uses static analysis to uncover potential issues and risks in your portfolio. Adjust the rules below and set custom thresholds to align with your personal investment strategy.</source>
-        <target state="translated">Ghostfolio X-ray utilise l’analyse statique pour détecter d’éventuels problèmes et risques dans votre portefeuille. Ajustez les règles ci-dessous et définissez des seuils personnalisés afin de les adapter à votre stratégie d’investissement.</target>
+        <source>Polyfolio X-ray uses static analysis to uncover potential issues and risks in your portfolio. Adjust the rules below and set custom thresholds to align with your personal investment strategy.</source>
+        <target state="translated">Polyfolio X-ray utilise l’analyse statique pour détecter d’éventuels problèmes et risques dans votre portefeuille. Ajustez les règles ci-dessous et définissez des seuils personnalisés afin de les adapter à votre stratégie d’investissement.</target>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/client/src/app/pages/portfolio/x-ray/x-ray-page.component.html</context>
           <context context-type="linenumber">6</context>
@@ -7215,8 +7215,8 @@
         </context-group>
       </trans-unit>
       <trans-unit id="1486033335993102285" datatype="html">
-        <source>Please enter your Ghostfolio API key:</source>
-        <target state="translated">Veuillez saisir votre clé API Ghostfolio :</target>
+        <source>Please enter your Polyfolio API key:</source>
+        <target state="translated">Veuillez saisir votre clé API Polyfolio :</target>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/client/src/app/pages/api/api-page.component.ts</context>
           <context context-type="linenumber">43</context>
@@ -7251,8 +7251,8 @@
         </context-group>
       </trans-unit>
       <trans-unit id="7954609080122968528" datatype="html">
-        <source>Ghostfolio Premium Data Provider API Key</source>
-        <target state="translated">Clé API du fournisseur de données Ghostfolio Premium</target>
+        <source>Polyfolio Premium Data Provider API Key</source>
+        <target state="translated">Clé API du fournisseur de données Polyfolio Premium</target>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/client/src/app/components/user-account-membership/user-account-membership.component.ts</context>
           <context context-type="linenumber">154</context>
@@ -7275,8 +7275,8 @@
         </context-group>
       </trans-unit>
       <trans-unit id="2224199164108745234" datatype="html">
-        <source>Generate Ghostfolio Premium Data Provider API key for self-hosted environments...</source>
-        <target state="translated">Générer la clé API du fournisseur de données Ghostfolio Premium pour les environnements auto-hébergés...</target>
+        <source>Generate Polyfolio Premium Data Provider API key for self-hosted environments...</source>
+        <target state="translated">Générer la clé API du fournisseur de données Polyfolio Premium pour les environnements auto-hébergés...</target>
         <context-group purpose="location">
           <context context-type="sourcefile">libs/ui/src/lib/membership-card/membership-card.component.html</context>
           <context context-type="linenumber">29</context>
@@ -7375,8 +7375,8 @@
         </context-group>
       </trans-unit>
       <trans-unit id="4068738931505527681" datatype="html">
-        <source>Please enter your Ghostfolio API key.</source>
-        <target state="translated">Veuillez saisir votre clé API Ghostfolio.</target>
+        <source>Please enter your Polyfolio API key.</source>
+        <target state="translated">Veuillez saisir votre clé API Polyfolio.</target>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/client/src/app/components/admin-settings/admin-settings.component.ts</context>
           <context context-type="linenumber">146</context>
@@ -8023,8 +8023,8 @@
         </context-group>
       </trans-unit>
       <trans-unit id="2813275520458225294" datatype="html">
-        <source>Fuel your <x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong&gt;"/>self-hosted Ghostfolio<x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/strong&gt;"/> with a <x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong&gt;"/>powerful data provider<x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/strong&gt;"/> to access <x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong&gt;"/>80,000+ tickers<x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/strong&gt;"/> from over <x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong&gt;"/>50 exchanges<x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/strong&gt;"/> worldwide.</source>
-        <target state="translated">Alimentez votre <x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong&gt;"/>Ghostfolio auto-hébergé<x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/strong&gt;"/> avec un <x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong&gt;"/>fournisseur de données puissant<x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/strong&gt;"/> pour accéder à plus de <x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong&gt;"/>80 000 tickers<x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/strong&gt;"/> issus de plus de <x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong&gt;"/>50 bourses<x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/strong&gt;"/> dans le monde entier.</target>
+        <source>Fuel your <x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong&gt;"/>self-hosted Polyfolio<x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/strong&gt;"/> with a <x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong&gt;"/>powerful data provider<x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/strong&gt;"/> to access <x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong&gt;"/>80,000+ tickers<x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/strong&gt;"/> from over <x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong&gt;"/>50 exchanges<x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/strong&gt;"/> worldwide.</source>
+        <target state="translated">Alimentez votre <x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong&gt;"/>Polyfolio auto-hébergé<x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/strong&gt;"/> avec un <x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong&gt;"/>fournisseur de données puissant<x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/strong&gt;"/> pour accéder à plus de <x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong&gt;"/>80 000 tickers<x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/strong&gt;"/> issus de plus de <x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong&gt;"/>50 bourses<x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/strong&gt;"/> dans le monde entier.</target>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/client/src/app/components/admin-settings/admin-settings.component.html</context>
           <context context-type="linenumber">16</context>
@@ -8272,8 +8272,8 @@
         </context-group>
       </trans-unit>
       <trans-unit id="5199695670214400859" datatype="html">
-        <source>If you encounter a bug, would like to suggest an improvement or a new <x id="START_LINK" ctype="x-a" equiv-text="&lt;a [routerLink]=&quot;routerLinkFeatures&quot;&gt;"/>feature<x id="CLOSE_LINK" ctype="x-a" equiv-text="&lt;/a &gt;"/>, please join the Ghostfolio <x id="START_LINK_1" equiv-text="&lt;a href=&quot;https://join.slack.com/t/ghostfolio/shared_invite/zt-vsaan64h-F_I0fEo5M0P88lP9ibCxFg&quot; title=&quot;Join the Ghostfolio Slack community&quot; &gt;"/>Slack<x id="CLOSE_LINK" ctype="x-a" equiv-text="&lt;/a &gt;"/> community, post to <x id="START_LINK_2" equiv-text="&lt;a href=&quot;https://x.com/ghostfolio_&quot; title=&quot;Post to Ghostfolio on X (formerly Twitter)&quot; &gt;"/>@ghostfolio_<x id="CLOSE_LINK" ctype="x-a" equiv-text="&lt;/a &gt;"/></source>
-        <target state="new">If you encounter a bug, would like to suggest an improvement or a new <x id="START_LINK" ctype="x-a" equiv-text="&lt;a [routerLink]=&quot;routerLinkFeatures&quot;&gt;"/>feature<x id="CLOSE_LINK" ctype="x-a" equiv-text="&lt;/a &gt;"/>, please join the Ghostfolio <x id="START_LINK_1" equiv-text="&lt;a href=&quot;https://join.slack.com/t/ghostfolio/shared_invite/zt-vsaan64h-F_I0fEo5M0P88lP9ibCxFg&quot; title=&quot;Join the Ghostfolio Slack community&quot; &gt;"/>Slack<x id="CLOSE_LINK" ctype="x-a" equiv-text="&lt;/a &gt;"/> community, post to <x id="START_LINK_2" equiv-text="&lt;a href=&quot;https://x.com/ghostfolio_&quot; title=&quot;Post to Ghostfolio on X (formerly Twitter)&quot; &gt;"/>@ghostfolio_<x id="CLOSE_LINK" ctype="x-a" equiv-text="&lt;/a &gt;"/></target>
+        <source>If you encounter a bug, would like to suggest an improvement or a new <x id="START_LINK" ctype="x-a" equiv-text="&lt;a [routerLink]=&quot;routerLinkFeatures&quot;&gt;"/>feature<x id="CLOSE_LINK" ctype="x-a" equiv-text="&lt;/a &gt;"/>, please join the Polyfolio <x id="START_LINK_1" equiv-text="&lt;a href=&quot;https://join.slack.com/t/ghostfolio/shared_invite/zt-vsaan64h-F_I0fEo5M0P88lP9ibCxFg&quot; title=&quot;Join the Polyfolio Slack community&quot; &gt;"/>Slack<x id="CLOSE_LINK" ctype="x-a" equiv-text="&lt;/a &gt;"/> community, post to <x id="START_LINK_2" equiv-text="&lt;a href=&quot;https://x.com/ghostfolio_&quot; title=&quot;Post to Polyfolio on X (formerly Twitter)&quot; &gt;"/>@ghostfolio_<x id="CLOSE_LINK" ctype="x-a" equiv-text="&lt;/a &gt;"/></source>
+        <target state="new">If you encounter a bug, would like to suggest an improvement or a new <x id="START_LINK" ctype="x-a" equiv-text="&lt;a [routerLink]=&quot;routerLinkFeatures&quot;&gt;"/>feature<x id="CLOSE_LINK" ctype="x-a" equiv-text="&lt;/a &gt;"/>, please join the Polyfolio <x id="START_LINK_1" equiv-text="&lt;a href=&quot;https://join.slack.com/t/ghostfolio/shared_invite/zt-vsaan64h-F_I0fEo5M0P88lP9ibCxFg&quot; title=&quot;Join the Polyfolio Slack community&quot; &gt;"/>Slack<x id="CLOSE_LINK" ctype="x-a" equiv-text="&lt;/a &gt;"/> community, post to <x id="START_LINK_2" equiv-text="&lt;a href=&quot;https://x.com/ghostfolio_&quot; title=&quot;Post to Polyfolio on X (formerly Twitter)&quot; &gt;"/>@ghostfolio_<x id="CLOSE_LINK" ctype="x-a" equiv-text="&lt;/a &gt;"/></target>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/client/src/app/pages/about/overview/about-overview-page.html</context>
           <context context-type="linenumber">69</context>
@@ -8692,8 +8692,8 @@
         </context-group>
       </trans-unit>
       <trans-unit id="2305116864852661861" datatype="html">
-        <source>Find Ghostfolio on GitHub</source>
-        <target state="new">Find Ghostfolio on GitHub</target>
+        <source>Find Polyfolio on GitHub</source>
+        <target state="new">Find Polyfolio on GitHub</target>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/client/src/app/pages/about/overview/about-overview-page.html</context>
           <context context-type="linenumber">99</context>
@@ -8704,16 +8704,16 @@
         </context-group>
       </trans-unit>
       <trans-unit id="5606994816647505945" datatype="html">
-        <source>Join the Ghostfolio Slack community</source>
-        <target state="new">Join the Ghostfolio Slack community</target>
+        <source>Join the Polyfolio Slack community</source>
+        <target state="new">Join the Polyfolio Slack community</target>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/client/src/app/pages/about/overview/about-overview-page.html</context>
           <context context-type="linenumber">109</context>
         </context-group>
       </trans-unit>
       <trans-unit id="2555424753565986929" datatype="html">
-        <source>Follow Ghostfolio on X (formerly Twitter)</source>
-        <target state="new">Follow Ghostfolio on X (formerly Twitter)</target>
+        <source>Follow Polyfolio on X (formerly Twitter)</source>
+        <target state="new">Follow Polyfolio on X (formerly Twitter)</target>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/client/src/app/pages/about/overview/about-overview-page.html</context>
           <context context-type="linenumber">118</context>
@@ -8740,24 +8740,24 @@
         </context-group>
       </trans-unit>
       <trans-unit id="5162138648470294706" datatype="html">
-        <source>Follow Ghostfolio on LinkedIn</source>
-        <target state="new">Follow Ghostfolio on LinkedIn</target>
+        <source>Follow Polyfolio on LinkedIn</source>
+        <target state="new">Follow Polyfolio on LinkedIn</target>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/client/src/app/pages/about/overview/about-overview-page.html</context>
           <context context-type="linenumber">147</context>
         </context-group>
       </trans-unit>
       <trans-unit id="4170353658096790081" datatype="html">
-        <source>Ghostfolio is an independent &amp; bootstrapped business</source>
-        <target state="new">Ghostfolio is an independent &amp; bootstrapped business</target>
+        <source>Polyfolio is an independent &amp; bootstrapped business</source>
+        <target state="new">Polyfolio is an independent &amp; bootstrapped business</target>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/client/src/app/pages/about/overview/about-overview-page.html</context>
           <context context-type="linenumber">157</context>
         </context-group>
       </trans-unit>
       <trans-unit id="1184917049575486230" datatype="html">
-        <source>Support Ghostfolio</source>
-        <target state="new">Support Ghostfolio</target>
+        <source>Support Polyfolio</source>
+        <target state="new">Support Polyfolio</target>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/client/src/app/pages/about/overview/about-overview-page.html</context>
           <context context-type="linenumber">166</context>

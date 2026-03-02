@@ -19,7 +19,7 @@ export const routes: Routes = [
       import('./2021/07/hallo-ghostfolio/hallo-ghostfolio-page.component').then(
         (c) => c.HalloGhostfolioPageComponent
       ),
-    title: 'Hallo Ghostfolio'
+    title: 'Hallo Polyfolio'
   },
   {
     canActivate: [AuthGuard],
@@ -28,7 +28,7 @@ export const routes: Routes = [
       import('./2021/07/hello-ghostfolio/hello-ghostfolio-page.component').then(
         (c) => c.HelloGhostfolioPageComponent
       ),
-    title: 'Hello Ghostfolio'
+    title: 'Hello Polyfolio'
   },
   {
     canActivate: [AuthGuard],
@@ -46,7 +46,7 @@ export const routes: Routes = [
       import('./2022/07/ghostfolio-meets-internet-identity/ghostfolio-meets-internet-identity-page.component').then(
         (c) => c.GhostfolioMeetsInternetIdentityPageComponent
       ),
-    title: 'Ghostfolio meets Internet Identity'
+    title: 'Polyfolio meets Internet Identity'
   },
   {
     canActivate: [AuthGuard],
@@ -100,7 +100,7 @@ export const routes: Routes = [
       import('./2023/01/ghostfolio-auf-sackgeld-vorgestellt/ghostfolio-auf-sackgeld-vorgestellt-page.component').then(
         (c) => c.GhostfolioAufSackgeldVorgestelltPageComponent
       ),
-    title: 'Ghostfolio auf Sackgeld.com vorgestellt'
+    title: 'Polyfolio auf Sackgeld.com vorgestellt'
   },
   {
     canActivate: [AuthGuard],
@@ -109,7 +109,7 @@ export const routes: Routes = [
       import('./2023/02/ghostfolio-meets-umbrel/ghostfolio-meets-umbrel-page.component').then(
         (c) => c.GhostfolioMeetsUmbrelPageComponent
       ),
-    title: 'Ghostfolio meets Umbrel'
+    title: 'Polyfolio meets Umbrel'
   },
   {
     canActivate: [AuthGuard],
@@ -118,7 +118,7 @@ export const routes: Routes = [
       import('./2023/03/1000-stars-on-github/1000-stars-on-github-page.component').then(
         (c) => c.ThousandStarsOnGitHubPageComponent
       ),
-    title: 'Ghostfolio reaches 1’000 Stars on GitHub'
+    title: `Polyfolio reaches 1\u2019000 Stars on GitHub`
   },
   {
     canActivate: [AuthGuard],
@@ -127,7 +127,7 @@ export const routes: Routes = [
       import('./2023/05/unlock-your-financial-potential-with-ghostfolio/unlock-your-financial-potential-with-ghostfolio-page.component').then(
         (c) => c.UnlockYourFinancialPotentialWithGhostfolioPageComponent
       ),
-    title: 'Unlock your Financial Potential with Ghostfolio'
+    title: 'Unlock your Financial Potential with Polyfolio'
   },
   {
     canActivate: [AuthGuard],
@@ -145,7 +145,7 @@ export const routes: Routes = [
       import('./2023/08/ghostfolio-joins-oss-friends/ghostfolio-joins-oss-friends-page.component').then(
         (c) => c.GhostfolioJoinsOssFriendsPageComponent
       ),
-    title: 'Ghostfolio joins OSS Friends'
+    title: 'Polyfolio joins OSS Friends'
   },
   {
     canActivate: [AuthGuard],
@@ -154,7 +154,7 @@ export const routes: Routes = [
       import('./2023/09/ghostfolio-2/ghostfolio-2-page.component').then(
         (c) => c.Ghostfolio2PageComponent
       ),
-    title: 'Ghostfolio 2.0'
+    title: 'Polyfolio 2.0'
   },
   {
     canActivate: [AuthGuard],

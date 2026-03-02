@@ -72,7 +72,7 @@ export const internalRoutes: Record<string, InternalRoute> = {
     excludeFromAssistant: true,
     path: 'api',
     routerLink: ['/api'],
-    title: 'Ghostfolio API'
+    title: 'Polyfolio API'
   },
   auth: {
     excludeFromAssistant: true,

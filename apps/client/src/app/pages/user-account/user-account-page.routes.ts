@@ -30,6 +30,6 @@ export const routes: Routes = [
     ],
     component: GfUserAccountPageComponent,
     path: '',
-    title: $localize`My Ghostfolio`
+    title: $localize`My Polyfolio`
   }
 ];
