@@ -97,7 +97,11 @@ class PredictionMarketInput(BaseModel):
     )
     query: str | None = Field(
         default=None,
-        description="Search query for filtering markets (used with 'search' action).",
+        description=(
+            "Search query for finding markets. Used with 'search' and 'scenario' actions. "
+            "For scenario, extract the market topic from the user's question "
+            "(e.g. 'Jesus returns 2027', 'Bitcoin 100k', 'Iran regime change')."
+        ),
     )
     category: str | None = Field(
         default=None,
@@ -113,7 +117,10 @@ class PredictionMarketInput(BaseModel):
     )
     outcome: str | None = Field(
         default=None,
-        description="Outcome side: 'Yes' or 'No' (used with simulate and scenario).",
+        description=(
+            "Outcome side: 'Yes' or 'No'. Extract from user intent — e.g. 'bet on Yes Jesus returns' → 'Yes', "
+            "'bet against Iran regime change' → 'No'. Required for simulate and scenario actions."
+        ),
     )
     market_slugs: list[str] | None = Field(
         default=None,
@@ -121,7 +128,10 @@ class PredictionMarketInput(BaseModel):
     )
     allocation_mode: Literal["fixed", "percent", "all_in"] | None = Field(
         default=None,
-        description="Allocation mode for scenario: fixed dollar amount, percentage of portfolio, or all-in.",
+        description=(
+            "Allocation mode for scenario: 'fixed' for a dollar amount, 'percent' for a portfolio percentage, "
+            "'all_in' when the user says liquidate, go all in, or put everything into a market."
+        ),
     )
     allocation_value: float | None = Field(
         default=None,

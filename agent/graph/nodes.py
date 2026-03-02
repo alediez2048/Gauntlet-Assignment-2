@@ -400,6 +400,8 @@ def _extract_market_query(user_query: str) -> str | None:
         "simulate", "scenario", "compare", "analyze", "browse", "trending",
         "compliance", "tax", "issues", "implications", "risk", "allocation",
         "reallocate", "reallocation", "move", "put", "invest", "allocate",
+        "calculate", "returns", "return", "invested", "liquidate", "liquidated",
+        "perform", "performance", "also", "estimate", "liability",
     }
     words = re.split(r"[\s\-,?.!\"']+", lowered)
     content_words = [w for w in words if len(w) >= 3 and w not in stop_words]
