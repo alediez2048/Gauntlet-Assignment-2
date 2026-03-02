@@ -78,13 +78,21 @@ class MarketDataInput(BaseModel):
 
 
 class PredictionMarketInput(BaseModel):
-    """Browse, search, analyze, simulate, compare, or model Polymarket prediction markets."""
+    """Browse, search, analyze, simulate, compare, or model what-if portfolio reallocation scenarios on Polymarket prediction markets."""
 
     action: Literal["browse", "search", "analyze", "positions", "simulate", "trending", "compare", "scenario"] = Field(
         default="browse",
         description=(
-            "Action to perform: browse active markets, search by query, analyze a specific market, "
-            "view positions, simulate a bet, show trending markets, compare markets, or run a scenario."
+            "Action to perform. Use 'scenario' when the user asks what-if questions about reallocating "
+            "their portfolio into a prediction market (e.g. 'what if I bet my portfolio on X', "
+            "'how would my portfolio perform if I went all-in on Y'). "
+            "Use 'simulate' for a specific dollar bet simulation. "
+            "Use 'search' to find markets by keyword. "
+            "Use 'trending' for popular/active markets. "
+            "Use 'analyze' for deep analysis of one market. "
+            "Use 'browse' to list markets. "
+            "Use 'positions' to view current holdings. "
+            "Use 'compare' to compare 2-3 markets side by side."
         ),
     )
     query: str | None = Field(

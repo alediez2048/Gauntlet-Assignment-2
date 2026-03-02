@@ -89,7 +89,12 @@ TOOL_REGISTRY: Final[dict[str, ToolDefinition]] = {
     ),
     "explore_prediction_markets": ToolDefinition(
         name="explore_prediction_markets",
-        description="Browse, search, or analyze Polymarket prediction markets and manage positions.",
+        description=(
+            "Browse, search, analyze, simulate, or compare Polymarket prediction markets. "
+            "Use action='scenario' to model what-if portfolio reallocation into a prediction market "
+            "(e.g. 'what if I put my portfolio into X market'). "
+            "Use action='simulate' to simulate a specific dollar bet on a market."
+        ),
         route="predictions",
         input_schema=PredictionMarketInput,
         callable=explore_prediction_markets,

@@ -137,6 +137,10 @@ _ROUTER_INTENTS: Final[dict[RouteName, tuple[str, ...]]] = {
         "what if i move",
         "what if i put",
         "what would happen",
+        "liquidate",
+        "put it all",
+        "bet my portfolio",
+        "how would my portfolio perform",
     ),
     "clarify": (),
 }
@@ -428,7 +432,7 @@ def _default_args_for_tool(tool_name: ToolName, user_query: str) -> dict[str, An
         pm_args: dict[str, Any] = {"action": "browse"}
         if "position" in lowered or "my poly" in lowered:
             pm_args["action"] = "positions"
-        elif any(kw in lowered for kw in ("scenario", "reallocat", "what if i move", "what if i put", "what would happen", "go all in", "all in on", "all-in on")):
+        elif any(kw in lowered for kw in ("scenario", "reallocat", "what if i move", "what if i put", "what would happen", "go all in", "all in on", "all-in on", "liquidat", "put it all", "put all my", "bet my portfolio", "how would my portfolio perform")):
             pm_args["action"] = "scenario"
             # Try to extract allocation
             pct_match = re.search(r"(\d+)\s*%", lowered)
